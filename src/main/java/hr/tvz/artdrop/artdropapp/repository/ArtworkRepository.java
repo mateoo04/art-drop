@@ -11,5 +11,13 @@ public interface ArtworkRepository {
 
     Optional<Artwork> findById(Long id);
 
-    List<Artwork> findByTitle(String val);
+    List<Artwork> findByMedium(String val);
+
+    Optional<Artwork> findOneByTitleIgnoreCase(String title);
+
+    boolean existsByTitleIgnoreCase(String title);
+
+    boolean deleteByTitleIgnoreCase(String title);
+
+    void addArtwork(Artwork artwork);
 }
