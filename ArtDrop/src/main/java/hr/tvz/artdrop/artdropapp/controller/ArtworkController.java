@@ -1,7 +1,10 @@
 package hr.tvz.artdrop.artdropapp.controller;
 
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommand;
+import hr.tvz.artdrop.artdropapp.dto.ArtworkCommentCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
+import hr.tvz.artdrop.artdropapp.dto.ArtworkLikeCommand;
+import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
 import hr.tvz.artdrop.artdropapp.service.ArtworkService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -50,6 +53,30 @@ public class ArtworkController {
     public ResponseEntity<Void> createArtwork(@Valid @RequestBody ArtworkCommand command) {
         if (!artworkService.createArtwork(command)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/likes")
+    public ResponseEntity<Void> createArtworkLike(@Valid @RequestBody ArtworkLikeCommand command) {
+        if (!artworkService.createArtworkLike(command)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/comments")
+    public ResponseEntity<Void> createArtworkComment(@Valid @RequestBody ArtworkCommentCommand command) {
+        if (!artworkService.createArtworkComment(command)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/reviews")
+    public ResponseEntity<Void> createArtworkReview(@Valid @RequestBody ArtworkReviewCommand command) {
+        if (!artworkService.createArtworkReview(command)) {
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
