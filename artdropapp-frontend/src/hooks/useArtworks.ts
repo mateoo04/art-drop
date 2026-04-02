@@ -1,27 +1,29 @@
-import { useEffect, useState } from 'react'
-import { mockArtworks } from '../data/mockArtworkData'
+import { useCallback, useEffect, useState } from 'react'
+import { fetchArtworks } from '../api/artworksApi'
 import type { Artwork } from '../types/artwork'
-
-const MOCK_DELAY_MS = 400
 
 export function useArtworks() {
   const [data, setData] = useState<Artwork[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  const refetch = useCallback(async () => {
     setLoading(true)
     setError(null)
-
-    const timeoutId = window.setTimeout(() => {
-      setData(mockArtworks)
+    try {
+      const list = await fetchArtworks()
+      setData(list)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unknown error')
+      setData(null)
+    } finally {
       setLoading(false)
-    }, MOCK_DELAY_MS)
-
-    return () => {
-      window.clearTimeout(timeoutId)
     }
   }, [])
 
-  return { data, loading, error }
+  useEffect(() => {
+    void refetch()
+  }, [refetch])
+
+  return { data, loading, error, refetch, setData }
 }

@@ -1,4 +1,5 @@
 export interface Artwork {
+  id: number
   title: string
   medium: string
   tags: string[]

@@ -1,8 +1,9 @@
 import type { Artwork } from '../types/artwork'
 
 export type ArtworkDetailComponentProps = {
-  selectedArtworkId: number | null
-  artworks: Artwork[] | null
+  artwork: Artwork | null
+  loading: boolean
+  error: string | null
 }
 
 function formatPublishedAt(iso: string): string {
@@ -12,48 +13,57 @@ function formatPublishedAt(iso: string): string {
 }
 
 export function ArtworkDetailComponent({
-  selectedArtworkId,
-  artworks,
+  artwork,
+  loading,
+  error,
 }: ArtworkDetailComponentProps) {
-  const list = artworks ?? []
-  const selected =
-    selectedArtworkId !== null &&
-    selectedArtworkId >= 0 &&
-    selectedArtworkId < list.length
-      ? list[selectedArtworkId]
-      : null
-
-  if (!selected) {
+  if (loading) {
     return (
-      <div className="artwork-detail artwork-detail--empty" role="region" aria-label="Detalji">
-        Odaberite rad iz liste.
+      <div className="artwork-detail artwork-detail--status" role="status">
+        Loading details…
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="artwork-detail artwork-detail--status artwork-list--error" role="alert">
+        {error}
+      </div>
+    )
+  }
+
+  if (!artwork) {
+    return (
+      <div className="artwork-detail artwork-detail--empty" role="region" aria-label="Details">
+        Artwork not found.
       </div>
     )
   }
 
   return (
-    <article className="artwork-detail" aria-label="Detalji odabranog rada">
-      <h2>{selected.title}</h2>
+    <article className="artwork-detail" aria-label="Selected artwork details">
+      <h2>{artwork.title}</h2>
       <dl className="artwork-detail__fields">
         <div>
-          <dt>Medij</dt>
-          <dd>{selected.medium}</dd>
+          <dt>Medium</dt>
+          <dd>{artwork.medium}</dd>
         </div>
         <div>
-          <dt>Oznake</dt>
-          <dd>{selected.tags.join(', ')}</dd>
+          <dt>Tags</dt>
+          <dd>{artwork.tags.join(', ')}</dd>
         </div>
         <div>
-          <dt>Objavljeno</dt>
-          <dd>{formatPublishedAt(selected.publishedAt)}</dd>
+          <dt>Published</dt>
+          <dd>{formatPublishedAt(artwork.publishedAt)}</dd>
         </div>
         <div>
-          <dt>Lajkovi</dt>
-          <dd>{selected.likeCount}</dd>
+          <dt>Likes</dt>
+          <dd>{artwork.likeCount}</dd>
         </div>
         <div>
-          <dt>Komentari</dt>
-          <dd>{selected.commentCount}</dd>
+          <dt>Comments</dt>
+          <dd>{artwork.commentCount}</dd>
         </div>
       </dl>
     </article>

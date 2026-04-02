@@ -1,24 +1,23 @@
+import { Link } from 'react-router-dom'
 import type { Artwork } from '../types/artwork'
 
 export type ArtworkListComponentProps = {
   artworks: Artwork[]
   loading: boolean
   error: string | null
-  selectedArtworkId: number | null
-  onSelectArtwork: (id: number) => void
+  onDelete: (title: string) => void
 }
 
 export function ArtworkListComponent({
   artworks,
   loading,
   error,
-  selectedArtworkId,
-  onSelectArtwork,
+  onDelete,
 }: ArtworkListComponentProps) {
   if (loading) {
     return (
       <div className="artwork-list artwork-list--status" role="status">
-        Učitavanje radova…
+        Loading artworks…
       </div>
     )
   }
@@ -32,18 +31,24 @@ export function ArtworkListComponent({
   }
 
   return (
-    <ul className="artwork-list" aria-label="Popis radova">
-      {artworks.map((artwork, index) => (
-        <li key={`${artwork.title}-${index}`}>
-          <button
-            type="button"
-            className={`artwork-list__item${selectedArtworkId === index ? ' artwork-list__item--selected' : ''}`}
-            onClick={() => onSelectArtwork(index)}
-          >
-            <span className="artwork-list__title">{artwork.title}</span>
-            <span className="artwork-list__medium">{artwork.medium}</span>
-            <span className="artwork-list__tags">{artwork.tags.join(', ')}</span>
-          </button>
+    <ul className="artwork-list" aria-label="Artworks list">
+      {artworks.map((artwork) => (
+        <li key={artwork.id} className="artwork-list__li">
+          <div className="artwork-list__row">
+            <Link className="artwork-list__item" to={`/details/${artwork.id}`}>
+              <span className="artwork-list__title">{artwork.title}</span>
+              <span className="artwork-list__medium">{artwork.medium}</span>
+              <span className="artwork-list__tags">{artwork.tags.join(', ')}</span>
+            </Link>
+            <button
+              type="button"
+              className="artwork-list__delete"
+              onClick={() => onDelete(artwork.title)}
+              aria-label={`Delete ${artwork.title}`}
+            >
+              Delete
+            </button>
+          </div>
         </li>
       ))}
     </ul>

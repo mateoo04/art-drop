@@ -1,7 +1,9 @@
 import type { Artwork } from '../types/artwork'
 
+/** Local mock data for testing without the backend (unused in the main app flow). */
 export const mockArtworks: Artwork[] = [
   {
+    id: 1,
     title: 'Morning Harbor',
     medium: 'Oil on canvas',
     tags: ['landscape', 'maritime', 'warm'],
@@ -10,6 +12,7 @@ export const mockArtworks: Artwork[] = [
     commentCount: 18,
   },
   {
+    id: 2,
     title: 'Urban Lines',
     medium: 'Digital print',
     tags: ['abstract', 'architecture', 'monochrome'],
@@ -18,6 +21,7 @@ export const mockArtworks: Artwork[] = [
     commentCount: 7,
   },
   {
+    id: 3,
     title: 'Ceramic Vessel Study',
     medium: 'Stoneware',
     tags: ['sculpture', 'minimal', 'earth tones'],
@@ -26,6 +30,7 @@ export const mockArtworks: Artwork[] = [
     commentCount: 12,
   },
   {
+    id: 4,
     title: 'Night Bloom',
     medium: 'Watercolor',
     tags: ['floral', 'nocturnal'],
