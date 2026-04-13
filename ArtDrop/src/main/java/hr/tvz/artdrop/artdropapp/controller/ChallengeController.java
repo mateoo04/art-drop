@@ -4,7 +4,6 @@ import hr.tvz.artdrop.artdropapp.dto.ChallengeDTO;
 import hr.tvz.artdrop.artdropapp.dto.SubmissionThumbnailDTO;
 import hr.tvz.artdrop.artdropapp.service.ChallengeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/challenges")
-@CrossOrigin(origins = "http://localhost:5173")
 public class ChallengeController {
 
     private final ChallengeService challengeService;

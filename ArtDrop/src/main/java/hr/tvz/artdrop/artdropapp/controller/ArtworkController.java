@@ -15,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/artworks")
-@CrossOrigin(origins = "http://localhost:5173")
 public class ArtworkController {
 
     private final ArtworkService artworkService;
