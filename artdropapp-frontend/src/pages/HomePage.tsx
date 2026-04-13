@@ -7,6 +7,9 @@ export function HomePage() {
       <p>
         <Link to="/artworks">Artworks</Link>
       </p>
+      <p>
+        <Link to="/collections">Collections</Link>
+      </p>
     </main>
   )
 }
