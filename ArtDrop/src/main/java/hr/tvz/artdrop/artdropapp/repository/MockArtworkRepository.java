@@ -1,6 +1,7 @@
 package hr.tvz.artdrop.artdropapp.repository;
 
 import hr.tvz.artdrop.artdropapp.model.Artwork;
+import hr.tvz.artdrop.artdropapp.model.ArtworkImage;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -16,35 +17,60 @@ public class MockArtworkRepository implements ArtworkRepository {
     public MockArtworkRepository() {
         artworks.add(new Artwork(
                 1L,
+                1L,
                 "Golden Hour",
                 "Digital Painting",
                 "Landscape inspired by sunset colors.",
                 "https://example.com/images/golden-hour.jpg",
+                List.of(
+                        new ArtworkImage(1L, null, "https://example.com/images/golden-hour.jpg", 0, true, "Cover image", LocalDateTime.of(2025, 10, 15, 18, 30)),
+                        new ArtworkImage(2L, null, "https://example.com/images/golden-hour-closeup.jpg", 1, false, "Brush texture close-up", LocalDateTime.of(2025, 10, 15, 18, 31))
+                ),
                 List.of("sunset", "landscape", "digital"),
                 LocalDateTime.of(2025, 10, 15, 18, 30),
-                125
+                125,
+                LocalDateTime.of(2025, 10, 15, 18, 20),
+                LocalDateTime.of(2025, 10, 15, 18, 30),
+                List.of(),
+                List.of()
         ));
 
         artworks.add(new Artwork(
+                2L,
                 2L,
                 "Urban Sketch",
                 "Traditional Ink",
                 "Quick ink sketch of a city street.",
                 "https://example.com/images/urban-sketch.jpg",
+                List.of(
+                        new ArtworkImage(3L, null, "https://example.com/images/urban-sketch.jpg", 0, true, "Main scan", LocalDateTime.of(2025, 11, 2, 14, 0))
+                ),
                 List.of("city", "ink", "traditional"),
                 LocalDateTime.of(2025, 11, 2, 14, 0),
-                87
+                87,
+                LocalDateTime.of(2025, 11, 2, 13, 45),
+                LocalDateTime.of(2025, 11, 2, 14, 0),
+                List.of(),
+                List.of()
         ));
 
         artworks.add(new Artwork(
                 3L,
+                2L,
                 "Rural Sketch",
                 "Digital Photo",
                 "Quick ink sketch of a city street.",
                 "https://example.com/images/urban-sketch.jpg",
+                List.of(
+                        new ArtworkImage(4L, null, "https://example.com/images/urban-sketch.jpg", 0, true, "Reference shot", LocalDateTime.of(2025, 11, 2, 14, 0))
+                ),
                 List.of("city", "ink", "traditional"),
                 LocalDateTime.of(2025, 11, 2, 14, 0),
-                87
+                87,
+                LocalDateTime.of(2025, 11, 2, 13, 50),
+                LocalDateTime.of(2025, 11, 2, 14, 0),
+                List.of(),
+                List.of()
         ));
     }
 

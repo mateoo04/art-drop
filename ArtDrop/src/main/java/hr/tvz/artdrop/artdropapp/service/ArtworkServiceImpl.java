@@ -6,8 +6,11 @@ import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkLikeCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
+import hr.tvz.artdrop.artdropapp.model.ArtworkImage;
+import hr.tvz.artdrop.artdropapp.model.Comment;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -56,25 +59,30 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
+    @Transactional
     public boolean createArtwork(ArtworkCommand command) {
         if (artworkRepository.existsByTitleIgnoreCase(command.title())) {
             return false;
         }
-        Artwork artwork = new Artwork(
-                null,
-                command.title(),
-                command.medium(),
-                command.description(),
-                command.imageUrl(),
-                List.of(),
-                LocalDateTime.now(),
-                0
-        );
+        Artwork artwork = new Artwork();
+        artwork.setAuthorId(1L);
+        artwork.setTitle(command.title());
+        artwork.setMedium(command.medium());
+        artwork.setDescription(command.description());
+        artwork.setImageUrl(command.imageUrl());
+        artwork.setTags(List.of());
+        artwork.setPublishedAt(LocalDateTime.now());
+        artwork.setLikeCount(0);
+        artwork.setCreatedAt(LocalDateTime.now());
+        artwork.setUpdatedAt(LocalDateTime.now());
+        ArtworkImage cover = new ArtworkImage(null, artwork, command.imageUrl(), 0, true, "Cover image", LocalDateTime.now());
+        artwork.setImages(new ArrayList<>(List.of(cover)));
         artworkRepository.addArtwork(artwork);
         return true;
     }
 
     @Override
+    @Transactional
     public boolean createArtworkLike(ArtworkLikeCommand command) {
         Optional<Artwork> maybeArtwork = artworkRepository.findOneByTitleIgnoreCase(command.title());
         if (maybeArtwork.isEmpty()) {
@@ -95,13 +103,32 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
+    @Transactional
     public boolean createArtworkComment(ArtworkCommentCommand command) {
         Optional<Artwork> maybeArtwork = artworkRepository.findOneByTitleIgnoreCase(command.title());
         if (maybeArtwork.isEmpty()) {
             return false;
         }
 
-        String key = maybeArtwork.get().getTitle().toLowerCase();
+        Artwork artwork = maybeArtwork.get();
+        Comment comment = new Comment(
+                null,
+                artwork,
+                null,
+                command.content(),
+                null,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                false
+        );
+        if (artwork.getComments() == null) {
+            artwork.setComments(new ArrayList<>());
+        }
+        artwork.getComments().add(comment);
+        artwork.setUpdatedAt(LocalDateTime.now());
+        artworkRepository.addArtwork(artwork);
+
+        String key = artwork.getTitle().toLowerCase();
         List<ArtworkCommentCommand> comments = commentsByTitle.get(key);
         if (comments == null) {
             comments = new ArrayList<>();
@@ -112,6 +139,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
+    @Transactional
     public boolean createArtworkReview(ArtworkReviewCommand command) {
         Optional<Artwork> maybeArtwork = artworkRepository.findOneByTitleIgnoreCase(command.title());
         if (maybeArtwork.isEmpty()) {
@@ -141,12 +169,13 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     private ArtworkDTO mapToDTO(Artwork artwork) {
         return new ArtworkDTO(
+                artwork.getId(),
                 artwork.getTitle(),
                 artwork.getMedium(),
                 artwork.getTags(),
                 artwork.getPublishedAt(),
                 artwork.getLikeCount(),
-                getCommentCount(artwork.getTitle())
+                artwork.getComments() == null ? getCommentCount(artwork.getTitle()) : artwork.getComments().size()
         );
     }
 
