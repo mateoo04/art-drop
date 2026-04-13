@@ -1,5 +1,20 @@
 import { API_BASE } from '../config'
-import type { Artwork } from '../types/artwork'
+import type { Artwork, ProgressStatus, SaleStatus } from '../types/artwork'
+
+const PROGRESS_VALUES: ProgressStatus[] = ['WIP', 'FINISHED']
+const SALE_VALUES: SaleStatus[] = ['ORIGINAL', 'EDITION', 'AVAILABLE', 'SOLD']
+
+function parseProgress(value: unknown): ProgressStatus | null {
+  return typeof value === 'string' && (PROGRESS_VALUES as string[]).includes(value)
+    ? (value as ProgressStatus)
+    : null
+}
+
+function parseSale(value: unknown): SaleStatus | null {
+  return typeof value === 'string' && (SALE_VALUES as string[]).includes(value)
+    ? (value as SaleStatus)
+    : null
+}
 
 function normalizePublishedAt(value: unknown): string {
   if (typeof value === 'string') return value
@@ -12,10 +27,31 @@ function normalizePublishedAt(value: unknown): string {
 }
 
 function mapApiArtwork(raw: Record<string, unknown>): Artwork {
+  const title = String(raw.title)
+  const medium = String(raw.medium)
+  const artistId = raw.artistId
+  const artist =
+    artistId != null
+      ? {
+          id: Number(artistId),
+          displayName: String(raw.artistDisplayName ?? ''),
+          slug: String(raw.artistSlug ?? ''),
+          avatarUrl: raw.artistAvatarUrl == null ? null : String(raw.artistAvatarUrl),
+        }
+      : null
+  const priceRaw = raw.price
   return {
     id: Number(raw.id),
-    title: String(raw.title),
-    medium: String(raw.medium),
+    title,
+    medium,
+    description: raw.description == null ? null : String(raw.description),
+    imageUrl: String(raw.imageUrl ?? ''),
+    imageAlt: String(raw.imageAlt ?? `${title} - ${medium}`),
+    aspectRatio: Number(raw.aspectRatio ?? 1),
+    price: priceRaw == null ? null : Number(priceRaw),
+    progressStatus: parseProgress(raw.progressStatus),
+    saleStatus: parseSale(raw.saleStatus),
+    artist,
     tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [],
     publishedAt: normalizePublishedAt(raw.publishedAt),
     likeCount: Number(raw.likeCount ?? 0),

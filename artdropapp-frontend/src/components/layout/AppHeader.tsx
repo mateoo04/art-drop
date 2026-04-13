@@ -1,0 +1,61 @@
+import { NavLink } from 'react-router-dom'
+
+const navItems = [
+  { to: '/', label: 'Discover' },
+  { to: '/circle', label: 'Circle' },
+  { to: '/challenges', label: 'Challenges' },
+]
+
+export function AppHeader() {
+  return (
+    <header className="bg-surface flex justify-between items-center w-full px-8 py-6 max-w-[1920px] mx-auto sticky top-0 z-50">
+      <NavLink
+        to="/"
+        className="font-headline text-2xl font-bold tracking-tighter text-on-surface"
+      >
+        ArtDrop
+      </NavLink>
+
+      <nav className="hidden md:flex gap-12 items-center" aria-label="Main navigation">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.to === '/'}
+            className={({ isActive }) =>
+              isActive
+                ? 'font-headline text-lg tracking-tight text-on-surface border-b-2 border-on-surface pb-1 transition-colors duration-300'
+                : 'font-body text-sm tracking-wide uppercase text-primary hover:text-on-surface transition-colors duration-300'
+            }
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="flex items-center gap-6">
+        <button
+          type="button"
+          aria-label="Search"
+          className="material-symbols-outlined text-on-surface transition-transform active:scale-95"
+        >
+          search
+        </button>
+        <button
+          type="button"
+          aria-label="Bag"
+          className="material-symbols-outlined text-on-surface transition-transform active:scale-95"
+        >
+          shopping_bag
+        </button>
+        <button
+          type="button"
+          aria-label="Account"
+          className="material-symbols-outlined text-on-surface transition-transform active:scale-95"
+        >
+          person
+        </button>
+      </div>
+    </header>
+  )
+}

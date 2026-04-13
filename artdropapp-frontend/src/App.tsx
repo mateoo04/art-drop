@@ -1,18 +1,28 @@
 import { Route, Routes } from 'react-router-dom'
+import { AppFooter } from './components/layout/AppFooter'
+import { AppHeader } from './components/layout/AppHeader'
 import { ArtworkDetailPage } from './pages/ArtworkDetailPage'
 import { ArtworksPage } from './pages/ArtworksPage'
+import { ChallengesPage } from './pages/ChallengesPage'
+import { CirclePage } from './pages/CirclePage'
 import { CollectionsPage } from './pages/CollectionsPage'
 import { HomePage } from './pages/HomePage'
 import './App.css'
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/artworks" element={<ArtworksPage />} />
-      <Route path="/collections" element={<CollectionsPage />} />
-      <Route path="/details/:id" element={<ArtworkDetailPage />} />
-    </Routes>
+    <>
+      <AppHeader />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/circle" element={<CirclePage />} />
+        <Route path="/challenges" element={<ChallengesPage />} />
+        <Route path="/artworks" element={<ArtworksPage />} />
+        <Route path="/collections" element={<CollectionsPage />} />
+        <Route path="/details/:id" element={<ArtworkDetailPage />} />
+      </Routes>
+      <AppFooter />
+    </>
   )
 }
 

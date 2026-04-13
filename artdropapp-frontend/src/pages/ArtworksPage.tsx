@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { deleteArtworkByTitle } from '../api/artworksApi'
 import { ArtworkCreateForm } from '../components/ArtworkCreateForm'
 import { ArtworkListComponent } from '../components/ArtworkListComponent'
@@ -23,9 +22,6 @@ export function ArtworksPage() {
 
   return (
     <main className="app-main">
-      <nav className="app-nav">
-        <Link to="/">Home</Link>
-      </nav>
       <h1>ArtDrop – Artworks</h1>
       <section className="app-section" aria-labelledby="list-heading">
         <h2 id="list-heading">Artworks</h2>

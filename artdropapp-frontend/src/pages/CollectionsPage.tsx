@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { useCollections } from '../hooks/useCollections'
 
 export function CollectionsPage() {
@@ -6,9 +5,6 @@ export function CollectionsPage() {
 
   return (
     <main className="app-main">
-      <nav className="app-nav">
-        <Link to="/">Home</Link>
-      </nav>
       <h1>ArtDrop - Collections</h1>
       {loading ? <p className="artwork-list--status">Loading collections...</p> : null}
       {error ? (

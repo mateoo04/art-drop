@@ -8,7 +8,11 @@ import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.ArtworkImage;
 import hr.tvz.artdrop.artdropapp.model.Comment;
+import hr.tvz.artdrop.artdropapp.model.ProgressStatus;
+import hr.tvz.artdrop.artdropapp.model.SaleStatus;
+import hr.tvz.artdrop.artdropapp.model.User;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkRepository;
+import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +27,13 @@ import java.util.Optional;
 public class ArtworkServiceImpl implements ArtworkService {
 
     private final ArtworkRepository artworkRepository;
+    private final UserJpaRepository userRepository;
     private final Map<String, List<ArtworkCommentCommand>> commentsByTitle = new HashMap<>();
     private final Map<String, List<ArtworkReviewCommand>> reviewsByTitle = new HashMap<>();
 
-    public ArtworkServiceImpl(ArtworkRepository artworkRepository) {
+    public ArtworkServiceImpl(ArtworkRepository artworkRepository, UserJpaRepository userRepository) {
         this.artworkRepository = artworkRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -65,11 +71,14 @@ public class ArtworkServiceImpl implements ArtworkService {
             return false;
         }
         Artwork artwork = new Artwork();
-        artwork.setAuthorId(1L);
+        User defaultAuthor = userRepository.findById(1L).orElse(null);
+        artwork.setAuthor(defaultAuthor);
         artwork.setTitle(command.title());
         artwork.setMedium(command.medium());
         artwork.setDescription(command.description());
         artwork.setImageUrl(command.imageUrl());
+        artwork.setProgressStatus(ProgressStatus.FINISHED);
+        artwork.setSaleStatus(SaleStatus.AVAILABLE);
         artwork.setTags(List.of());
         artwork.setPublishedAt(LocalDateTime.now());
         artwork.setLikeCount(0);
@@ -168,10 +177,22 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     private ArtworkDTO mapToDTO(Artwork artwork) {
+        User author = artwork.getAuthor();
         return new ArtworkDTO(
                 artwork.getId(),
                 artwork.getTitle(),
                 artwork.getMedium(),
+                artwork.getDescription(),
+                artwork.getImageUrl(),
+                artwork.getTitle() + " - " + artwork.getMedium(),
+                estimateAspectRatio(artwork),
+                artwork.getPrice(),
+                artwork.getProgressStatus() == null ? null : artwork.getProgressStatus().name(),
+                artwork.getSaleStatus() == null ? null : artwork.getSaleStatus().name(),
+                author == null ? null : author.getId(),
+                author == null ? null : author.getDisplayName(),
+                author == null ? null : author.getSlug(),
+                author == null ? null : author.getAvatarUrl(),
                 artwork.getTags(),
                 artwork.getPublishedAt(),
                 artwork.getLikeCount(),
@@ -188,5 +209,19 @@ public class ArtworkServiceImpl implements ArtworkService {
             return 0;
         }
         return comments.size();
+    }
+
+    private double estimateAspectRatio(Artwork artwork) {
+        if (artwork.getImageUrl() == null) {
+            return 1.0;
+        }
+        long selector = (artwork.getId() == null ? 0 : artwork.getId()) % 5;
+        return switch ((int) selector) {
+            case 0 -> 1.0;
+            case 1 -> 0.78;
+            case 2 -> 1.28;
+            case 3 -> 0.92;
+            default -> 1.14;
+        };
     }
 }

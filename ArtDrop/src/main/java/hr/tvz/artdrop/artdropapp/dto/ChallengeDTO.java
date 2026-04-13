@@ -1,15 +1,19 @@
 package hr.tvz.artdrop.artdropapp.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ChallengeDTO(
         Long id,
-        Long artworkId,
         String title,
         String description,
+        String quote,
+        String kind,
+        String status,
         String theme,
+        String coverImageUrl,
         LocalDateTime startsAt,
         LocalDateTime endsAt,
-        String status
-) {
-}
+        long submissionCount,
+        List<SubmissionThumbnailDTO> submissions
+) {}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { fetchArtworkById } from '../api/artworksApi'
 import { ArtworkDetailComponent } from '../components/ArtworkDetailComponent'
 import type { Artwork } from '../types/artwork'
@@ -52,9 +52,6 @@ export function ArtworkDetailPage() {
 
   return (
     <main className="app-main">
-      <nav className="app-nav">
-        <Link to="/artworks">Back to list</Link>
-      </nav>
       <h1>Artwork details</h1>
       <ArtworkDetailComponent artwork={artwork} loading={loading} error={error} />
     </main>
