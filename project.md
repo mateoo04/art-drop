@@ -51,6 +51,7 @@ Group into **MVP (course-aligned)**, **Phase 2 (differentiation)**, **Phase 3 (c
 ### 7. Non-functional requirements
 
 - Security (JWT, CORS, HTTPS in prod), performance (pagination for feed), accessibility baseline, i18n if you ever target HR/EN UI.
+- Frontend UI uses Tailwind CSS as the primary styling system and follows a mobile-first responsive approach (base styles for small screens, then breakpoint enhancements for larger viewports).
 
 ### 8. Monorepo layout reference
 

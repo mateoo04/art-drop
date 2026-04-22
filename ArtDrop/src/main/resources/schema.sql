@@ -1,15 +1,27 @@
 CREATE TABLE IF NOT EXISTS app_user (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) UNIQUE,
+    username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255),
-    password_hash VARCHAR(255),
-    role VARCHAR(30),
+    password_hash VARCHAR(255) NOT NULL,
     display_name VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
     bio VARCHAR(1000),
     avatar_url VARCHAR(1000),
     created_at TIMESTAMP,
     updated_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS authority (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS user_authority (
+    user_id BIGINT NOT NULL,
+    authority_id BIGINT NOT NULL,
+    PRIMARY KEY (user_id, authority_id),
+    FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (authority_id) REFERENCES authority(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS artwork (

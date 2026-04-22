@@ -95,7 +95,7 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
               </span>
             ) : null}
           </div>
-          <button
+          {/* <button
             type="button"
             aria-label={`Edit ${artwork.title}`}
             onClick={(e) => {
@@ -106,7 +106,7 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
             className="material-symbols-outlined absolute top-4 right-4 bg-surface/90 backdrop-blur-md p-2 text-on-surface hover:bg-surface transition-colors"
           >
             edit
-          </button>
+          </button> */}
         </div>
 
         <div className="mt-6">
