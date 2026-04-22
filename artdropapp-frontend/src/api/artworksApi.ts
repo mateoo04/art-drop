@@ -107,6 +107,29 @@ export async function createArtwork(payload: CreateArtworkPayload): Promise<void
   }
 }
 
+export type UpdateArtworkPayload = {
+  title?: string
+  medium?: string
+  description?: string
+  imageUrl?: string
+}
+
+export async function updateArtwork(id: number, payload: UpdateArtworkPayload): Promise<Artwork> {
+  const res = await fetch(`${API_BASE}/api/artworks/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (res.status === 404) {
+    throw new Error('Artwork not found')
+  }
+  if (!res.ok) {
+    throw new Error(`Update failed (${res.status})`)
+  }
+  const json: unknown = await res.json()
+  return mapApiArtwork(json as Record<string, unknown>)
+}
+
 export async function deleteArtworkByTitle(title: string): Promise<void> {
   const encoded = encodeURIComponent(title)
   const res = await fetch(`${API_BASE}/api/artworks/${encoded}`, {

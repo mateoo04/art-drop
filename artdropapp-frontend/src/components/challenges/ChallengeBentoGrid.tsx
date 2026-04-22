@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { SubmissionThumbnail } from '../../types/challenge'
 
 type ChallengeBentoGridProps = {
@@ -25,9 +26,11 @@ export function ChallengeBentoGrid({ submissions }: ChallengeBentoGridProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 h-[600px] lg:h-[500px]">
       {cells.map((submission, i) => (
-        <div
+        <Link
           key={submission.submissionId}
-          className={`${CELL_CLASSES[i]} relative group overflow-hidden bg-surface-container`}
+          to={`/details/${submission.artworkId}`}
+          className={`${CELL_CLASSES[i]} relative group overflow-hidden bg-surface-container block`}
+          aria-label={`View details for ${submission.title}`}
         >
           <img
             alt={submission.imageAlt}
@@ -35,7 +38,7 @@ export function ChallengeBentoGrid({ submissions }: ChallengeBentoGridProps) {
             loading="lazy"
             className="w-full h-full object-cover grayscale-[0.2] group-hover:scale-105 transition-transform duration-700"
           />
-        </div>
+        </Link>
       ))}
     </div>
   )

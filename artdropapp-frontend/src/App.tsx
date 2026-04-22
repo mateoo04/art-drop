@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import { AppFooter } from './components/layout/AppFooter'
 import { AppHeader } from './components/layout/AppHeader'
 import { ArtworkDetailPage } from './pages/ArtworkDetailPage'
+import { ArtworkEditPage } from './pages/ArtworkEditPage'
 import { ArtworksPage } from './pages/ArtworksPage'
 import { ChallengesPage } from './pages/ChallengesPage'
 import { CirclePage } from './pages/CirclePage'
@@ -20,6 +21,7 @@ function App() {
         <Route path="/artworks" element={<ArtworksPage />} />
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/details/:id" element={<ArtworkDetailPage />} />
+        <Route path="/edit/:id" element={<ArtworkEditPage />} />
       </Routes>
       <AppFooter />
     </>

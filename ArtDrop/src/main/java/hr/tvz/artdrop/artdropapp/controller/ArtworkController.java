@@ -5,6 +5,7 @@ import hr.tvz.artdrop.artdropapp.dto.ArtworkCommentCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkLikeCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
+import hr.tvz.artdrop.artdropapp.dto.ArtworkUpdateCommand;
 import hr.tvz.artdrop.artdropapp.service.ArtworkService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -79,6 +80,13 @@ public class ArtworkController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ArtworkDTO> updateArtwork(@PathVariable Long id, @Valid @RequestBody ArtworkUpdateCommand command) {
+        return artworkService.updateArtwork(id, command)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{title}")

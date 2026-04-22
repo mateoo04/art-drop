@@ -2,7 +2,7 @@ package hr.tvz.artdrop.artdropapp.service;
 
 import hr.tvz.artdrop.artdropapp.dto.CollectionDTO;
 import hr.tvz.artdrop.artdropapp.model.Collection;
-import hr.tvz.artdrop.artdropapp.repository.CollectionRepository;
+import hr.tvz.artdrop.artdropapp.repository.CollectionJpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +11,9 @@ import java.util.Optional;
 @Service
 public class CollectionServiceImpl implements CollectionService {
 
-    private final CollectionRepository collectionRepository;
+    private final CollectionJpaRepository collectionRepository;
 
-    public CollectionServiceImpl(CollectionRepository collectionRepository) {
+    public CollectionServiceImpl(CollectionJpaRepository collectionRepository) {
         this.collectionRepository = collectionRepository;
     }
 

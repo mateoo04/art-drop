@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type { Artwork, ProgressStatus, SaleStatus } from '../../types/artwork'
 
 type ArtworkCardProps = {
@@ -69,6 +69,7 @@ function saleBadgeClasses(status: SaleStatus | null): string {
 export function ArtworkCard({ artwork }: ArtworkCardProps) {
   const progress = progressLabel(artwork.progressStatus)
   const sale = saleLabel(artwork.saleStatus)
+  const navigate = useNavigate()
 
   return (
     <article className="masonry-item group cursor-pointer">
@@ -94,6 +95,18 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
               </span>
             ) : null}
           </div>
+          <button
+            type="button"
+            aria-label={`Edit ${artwork.title}`}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              navigate(`/edit/${artwork.id}`)
+            }}
+            className="material-symbols-outlined absolute top-4 right-4 bg-surface/90 backdrop-blur-md p-2 text-on-surface hover:bg-surface transition-colors"
+          >
+            edit
+          </button>
         </div>
 
         <div className="mt-6">

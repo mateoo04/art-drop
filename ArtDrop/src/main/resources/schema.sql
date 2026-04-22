@@ -75,6 +75,24 @@ CREATE TABLE IF NOT EXISTS challenge (
     updated_at TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS collection (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(2000),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    is_public BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (owner_id) REFERENCES app_user(id)
+);
+
+CREATE TABLE IF NOT EXISTS collection_artwork (
+    collection_id BIGINT NOT NULL,
+    artwork_id BIGINT NOT NULL,
+    FOREIGN KEY (collection_id) REFERENCES collection(id) ON DELETE CASCADE,
+    FOREIGN KEY (artwork_id) REFERENCES artwork(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS challenge_submission (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     challenge_id BIGINT NOT NULL,

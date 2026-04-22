@@ -44,6 +44,14 @@ export function ArtworkDetailComponent({
   return (
     <article className="artwork-detail" aria-label="Selected artwork details">
       <h2>{artwork.title}</h2>
+      {artwork.imageUrl ? (
+        <img
+          src={artwork.imageUrl}
+          alt={artwork.imageAlt}
+          className="artwork-detail__image"
+          loading="lazy"
+        />
+      ) : null}
       <dl className="artwork-detail__fields">
         <div>
           <dt>Medium</dt>

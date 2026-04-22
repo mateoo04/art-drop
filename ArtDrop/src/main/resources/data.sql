@@ -48,6 +48,18 @@ INSERT INTO comment (artwork_id, author_id, text, parent_comment_id, created_at,
 (1, 3, 'Nastavak serije?', NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), FALSE),
 (2, 1, 'Odlican kontrast i linije.', NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), FALSE);
 
+INSERT INTO collection (id, owner_id, name, description, created_at, updated_at, is_public) VALUES
+(1, 1, 'Urban Scenes', 'Street-focused sketches and photo references.', DATEADD('DAY', -95, CURRENT_TIMESTAMP()), DATEADD('DAY', -95, CURRENT_TIMESTAMP()), TRUE),
+(2, 1, 'Sunset Studies', 'Warm color palette experiments for landscape compositions.', DATEADD('DAY', -77, CURRENT_TIMESTAMP()), DATEADD('DAY', -77, CURRENT_TIMESTAMP()), FALSE),
+(3, 2, 'Print Drafts', 'Mixed-media drafts prepared for print review.', DATEADD('DAY', -40, CURRENT_TIMESTAMP()), DATEADD('DAY', -40, CURRENT_TIMESTAMP()), TRUE);
+
+INSERT INTO collection_artwork (collection_id, artwork_id) VALUES
+(1, 2),
+(1, 3),
+(2, 1),
+(3, 3),
+(3, 1);
+
 INSERT INTO challenge (id, created_by, title, description, quote, kind, status, theme, cover_image_url, starts_at, ends_at, created_at, updated_at) VALUES
 (1, 1, 'The Light of Dusk', 'Capturing the fleeting transition between day and night. We are looking for work that emphasizes long shadows, warm gradients, and the quiet melancholy of the blue hour.', 'Twilight is the crack between worlds where the light forgets its name and the shadows begin to sing.', 'FEATURED', 'ACTIVE', 'Dusk', NULL, DATEADD('DAY', -3, CURRENT_TIMESTAMP()), DATEADD('DAY', 11, CURRENT_TIMESTAMP()), CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
 (2, 1, 'Brutalist Forms', 'A study of raw materials and uncompromising geometry. We celebrate the beauty of concrete, steel, and the rhythm of repetitive structures in the urban landscape.', 'The architect''s task is to make life more beautiful, but also to show the strength that holds it up.', 'COMMUNITY_CHOICE', 'ACTIVE', 'Brutalism', NULL, DATEADD('DAY', -7, CURRENT_TIMESTAMP()), DATEADD('DAY', 7, CURRENT_TIMESTAMP()), CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());

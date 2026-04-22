@@ -5,13 +5,14 @@ import hr.tvz.artdrop.artdropapp.dto.ArtworkCommentCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkLikeCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
+import hr.tvz.artdrop.artdropapp.dto.ArtworkUpdateCommand;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.ArtworkImage;
 import hr.tvz.artdrop.artdropapp.model.Comment;
 import hr.tvz.artdrop.artdropapp.model.ProgressStatus;
 import hr.tvz.artdrop.artdropapp.model.SaleStatus;
 import hr.tvz.artdrop.artdropapp.model.User;
-import hr.tvz.artdrop.artdropapp.repository.ArtworkRepository;
+import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,12 +27,12 @@ import java.util.Optional;
 @Service
 public class ArtworkServiceImpl implements ArtworkService {
 
-    private final ArtworkRepository artworkRepository;
+    private final ArtworkJpaRepository artworkRepository;
     private final UserJpaRepository userRepository;
     private final Map<String, List<ArtworkCommentCommand>> commentsByTitle = new HashMap<>();
     private final Map<String, List<ArtworkReviewCommand>> reviewsByTitle = new HashMap<>();
 
-    public ArtworkServiceImpl(ArtworkRepository artworkRepository, UserJpaRepository userRepository) {
+    public ArtworkServiceImpl(ArtworkJpaRepository artworkRepository, UserJpaRepository userRepository) {
         this.artworkRepository = artworkRepository;
         this.userRepository = userRepository;
     }
@@ -52,7 +53,7 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     @Override
     public List<ArtworkDTO> findByMedium(String medium) {
-        return artworkRepository.findByMedium(medium)
+        return artworkRepository.findByMediumContainingIgnoreCase(medium)
                 .stream()
                 .map(this::mapToDTO)
                 .toList();
@@ -60,7 +61,7 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     @Override
     public Optional<ArtworkDTO> findOneByTitle(String title) {
-        return artworkRepository.findOneByTitleIgnoreCase(title)
+        return artworkRepository.findByTitleIgnoreCase(title)
                 .map(this::mapToDTO);
     }
 
@@ -86,14 +87,14 @@ public class ArtworkServiceImpl implements ArtworkService {
         artwork.setUpdatedAt(LocalDateTime.now());
         ArtworkImage cover = new ArtworkImage(null, artwork, command.imageUrl(), 0, true, "Cover image", LocalDateTime.now());
         artwork.setImages(new ArrayList<>(List.of(cover)));
-        artworkRepository.addArtwork(artwork);
+        artworkRepository.save(artwork);
         return true;
     }
 
     @Override
     @Transactional
     public boolean createArtworkLike(ArtworkLikeCommand command) {
-        Optional<Artwork> maybeArtwork = artworkRepository.findOneByTitleIgnoreCase(command.title());
+        Optional<Artwork> maybeArtwork = artworkRepository.findByTitleIgnoreCase(command.title());
         if (maybeArtwork.isEmpty()) {
             return false;
         }
@@ -114,7 +115,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     @Transactional
     public boolean createArtworkComment(ArtworkCommentCommand command) {
-        Optional<Artwork> maybeArtwork = artworkRepository.findOneByTitleIgnoreCase(command.title());
+        Optional<Artwork> maybeArtwork = artworkRepository.findByTitleIgnoreCase(command.title());
         if (maybeArtwork.isEmpty()) {
             return false;
         }
@@ -135,7 +136,7 @@ public class ArtworkServiceImpl implements ArtworkService {
         }
         artwork.getComments().add(comment);
         artwork.setUpdatedAt(LocalDateTime.now());
-        artworkRepository.addArtwork(artwork);
+        artworkRepository.save(artwork);
 
         String key = artwork.getTitle().toLowerCase();
         List<ArtworkCommentCommand> comments = commentsByTitle.get(key);
@@ -150,7 +151,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     @Transactional
     public boolean createArtworkReview(ArtworkReviewCommand command) {
-        Optional<Artwork> maybeArtwork = artworkRepository.findOneByTitleIgnoreCase(command.title());
+        Optional<Artwork> maybeArtwork = artworkRepository.findByTitleIgnoreCase(command.title());
         if (maybeArtwork.isEmpty()) {
             return false;
         }
@@ -166,8 +167,34 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
+    @Transactional
+    public Optional<ArtworkDTO> updateArtwork(Long id, ArtworkUpdateCommand command) {
+        Optional<Artwork> maybeArtwork = artworkRepository.findById(id);
+        if (maybeArtwork.isEmpty()) {
+            return Optional.empty();
+        }
+        Artwork artwork = maybeArtwork.get();
+        if (command.title() != null && !command.title().isBlank()) {
+            artwork.setTitle(command.title());
+        }
+        if (command.medium() != null && !command.medium().isBlank()) {
+            artwork.setMedium(command.medium());
+        }
+        if (command.description() != null) {
+            artwork.setDescription(command.description());
+        }
+        if (command.imageUrl() != null && !command.imageUrl().isBlank()) {
+            artwork.setImageUrl(command.imageUrl());
+        }
+        artwork.setUpdatedAt(LocalDateTime.now());
+        artworkRepository.save(artwork);
+        return Optional.of(mapToDTO(artwork));
+    }
+
+    @Override
+    @Transactional
     public boolean deleteByTitle(String title) {
-        boolean deleted = artworkRepository.deleteByTitleIgnoreCase(title);
+        boolean deleted = artworkRepository.deleteByTitleIgnoreCase(title) > 0;
         if (deleted) {
             String key = title.toLowerCase();
             commentsByTitle.remove(key);

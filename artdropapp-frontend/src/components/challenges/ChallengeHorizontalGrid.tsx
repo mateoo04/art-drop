@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { SubmissionThumbnail } from '../../types/challenge'
 
 type ChallengeHorizontalGridProps = {
@@ -18,20 +19,28 @@ export function ChallengeHorizontalGrid({ submissions }: ChallengeHorizontalGrid
     <div className="flex flex-col md:flex-row gap-6 overflow-hidden">
       <div className="w-full md:w-1/3 aspect-[4/5] bg-surface-container-low overflow-hidden">
         {hero ? (
-          <img
-            alt={hero.imageAlt}
-            src={hero.imageUrl}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
+          <Link
+            to={`/details/${hero.artworkId}`}
+            className="block w-full h-full"
+            aria-label={`View details for ${hero.title}`}
+          >
+            <img
+              alt={hero.imageAlt}
+              src={hero.imageUrl}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          </Link>
         ) : null}
       </div>
       <div className="w-full md:w-2/3 flex flex-col gap-6">
         <div className="flex gap-6 h-1/2">
           {rest.slice(0, 2).map((s) => (
-            <div
+            <Link
               key={s.submissionId}
-              className="w-1/2 aspect-square bg-surface-container-low overflow-hidden"
+              to={`/details/${s.artworkId}`}
+              className="w-1/2 aspect-square bg-surface-container-low overflow-hidden block"
+              aria-label={`View details for ${s.title}`}
             >
               <img
                 alt={s.imageAlt}
@@ -39,14 +48,16 @@ export function ChallengeHorizontalGrid({ submissions }: ChallengeHorizontalGrid
                 loading="lazy"
                 className="w-full h-full object-cover"
               />
-            </div>
+            </Link>
           ))}
         </div>
         <div className="flex gap-6 h-1/2">
           {rest.slice(2, 4).map((s, i) => (
-            <div
+            <Link
               key={s.submissionId}
-              className={`${i === 0 ? 'w-1/3' : 'w-2/3 aspect-[2/1]'} ${i === 0 ? 'aspect-square' : ''} bg-surface-container-low overflow-hidden`}
+              to={`/details/${s.artworkId}`}
+              className={`${i === 0 ? 'w-1/3' : 'w-2/3 aspect-[2/1]'} ${i === 0 ? 'aspect-square' : ''} bg-surface-container-low overflow-hidden block`}
+              aria-label={`View details for ${s.title}`}
             >
               <img
                 alt={s.imageAlt}
@@ -54,7 +65,7 @@ export function ChallengeHorizontalGrid({ submissions }: ChallengeHorizontalGrid
                 loading="lazy"
                 className="w-full h-full object-cover"
               />
-            </div>
+            </Link>
           ))}
         </div>
       </div>
