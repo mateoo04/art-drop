@@ -1,4 +1,7 @@
 import type { Artwork } from '../types/artwork'
+import { useComments } from '../hooks/useComments'
+import { CommentComposer } from './artwork/CommentComposer'
+import { CommentList } from './artwork/CommentList'
 
 export type ArtworkDetailComponentProps = {
   artwork: Artwork | null
@@ -17,6 +20,8 @@ export function ArtworkDetailComponent({
   loading,
   error,
 }: ArtworkDetailComponentProps) {
+  const comments = useComments(artwork?.id ?? null)
+
   if (loading) {
     return (
       <div className="artwork-detail artwork-detail--status" role="status">
@@ -74,6 +79,36 @@ export function ArtworkDetailComponent({
           <dd>{artwork.commentCount}</dd>
         </div>
       </dl>
+
+      <section className="mt-12 max-w-2xl">
+        <h3 className="font-headline text-2xl text-on-surface mb-6">Comments</h3>
+        <div className="mb-8">
+          <CommentComposer
+            onSubmit={async (text) => {
+              await comments.add(text)
+            }}
+          />
+        </div>
+        {comments.loading ? (
+          <p className="py-6 text-center text-on-surface-variant italic font-body text-sm" role="status">
+            Loading comments…
+          </p>
+        ) : comments.error ? (
+          <p
+            className="py-6 text-center text-error border border-error-container/40 bg-error-container/10 font-body text-sm"
+            role="alert"
+          >
+            {comments.error}
+          </p>
+        ) : (
+          <CommentList
+            comments={comments.data}
+            onDelete={(id) => {
+              void comments.remove(id)
+            }}
+          />
+        )}
+      </section>
     </article>
   )
 }
