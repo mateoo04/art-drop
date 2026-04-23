@@ -21,7 +21,14 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/circle" element={<CirclePage />} />
+        <Route
+          path="/circle"
+          element={
+            <ProtectedRoute>
+              <CirclePage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/challenges" element={<ChallengesPage />} />
         <Route path="/artworks" element={<ArtworksPage />} />
         <Route path="/collections" element={<CollectionsPage />} />

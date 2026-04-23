@@ -68,6 +68,17 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
+    public List<ArtworkDTO> findCircleFeed(Long viewerId, int limit, int offset) {
+        int safeLimit = Math.max(1, Math.min(limit, 100));
+        int safeOffset = Math.max(0, offset);
+        int page = safeOffset / safeLimit;
+        return artworkRepository.findCircleFeed(viewerId, org.springframework.data.domain.PageRequest.of(page, safeLimit))
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
+    @Override
     public Optional<ArtworkDTO> findOneByTitle(String title) {
         return artworkRepository.findByTitleIgnoreCase(title)
                 .map(this::mapToDTO);
