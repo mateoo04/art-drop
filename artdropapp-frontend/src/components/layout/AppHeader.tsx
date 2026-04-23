@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { getToken } from '../../lib/auth'
 
 const navItems = [
   { to: '/', label: 'Discover' },
@@ -7,6 +8,14 @@ const navItems = [
 ]
 
 export function AppHeader() {
+  const navigate = useNavigate()
+
+  const handleAccountClick = () => {
+    if (!getToken()) {
+      navigate('/login')
+    }
+  }
+
   return (
     <header className="bg-surface flex justify-between items-center w-full px-8 py-6 max-w-[1920px] mx-auto sticky top-0 z-50">
       <NavLink
@@ -51,6 +60,7 @@ export function AppHeader() {
         <button
           type="button"
           aria-label="Account"
+          onClick={handleAccountClick}
           className="material-symbols-outlined text-on-surface transition-transform active:scale-95"
         >
           person

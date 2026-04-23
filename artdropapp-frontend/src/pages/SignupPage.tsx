@@ -80,7 +80,7 @@ export function SignupPage() {
         password: values.password,
         displayName: `${values.firstName.trim()} ${values.lastName.trim()}`,
       })
-      storeToken(response.token)
+      storeToken(response.accessToken)
       navigate('/')
     } catch (error) {
       if (isSignupError(error)) {

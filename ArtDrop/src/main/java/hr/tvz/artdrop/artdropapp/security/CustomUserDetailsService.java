@@ -21,9 +21,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userJpaRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        User user = userJpaRepository.findByUsername(identifier)
+                .or(() -> userJpaRepository.findByEmail(identifier))
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + identifier));
 
         Set<GrantedAuthority> authorities = user.getAuthorities()
                 .stream()
