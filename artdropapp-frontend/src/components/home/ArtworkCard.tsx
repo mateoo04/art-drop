@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import type { Artwork, ProgressStatus, SaleStatus } from '../../types/artwork'
 
 type ArtworkCardProps = {
@@ -69,7 +69,6 @@ function saleBadgeClasses(status: SaleStatus | null): string {
 export function ArtworkCard({ artwork }: ArtworkCardProps) {
   const progress = progressLabel(artwork.progressStatus)
   const sale = saleLabel(artwork.saleStatus)
-  const navigate = useNavigate()
 
   return (
     <article className="masonry-item group cursor-pointer">
