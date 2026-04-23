@@ -1,9 +1,66 @@
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { Link } from 'react-router-dom'
+import { z } from 'zod'
 import { AuthHeader } from '../components/layout/AuthHeader'
+import { Button } from '../components/ui/Button'
+import { FormField } from '../components/ui/FormField'
+import { Input } from '../components/ui/Input'
 
 const HERO_IMAGE_URL =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuCu_FZrOTTzX5XK4WeCT-aVlozipqUREoyXBxA5nWws63YY8rNsVbPz1NCAOtwKduW0_QEzLi8p9XX7znw-1V0XyRhwF4PpxCMY0mVyilcV-4DmBEUYQVd9c3a_IrAMxQ83RzHyA1036Y8NMzU4av-LYfBL_pi5xovfyk1x6TpPvrL0foUy1iHaaHlFU-QSAvd4v1sU6FInP0ZrSWzPhs8QDeSeanyr-Rox6N1SktzKjx5mUexaemlyoJC8OuSHOsbNs1NIRnhHPFU'
 
+const signupSchema = z
+  .object({
+    firstName: z
+      .string()
+      .trim()
+      .min(1, { message: 'First name is required' })
+      .max(50, { message: 'First name must be 50 characters or fewer' }),
+    lastName: z
+      .string()
+      .trim()
+      .min(1, { message: 'Last name is required' })
+      .max(50, { message: 'Last name must be 50 characters or fewer' }),
+    email: z
+      .string()
+      .trim()
+      .min(1, { message: 'Email is required' })
+      .email({ message: 'Enter a valid email address' }),
+    password: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters' }),
+    confirmPassword: z.string().min(1, { message: 'Please confirm your password' }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ['confirmPassword'],
+    message: "Passwords don't match",
+  })
+
+type SignupFormValues = z.infer<typeof signupSchema>
+
 export function SignupPage() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormValues>({
+    mode: 'onTouched',
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  })
+
+  const onSubmit = handleSubmit((values) => {
+    // Wiring in Task 10
+    console.log('submit', values)
+  })
+
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <AuthHeader />
@@ -25,7 +82,86 @@ export function SignupPage() {
           </p>
         </section>
 
-        {/* Form comes in Task 9 */}
+        <form className="space-y-6" onSubmit={onSubmit} noValidate>
+          <FormField label="First Name" htmlFor="firstName" error={errors.firstName?.message}>
+            <Input
+              id="firstName"
+              type="text"
+              autoComplete="given-name"
+              placeholder="E.g. Elena"
+              disabled={isSubmitting}
+              invalid={!!errors.firstName}
+              {...register('firstName')}
+            />
+          </FormField>
+
+          <FormField label="Last Name" htmlFor="lastName" error={errors.lastName?.message}>
+            <Input
+              id="lastName"
+              type="text"
+              autoComplete="family-name"
+              placeholder="E.g. Rossi"
+              disabled={isSubmitting}
+              invalid={!!errors.lastName}
+              {...register('lastName')}
+            />
+          </FormField>
+
+          <FormField label="Email Address" htmlFor="email" error={errors.email?.message}>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="name@curator.com"
+              disabled={isSubmitting}
+              invalid={!!errors.email}
+              {...register('email')}
+            />
+          </FormField>
+
+          <FormField label="Password" htmlFor="password" error={errors.password?.message}>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              placeholder="••••••••"
+              disabled={isSubmitting}
+              invalid={!!errors.password}
+              {...register('password')}
+            />
+          </FormField>
+
+          <FormField
+            label="Confirm Password"
+            htmlFor="confirmPassword"
+            error={errors.confirmPassword?.message}
+          >
+            <Input
+              id="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              placeholder="••••••••"
+              disabled={isSubmitting}
+              invalid={!!errors.confirmPassword}
+              {...register('confirmPassword')}
+            />
+          </FormField>
+
+          <div className="pt-2">
+            <Button type="submit" variant="primary" fullWidth loading={isSubmitting}>
+              Create Your Profile
+            </Button>
+          </div>
+        </form>
+
+        <footer className="mt-auto pt-16 pb-10 text-center">
+          <Link
+            to="/login"
+            className="font-label text-[11px] uppercase tracking-[0.15em] text-on-surface hover:text-outline transition-colors duration-300"
+          >
+            Already have an account? <span className="border-b border-on-surface pb-1">Sign In</span>
+          </Link>
+        </footer>
       </main>
     </div>
   )
