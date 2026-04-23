@@ -50,19 +50,19 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JwtResponse signup(RegisterRequest registerRequest) {
-        if (userJpaRepository.existsByUsername(registerRequest.username())
-                || userJpaRepository.existsByEmail(registerRequest.email())) {
-            throw new IllegalArgumentException("Username or email already exists");
+        if (userJpaRepository.existsByEmail(registerRequest.email())) {
+            throw new IllegalArgumentException("Email already exists");
         }
 
         Authority roleUser = authorityJpaRepository.findByName("ROLE_USER")
                 .orElseGet(() -> authorityJpaRepository.save(new Authority(null, "ROLE_USER")));
 
-        String slug = generateUniqueSlug(registerRequest.username());
+        String uniqueUsername = generateUniqueUsername(registerRequest.username());
+        String slug = generateUniqueSlug(uniqueUsername);
         LocalDateTime now = LocalDateTime.now();
 
         User user = new User();
-        user.setUsername(registerRequest.username());
+        user.setUsername(uniqueUsername);
         user.setEmail(registerRequest.email());
         user.setPasswordHash(passwordEncoder.encode(registerRequest.password()));
         user.setDisplayName(registerRequest.displayName());
@@ -74,7 +74,18 @@ public class AuthServiceImpl implements AuthService {
         user.setAuthorities(Set.of(roleUser));
         userJpaRepository.save(user);
 
-        return login(new LoginRequest(registerRequest.username(), registerRequest.password()));
+        return login(new LoginRequest(uniqueUsername, registerRequest.password()));
+    }
+
+    private String generateUniqueUsername(String base) {
+        if (!userJpaRepository.existsByUsername(base)) {
+            return base;
+        }
+        int suffix = 2;
+        while (userJpaRepository.existsByUsername(base + suffix)) {
+            suffix++;
+        }
+        return base + suffix;
     }
 
     private String generateUniqueSlug(String username) {
