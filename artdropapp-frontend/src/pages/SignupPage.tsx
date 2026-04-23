@@ -1,11 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
+import { signup, isSignupError, type SignupError } from '../api/authApi'
 import { AuthHeader } from '../components/layout/AuthHeader'
 import { Button } from '../components/ui/Button'
 import { FormField } from '../components/ui/FormField'
 import { Input } from '../components/ui/Input'
+import { deriveUsernameFromEmail, storeToken } from '../lib/auth'
 
 const HERO_IMAGE_URL =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuCu_FZrOTTzX5XK4WeCT-aVlozipqUREoyXBxA5nWws63YY8rNsVbPz1NCAOtwKduW0_QEzLi8p9XX7znw-1V0XyRhwF4PpxCMY0mVyilcV-4DmBEUYQVd9c3a_IrAMxQ83RzHyA1036Y8NMzU4av-LYfBL_pi5xovfyk1x6TpPvrL0foUy1iHaaHlFU-QSAvd4v1sU6FInP0ZrSWzPhs8QDeSeanyr-Rox6N1SktzKjx5mUexaemlyoJC8OuSHOsbNs1NIRnhHPFU'
@@ -39,7 +42,19 @@ const signupSchema = z
 
 type SignupFormValues = z.infer<typeof signupSchema>
 
+function messageFor(err: SignupError): string {
+  if (err.kind === 'email_taken') {
+    return 'An account with this email already exists.'
+  }
+  if (err.kind === 'invalid') {
+    return 'Please check your details and try again.'
+  }
+  return 'Something went wrong. Please try again.'
+}
+
 export function SignupPage() {
+  const navigate = useNavigate()
+  const [formError, setFormError] = useState<SignupError | null>(null)
   const {
     register,
     handleSubmit,
@@ -56,9 +71,24 @@ export function SignupPage() {
     },
   })
 
-  const onSubmit = handleSubmit((values) => {
-    // Wiring in Task 10
-    console.log('submit', values)
+  const onSubmit = handleSubmit(async (values) => {
+    setFormError(null)
+    try {
+      const response = await signup({
+        username: deriveUsernameFromEmail(values.email),
+        email: values.email.trim(),
+        password: values.password,
+        displayName: `${values.firstName.trim()} ${values.lastName.trim()}`,
+      })
+      storeToken(response.token)
+      navigate('/')
+    } catch (error) {
+      if (isSignupError(error)) {
+        setFormError(error)
+      } else {
+        setFormError({ kind: 'network' })
+      }
+    }
   })
 
   return (
@@ -146,6 +176,20 @@ export function SignupPage() {
               {...register('confirmPassword')}
             />
           </FormField>
+
+          {formError ? (
+            <div
+              role="alert"
+              className="font-body text-sm text-on-error-container bg-error-container/30 border border-error/30 p-3"
+            >
+              {messageFor(formError)}{' '}
+              {formError.kind === 'email_taken' ? (
+                <Link to="/login" className="underline underline-offset-4 hover:text-on-surface">
+                  Sign in instead?
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="pt-2">
             <Button type="submit" variant="primary" fullWidth loading={isSubmitting}>
