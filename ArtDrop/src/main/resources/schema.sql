@@ -105,6 +105,18 @@ CREATE TABLE IF NOT EXISTS collection_artwork (
     FOREIGN KEY (artwork_id) REFERENCES artwork(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS user_follow (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    follower_id BIGINT NOT NULL,
+    followee_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    UNIQUE (follower_id, followee_id),
+    FOREIGN KEY (follower_id) REFERENCES app_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (followee_id) REFERENCES app_user(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_user_follow_follower ON user_follow(follower_id);
+CREATE INDEX IF NOT EXISTS idx_user_follow_followee ON user_follow(followee_id);
+
 CREATE TABLE IF NOT EXISTS challenge_submission (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     challenge_id BIGINT NOT NULL,

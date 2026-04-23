@@ -69,3 +69,58 @@ export async function fetchMyArtworks(): Promise<Artwork[]> {
   }
   return json.map((item) => mapApiArtwork(item as Record<string, unknown>))
 }
+
+export async function fetchProfileBySlug(slug: string): Promise<UserProfile> {
+  const res = await authFetch(`${API_BASE}/api/users/${encodeURIComponent(slug)}`)
+  if (res.status === 404) {
+    throw new Error('NOT_FOUND')
+  }
+  if (!res.ok) {
+    throw new Error(`Failed to load profile (${res.status})`)
+  }
+  const json = (await res.json()) as Record<string, unknown>
+  return mapUserProfile(json)
+}
+
+export async function fetchProfileArtworks(slug: string): Promise<Artwork[]> {
+  const res = await authFetch(`${API_BASE}/api/users/${encodeURIComponent(slug)}/artworks`)
+  if (!res.ok) {
+    throw new Error(`Failed to load artworks (${res.status})`)
+  }
+  const json: unknown = await res.json()
+  if (!Array.isArray(json)) {
+    throw new Error('Unexpected server response')
+  }
+  return json.map((item) => mapApiArtwork(item as Record<string, unknown>))
+}
+
+export async function fetchCircleStatus(slug: string): Promise<boolean> {
+  const res = await authFetch(`${API_BASE}/api/users/${encodeURIComponent(slug)}/circle-status`)
+  if (!res.ok) {
+    throw new Error(`Failed to load circle status (${res.status})`)
+  }
+  const json = (await res.json()) as { inCircle?: unknown }
+  return Boolean(json.inCircle)
+}
+
+export async function joinCircle(slug: string): Promise<boolean> {
+  const res = await authFetch(`${API_BASE}/api/users/${encodeURIComponent(slug)}/circle`, {
+    method: 'POST',
+  })
+  if (!res.ok) {
+    throw new Error(`Failed to join circle (${res.status})`)
+  }
+  const json = (await res.json()) as { inCircle?: unknown }
+  return Boolean(json.inCircle)
+}
+
+export async function leaveCircle(slug: string): Promise<boolean> {
+  const res = await authFetch(`${API_BASE}/api/users/${encodeURIComponent(slug)}/circle`, {
+    method: 'DELETE',
+  })
+  if (!res.ok) {
+    throw new Error(`Failed to leave circle (${res.status})`)
+  }
+  const json = (await res.json()) as { inCircle?: unknown }
+  return Boolean(json.inCircle)
+}

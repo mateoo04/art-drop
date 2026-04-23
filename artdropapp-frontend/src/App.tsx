@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { MainLayout } from './components/layout/MainLayout'
 import { AccountPage } from './pages/AccountPage'
+import { ProfilePage } from './pages/ProfilePage'
 import { ArtworkDetailPage } from './pages/ArtworkDetailPage'
 import { ArtworkEditPage } from './pages/ArtworkEditPage'
 import { ArtworksPage } from './pages/ArtworksPage'
@@ -34,6 +35,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/u/:slug" element={<ProfilePage />} />
       </Route>
     </Routes>
   )

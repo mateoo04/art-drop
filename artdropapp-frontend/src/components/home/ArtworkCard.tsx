@@ -71,8 +71,8 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
   const sale = saleLabel(artwork.saleStatus)
 
   return (
-    <article className="masonry-item group cursor-pointer">
-      <Link to={`/details/${artwork.id}`} className="block">
+    <article className="masonry-item group">
+      <Link to={`/details/${artwork.id}`} className="block cursor-pointer">
         <div className="relative bg-surface-container-lowest overflow-hidden">
           <img
             alt={artwork.imageAlt}
@@ -94,65 +94,64 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
               </span>
             ) : null}
           </div>
-          {/* <button
-            type="button"
-            aria-label={`Edit ${artwork.title}`}
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              navigate(`/edit/${artwork.id}`)
-            }}
-            className="material-symbols-outlined absolute top-4 right-4 bg-surface/90 backdrop-blur-md p-2 text-on-surface hover:bg-surface transition-colors"
-          >
-            edit
-          </button> */}
         </div>
+      </Link>
 
-        <div className="mt-6">
-          <div className="flex justify-between items-start gap-4">
-            <div className="min-w-0">
-              <h3 className="font-headline text-2xl text-on-surface leading-tight truncate">
-                {artwork.title}
-              </h3>
-              {artwork.artist ? (
-                <p className="font-body text-sm text-on-surface-variant italic">
-                  by {artwork.artist.displayName}
-                </p>
-              ) : null}
-            </div>
-            {artwork.price != null ? (
-              <p className="font-body text-lg font-semibold whitespace-nowrap">
-                {formatPrice(artwork.price)}
+      <div className="mt-6">
+        <div className="flex justify-between items-start gap-4">
+          <div className="min-w-0">
+            <Link
+              to={`/details/${artwork.id}`}
+              className="font-headline text-2xl text-on-surface leading-tight truncate block hover:text-outline transition-colors"
+            >
+              {artwork.title}
+            </Link>
+            {artwork.artist ? (
+              <p className="font-body text-sm text-on-surface-variant italic">
+                by{' '}
+                <Link
+                  to={`/u/${artwork.artist.slug}`}
+                  className="hover:text-on-surface transition-colors underline-offset-4 hover:underline"
+                >
+                  {artwork.artist.displayName}
+                </Link>
               </p>
             ) : null}
           </div>
-          {artwork.description ? (
-            <p className="mt-4 text-sm text-on-surface-variant leading-relaxed line-clamp-2 italic">
-              “{artwork.description}”
+          {artwork.price != null ? (
+            <p className="font-body text-lg font-semibold whitespace-nowrap">
+              {formatPrice(artwork.price)}
             </p>
           ) : null}
-          <div className="mt-6 flex items-center justify-between">
-            <div className="flex items-center gap-4 text-on-surface-variant">
-              <span className="flex items-center gap-1.5 text-xs">
-                <span className="material-symbols-outlined text-sm">favorite</span>
-                {formatCount(artwork.likeCount)}
-              </span>
-              <span className="flex items-center gap-1.5 text-xs">
-                <span className="material-symbols-outlined text-sm">chat_bubble</span>
-                {formatCount(artwork.commentCount)}
-              </span>
-            </div>
-            <button
-              type="button"
-              aria-label="Bookmark"
-              onClick={(e) => e.preventDefault()}
-              className="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors"
-            >
-              bookmark
-            </button>
-          </div>
         </div>
-      </Link>
+        {artwork.description ? (
+          <Link
+            to={`/details/${artwork.id}`}
+            className="mt-4 text-sm text-on-surface-variant leading-relaxed line-clamp-2 italic block"
+          >
+            “{artwork.description}”
+          </Link>
+        ) : null}
+        <div className="mt-6 flex items-center justify-between">
+          <div className="flex items-center gap-4 text-on-surface-variant">
+            <span className="flex items-center gap-1.5 text-xs">
+              <span className="material-symbols-outlined text-sm">favorite</span>
+              {formatCount(artwork.likeCount)}
+            </span>
+            <span className="flex items-center gap-1.5 text-xs">
+              <span className="material-symbols-outlined text-sm">chat_bubble</span>
+              {formatCount(artwork.commentCount)}
+            </span>
+          </div>
+          <button
+            type="button"
+            aria-label="Bookmark"
+            className="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors"
+          >
+            bookmark
+          </button>
+        </div>
+      </div>
     </article>
   )
 }
