@@ -14,4 +14,8 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
     boolean existsByTitleIgnoreCase(String title);
 
     long deleteByTitleIgnoreCase(String title);
+
+    List<Artwork> findByAuthor_IdOrderByPublishedAtDesc(Long authorId);
+
+    long countByAuthor_Id(Long authorId);
 }

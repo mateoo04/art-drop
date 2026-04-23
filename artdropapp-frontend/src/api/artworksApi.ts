@@ -1,4 +1,5 @@
 import { API_BASE } from '../config'
+import { authFetch } from '../lib/authFetch'
 import type { Artwork, ProgressStatus, SaleStatus } from '../types/artwork'
 
 const PROGRESS_VALUES: ProgressStatus[] = ['WIP', 'FINISHED']
@@ -26,7 +27,7 @@ function normalizePublishedAt(value: unknown): string {
   return String(value)
 }
 
-function mapApiArtwork(raw: Record<string, unknown>): Artwork {
+export function mapApiArtwork(raw: Record<string, unknown>): Artwork {
   const title = String(raw.title)
   const medium = String(raw.medium)
   const artistId = raw.artistId
@@ -91,7 +92,7 @@ export type CreateArtworkPayload = {
 }
 
 export async function createArtwork(payload: CreateArtworkPayload): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/artworks`, {
+  const res = await authFetch(`${API_BASE}/api/artworks`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -115,7 +116,7 @@ export type UpdateArtworkPayload = {
 }
 
 export async function updateArtwork(id: number, payload: UpdateArtworkPayload): Promise<Artwork> {
-  const res = await fetch(`${API_BASE}/api/artworks/${id}`, {
+  const res = await authFetch(`${API_BASE}/api/artworks/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -132,7 +133,7 @@ export async function updateArtwork(id: number, payload: UpdateArtworkPayload): 
 
 export async function deleteArtworkByTitle(title: string): Promise<void> {
   const encoded = encodeURIComponent(title)
-  const res = await fetch(`${API_BASE}/api/artworks/${encoded}`, {
+  const res = await authFetch(`${API_BASE}/api/artworks/${encoded}`, {
     method: 'DELETE',
   })
   if (res.status === 404) {

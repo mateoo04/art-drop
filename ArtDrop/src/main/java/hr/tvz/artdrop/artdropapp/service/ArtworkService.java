@@ -18,6 +18,8 @@ public interface ArtworkService {
 
     List<ArtworkDTO> findByMedium(String val);
 
+    List<ArtworkDTO> findByAuthorId(Long authorId);
+
     Optional<ArtworkDTO> findOneByTitle(String title);
 
     boolean createArtwork(ArtworkCommand command);

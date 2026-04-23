@@ -60,6 +60,14 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
+    public List<ArtworkDTO> findByAuthorId(Long authorId) {
+        return artworkRepository.findByAuthor_IdOrderByPublishedAtDesc(authorId)
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
+    @Override
     public Optional<ArtworkDTO> findOneByTitle(String title) {
         return artworkRepository.findByTitleIgnoreCase(title)
                 .map(this::mapToDTO);

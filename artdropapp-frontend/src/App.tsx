@@ -1,5 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
+import { ProtectedRoute } from './components/ProtectedRoute'
 import { MainLayout } from './components/layout/MainLayout'
+import { AccountPage } from './pages/AccountPage'
 import { ArtworkDetailPage } from './pages/ArtworkDetailPage'
 import { ArtworkEditPage } from './pages/ArtworkEditPage'
 import { ArtworksPage } from './pages/ArtworksPage'
@@ -24,6 +26,14 @@ function App() {
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/details/:id" element={<ArtworkDetailPage />} />
         <Route path="/edit/:id" element={<ArtworkEditPage />} />
+        <Route
+          path="/account"
+          element={
+            <ProtectedRoute>
+              <AccountPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   )

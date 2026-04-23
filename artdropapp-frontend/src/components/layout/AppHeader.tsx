@@ -11,9 +11,7 @@ export function AppHeader() {
   const navigate = useNavigate()
 
   const handleAccountClick = () => {
-    if (!getToken()) {
-      navigate('/login')
-    }
+    navigate(getToken() ? '/account' : '/login')
   }
 
   return (
