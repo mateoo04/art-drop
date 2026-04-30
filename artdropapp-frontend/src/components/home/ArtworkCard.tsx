@@ -1,4 +1,7 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuthPrompt } from '../../contexts/AuthPromptContext'
+import { getToken } from '../../lib/auth'
 import type { Artwork, ProgressStatus, SaleStatus } from '../../types/artwork'
 
 type ArtworkCardProps = {
@@ -69,6 +72,28 @@ function saleBadgeClasses(status: SaleStatus | null): string {
 export function ArtworkCard({ artwork }: ArtworkCardProps) {
   const progress = progressLabel(artwork.progressStatus)
   const sale = saleLabel(artwork.saleStatus)
+  const { promptToAuth } = useAuthPrompt()
+  const [liked, setLiked] = useState(false)
+  const [likeBump, setLikeBump] = useState(0)
+  const [animating, setAnimating] = useState(false)
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!getToken()) {
+      promptToAuth('like this artwork')
+      return
+    }
+    setLiked((wasLiked) => {
+      const next = !wasLiked
+      setLikeBump((b) => b + (next ? 1 : -1))
+      if (next) {
+        setAnimating(true)
+        window.setTimeout(() => setAnimating(false), 320)
+      }
+      return next
+    })
+  }
 
   return (
     <article className="masonry-item group">
@@ -134,14 +159,37 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
         ) : null}
         <div className="mt-6 flex items-center justify-between">
           <div className="flex items-center gap-4 text-on-surface-variant">
-            <span className="flex items-center gap-1.5 text-xs">
-              <span className="material-symbols-outlined text-sm">favorite</span>
-              {formatCount(artwork.likeCount)}
-            </span>
-            <span className="flex items-center gap-1.5 text-xs">
+            <button
+              type="button"
+              onClick={handleLike}
+              aria-pressed={liked}
+              aria-label={liked ? 'Unlike artwork' : 'Like artwork'}
+              className={`flex items-center gap-1.5 text-xs transition-colors ${
+                liked ? 'text-error' : 'hover:text-on-surface'
+              }`}
+            >
+              <span
+                className={`material-symbols-outlined text-sm transition-transform duration-300 ease-out will-change-transform ${
+                  animating ? 'scale-150' : 'scale-100'
+                }`}
+                style={{
+                  fontVariationSettings: liked
+                    ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24"
+                    : undefined,
+                }}
+              >
+                favorite
+              </span>
+              {formatCount(artwork.likeCount + likeBump)}
+            </button>
+            <Link
+              to={`/details/${artwork.id}#comments`}
+              aria-label="Open comments"
+              className="flex items-center gap-1.5 text-xs hover:text-on-surface transition-colors"
+            >
               <span className="material-symbols-outlined text-sm">chat_bubble</span>
               {formatCount(artwork.commentCount)}
-            </span>
+            </Link>
           </div>
           <button
             type="button"

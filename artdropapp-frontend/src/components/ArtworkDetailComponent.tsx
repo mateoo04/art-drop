@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import type { Artwork } from '../types/artwork'
 import { useComments } from '../hooks/useComments'
+import { useAuthPrompt } from '../contexts/AuthPromptContext'
+import { getToken } from '../lib/auth'
 import { CommentComposer } from './artwork/CommentComposer'
 import { CommentList } from './artwork/CommentList'
 
@@ -21,6 +24,20 @@ export function ArtworkDetailComponent({
   error,
 }: ArtworkDetailComponentProps) {
   const comments = useComments(artwork?.id ?? null)
+  const { promptToAuth } = useAuthPrompt()
+  const [liked, setLiked] = useState(false)
+  const [likeBump, setLikeBump] = useState(0)
+
+  const handleLike = () => {
+    if (!getToken()) {
+      promptToAuth('like this artwork')
+      return
+    }
+    setLiked((v) => {
+      setLikeBump((b) => b + (v ? -1 : 1))
+      return !v
+    })
+  }
 
   if (loading) {
     return (
@@ -71,16 +88,31 @@ export function ArtworkDetailComponent({
           <dd>{formatPublishedAt(artwork.publishedAt)}</dd>
         </div>
         <div>
-          <dt>Likes</dt>
-          <dd>{artwork.likeCount}</dd>
-        </div>
-        <div>
           <dt>Comments</dt>
           <dd>{artwork.commentCount}</dd>
         </div>
       </dl>
 
-      <section className="mt-12 max-w-2xl">
+      <div className="mt-6 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={handleLike}
+          aria-pressed={liked}
+          className={`inline-flex items-center gap-2 px-5 py-3 border font-label text-[11px] uppercase tracking-[0.2em] font-semibold transition-all duration-200 ${
+            liked
+              ? 'bg-on-surface text-surface border-on-surface'
+              : 'bg-transparent text-on-surface border-on-surface hover:bg-on-surface hover:text-surface'
+          }`}
+        >
+          <span className="material-symbols-outlined text-base" aria-hidden="true">
+            favorite
+          </span>
+          <span>{liked ? 'Liked' : 'Like'}</span>
+          <span className="ml-1 text-xs opacity-80">{artwork.likeCount + likeBump}</span>
+        </button>
+      </div>
+
+      <section id="comments" className="mt-12 max-w-2xl scroll-mt-24">
         <h3 className="font-headline text-2xl text-on-surface mb-6">Comments</h3>
         <div className="mb-8">
           <CommentComposer

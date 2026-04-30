@@ -1,12 +1,14 @@
 import { Navigate, useParams } from 'react-router-dom'
 import { MasonryFeed } from '../components/home/MasonryFeed'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
+import { useAuthPrompt } from '../contexts/AuthPromptContext'
 import { useProfile } from '../hooks/useProfile'
 import { getToken } from '../lib/auth'
 
 export function ProfilePage() {
   const { slug } = useParams<{ slug: string }>()
   const { profile, artworks, inCircle, loading, error, toggleCircle } = useProfile(slug)
+  const { promptToAuth } = useAuthPrompt()
 
   if (loading) {
     return (
@@ -53,27 +55,24 @@ export function ProfilePage() {
       <ProfileHeader
         user={profile}
         action={
-          isAuthed ? (
-            <button
-              type="button"
-              onClick={() => void toggleCircle()}
-              aria-pressed={inCircle === true}
-              className={`font-label text-[11px] uppercase tracking-[0.2em] font-semibold px-6 py-3 border transition-all duration-200 ${
-                inCircle
-                  ? 'bg-on-surface text-surface border-on-surface hover:opacity-90'
-                  : 'bg-transparent text-on-surface border-on-surface hover:bg-on-surface hover:text-surface'
-              }`}
-            >
-              {circleActionLabel}
-            </button>
-          ) : (
-            <a
-              href="/login"
-              className="font-label text-[11px] uppercase tracking-[0.2em] font-semibold px-6 py-3 border border-on-surface text-on-surface hover:bg-on-surface hover:text-surface transition-all duration-200"
-            >
-              Sign in to follow
-            </a>
-          )
+          <button
+            type="button"
+            onClick={() => {
+              if (!isAuthed) {
+                promptToAuth(`follow ${profile.displayName}`)
+                return
+              }
+              void toggleCircle()
+            }}
+            aria-pressed={inCircle === true}
+            className={`font-label text-[11px] uppercase tracking-[0.2em] font-semibold px-6 py-3 border transition-all duration-200 ${
+              isAuthed && inCircle
+                ? 'bg-on-surface text-surface border-on-surface hover:opacity-90'
+                : 'bg-transparent text-on-surface border-on-surface hover:bg-on-surface hover:text-surface'
+            }`}
+          >
+            {isAuthed ? circleActionLabel : 'Join Circle'}
+          </button>
         }
       />
 
