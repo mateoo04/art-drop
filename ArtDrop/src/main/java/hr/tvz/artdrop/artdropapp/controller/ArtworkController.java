@@ -38,6 +38,11 @@ public class ArtworkController {
         return ResponseEntity.ok(artworkService.findAll(viewer, limit, offset));
     }
 
+    @GetMapping("/mediums")
+    public ResponseEntity<List<String>> getMediums() {
+        return ResponseEntity.ok(artworkService.findDistinctMediums());
+    }
+
     @GetMapping("/id/{id}")
     public ResponseEntity<ArtworkDTO> getArtworkById(@PathVariable Long id, Authentication authentication) {
         String viewer = authentication == null ? null : authentication.getName();

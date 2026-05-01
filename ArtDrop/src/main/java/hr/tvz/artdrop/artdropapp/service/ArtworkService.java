@@ -42,4 +42,6 @@ public interface ArtworkService {
     Optional<ArtworkDTO> updateArtwork(Long id, ArtworkUpdateCommand command);
 
     boolean deleteByTitle(String title);
+
+    List<String> findDistinctMediums();
 }

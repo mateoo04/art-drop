@@ -1,4 +1,3 @@
-import { API_BASE } from '../config'
 
 export type RegisterRequest = {
   username: string
@@ -19,7 +18,7 @@ export type SignupError =
 export async function signup(request: RegisterRequest): Promise<JwtResponse> {
   let res: Response
   try {
-    res = await fetch(`${API_BASE}/api/auth/signup`, {
+    res = await fetch(`/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
@@ -66,7 +65,7 @@ export type LoginError =
 export async function login(request: LoginRequest): Promise<JwtResponse> {
   let res: Response
   try {
-    res = await fetch(`${API_BASE}/api/auth/login`, {
+    res = await fetch(`/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: request.email, password: request.password }),

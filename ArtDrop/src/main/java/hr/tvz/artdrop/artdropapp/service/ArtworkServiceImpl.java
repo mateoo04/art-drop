@@ -246,6 +246,11 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
+    public List<String> findDistinctMediums() {
+        return artworkRepository.findDistinctMediums();
+    }
+
+    @Override
     @Transactional
     public boolean deleteByTitle(String title) {
         boolean deleted = artworkRepository.deleteByTitleIgnoreCase(title) > 0;

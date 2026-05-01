@@ -1,4 +1,3 @@
-import { API_BASE } from '../config'
 import { authFetch } from '../lib/authFetch'
 import type { UserProfile } from '../types/user'
 import type { Artwork } from '../types/artwork'
@@ -37,7 +36,7 @@ function mapUserProfile(raw: Record<string, unknown>): UserProfile {
 }
 
 export async function fetchMe(): Promise<UserProfile> {
-  const res = await authFetch(`${API_BASE}/api/users/me`)
+  const res = await authFetch(`/api/users/me`)
   if (!res.ok) {
     throw new Error(`Failed to load profile (${res.status})`)
   }
@@ -46,7 +45,7 @@ export async function fetchMe(): Promise<UserProfile> {
 }
 
 export async function updateMe(payload: UpdateProfilePayload): Promise<UserProfile> {
-  const res = await authFetch(`${API_BASE}/api/users/me`, {
+  const res = await authFetch(`/api/users/me`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -59,7 +58,7 @@ export async function updateMe(payload: UpdateProfilePayload): Promise<UserProfi
 }
 
 export async function fetchMyArtworks(): Promise<Artwork[]> {
-  const res = await authFetch(`${API_BASE}/api/users/me/artworks`)
+  const res = await authFetch(`/api/users/me/artworks`)
   if (!res.ok) {
     throw new Error(`Failed to load your artworks (${res.status})`)
   }
@@ -71,7 +70,7 @@ export async function fetchMyArtworks(): Promise<Artwork[]> {
 }
 
 export async function fetchProfileBySlug(slug: string): Promise<UserProfile> {
-  const res = await authFetch(`${API_BASE}/api/users/${encodeURIComponent(slug)}`)
+  const res = await authFetch(`/api/users/${encodeURIComponent(slug)}`)
   if (res.status === 404) {
     throw new Error('NOT_FOUND')
   }
@@ -83,7 +82,7 @@ export async function fetchProfileBySlug(slug: string): Promise<UserProfile> {
 }
 
 export async function fetchProfileArtworks(slug: string): Promise<Artwork[]> {
-  const res = await authFetch(`${API_BASE}/api/users/${encodeURIComponent(slug)}/artworks`)
+  const res = await authFetch(`/api/users/${encodeURIComponent(slug)}/artworks`)
   if (!res.ok) {
     throw new Error(`Failed to load artworks (${res.status})`)
   }
@@ -95,7 +94,7 @@ export async function fetchProfileArtworks(slug: string): Promise<Artwork[]> {
 }
 
 export async function fetchCircleStatus(slug: string): Promise<boolean> {
-  const res = await authFetch(`${API_BASE}/api/users/${encodeURIComponent(slug)}/circle-status`)
+  const res = await authFetch(`/api/users/${encodeURIComponent(slug)}/circle-status`)
   if (!res.ok) {
     throw new Error(`Failed to load circle status (${res.status})`)
   }
@@ -104,7 +103,7 @@ export async function fetchCircleStatus(slug: string): Promise<boolean> {
 }
 
 export async function joinCircle(slug: string): Promise<boolean> {
-  const res = await authFetch(`${API_BASE}/api/users/${encodeURIComponent(slug)}/circle`, {
+  const res = await authFetch(`/api/users/${encodeURIComponent(slug)}/circle`, {
     method: 'POST',
   })
   if (!res.ok) {
@@ -115,7 +114,7 @@ export async function joinCircle(slug: string): Promise<boolean> {
 }
 
 export async function leaveCircle(slug: string): Promise<boolean> {
-  const res = await authFetch(`${API_BASE}/api/users/${encodeURIComponent(slug)}/circle`, {
+  const res = await authFetch(`/api/users/${encodeURIComponent(slug)}/circle`, {
     method: 'DELETE',
   })
   if (!res.ok) {

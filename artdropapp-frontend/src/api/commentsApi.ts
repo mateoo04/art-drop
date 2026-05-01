@@ -1,4 +1,3 @@
-import { API_BASE } from '../config'
 import { authFetch } from '../lib/authFetch'
 import type { Comment } from '../types/comment'
 
@@ -28,7 +27,7 @@ function mapComment(raw: Record<string, unknown>): Comment {
 }
 
 export async function fetchComments(artworkId: number): Promise<Comment[]> {
-  const res = await authFetch(`${API_BASE}/api/artworks/${artworkId}/comments`)
+  const res = await authFetch(`/api/artworks/${artworkId}/comments`)
   if (!res.ok) {
     throw new Error(`Failed to load comments (${res.status})`)
   }
@@ -40,7 +39,7 @@ export async function fetchComments(artworkId: number): Promise<Comment[]> {
 }
 
 export async function postComment(artworkId: number, text: string): Promise<Comment> {
-  const res = await authFetch(`${API_BASE}/api/artworks/${artworkId}/comments`, {
+  const res = await authFetch(`/api/artworks/${artworkId}/comments`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text }),
@@ -53,7 +52,7 @@ export async function postComment(artworkId: number, text: string): Promise<Comm
 }
 
 export async function deleteComment(commentId: number): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/comments/${commentId}`, { method: 'DELETE' })
+  const res = await authFetch(`/api/comments/${commentId}`, { method: 'DELETE' })
   if (!res.ok && res.status !== 204) {
     throw new Error(`Failed to delete comment (${res.status})`)
   }

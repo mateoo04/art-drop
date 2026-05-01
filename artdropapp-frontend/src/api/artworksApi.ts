@@ -1,4 +1,3 @@
-import { API_BASE } from '../config'
 import { authFetch } from '../lib/authFetch'
 import type {
   Artwork,
@@ -116,7 +115,7 @@ export async function fetchArtworks({
   params.set('limit', String(limit))
   params.set('offset', String(offset))
   if (medium && medium !== 'All') params.set('medium', medium)
-  const res = await authFetch(`${API_BASE}/api/artworks?${params.toString()}`)
+  const res = await authFetch(`/api/artworks?${params.toString()}`)
   if (!res.ok) {
     throw new Error(`Failed to load artworks (${res.status})`)
   }
@@ -127,8 +126,20 @@ export async function fetchArtworks({
   return json.map((item) => mapApiArtwork(item as Record<string, unknown>))
 }
 
+export async function fetchMediums(): Promise<string[]> {
+  const res = await authFetch(`/api/artworks/mediums`)
+  if (!res.ok) {
+    throw new Error(`Failed to load mediums (${res.status})`)
+  }
+  const json: unknown = await res.json()
+  if (!Array.isArray(json)) {
+    throw new Error('Unexpected server response')
+  }
+  return json.map(String)
+}
+
 export async function fetchArtworkById(id: number): Promise<Artwork> {
-  const res = await authFetch(`${API_BASE}/api/artworks/id/${id}`)
+  const res = await authFetch(`/api/artworks/id/${id}`)
   if (res.status === 404) {
     throw new Error('NOT_FOUND')
   }
@@ -140,14 +151,14 @@ export async function fetchArtworkById(id: number): Promise<Artwork> {
 }
 
 export async function likeArtwork(id: number): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/artworks/${id}/likes`, { method: 'POST' })
+  const res = await authFetch(`/api/artworks/${id}/likes`, { method: 'POST' })
   if (!res.ok && res.status !== 204) {
     throw new Error(`Failed to like (${res.status})`)
   }
 }
 
 export async function unlikeArtwork(id: number): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/artworks/${id}/likes`, { method: 'DELETE' })
+  const res = await authFetch(`/api/artworks/${id}/likes`, { method: 'DELETE' })
   if (!res.ok && res.status !== 204) {
     throw new Error(`Failed to unlike (${res.status})`)
   }
@@ -172,7 +183,7 @@ export type UpdateArtworkPayload = {
 }
 
 export async function updateArtwork(id: number, payload: UpdateArtworkPayload): Promise<Artwork> {
-  const res = await authFetch(`${API_BASE}/api/artworks/${id}`, {
+  const res = await authFetch(`/api/artworks/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

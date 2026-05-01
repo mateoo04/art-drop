@@ -1,4 +1,3 @@
-import { API_BASE } from '../config'
 import type {
   Challenge,
   ChallengeKind,
@@ -66,7 +65,7 @@ function mapChallenge(raw: Record<string, unknown>): Challenge {
 }
 
 export async function fetchChallenges(): Promise<Challenge[]> {
-  const res = await fetch(`${API_BASE}/api/challenges`)
+  const res = await fetch(`/api/challenges`)
   if (!res.ok) {
     throw new Error(`Failed to load challenges (${res.status})`)
   }
@@ -83,7 +82,7 @@ export async function fetchChallengeSubmissions(
   offset = 0,
 ): Promise<SubmissionThumbnail[]> {
   const res = await fetch(
-    `${API_BASE}/api/challenges/${challengeId}/submissions?limit=${limit}&offset=${offset}`,
+    `/api/challenges/${challengeId}/submissions?limit=${limit}&offset=${offset}`,
   )
   if (!res.ok) {
     throw new Error(`Failed to load submissions (${res.status})`)

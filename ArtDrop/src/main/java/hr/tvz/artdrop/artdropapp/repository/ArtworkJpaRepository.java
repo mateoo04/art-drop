@@ -28,4 +28,7 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
             "(SELECT f.followeeId FROM UserFollow f WHERE f.followerId = :viewerId) " +
             "ORDER BY a.publishedAt DESC")
     List<Artwork> findCircleFeed(@Param("viewerId") Long viewerId, Pageable pageable);
+
+    @Query("SELECT DISTINCT a.medium FROM Artwork a WHERE a.medium IS NOT NULL ORDER BY a.medium")
+    List<String> findDistinctMediums();
 }

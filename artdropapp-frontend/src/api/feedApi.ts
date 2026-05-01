@@ -1,4 +1,3 @@
-import { API_BASE } from '../config'
 import { authFetch } from '../lib/authFetch'
 import type { Artwork } from '../types/artwork'
 import { mapApiArtwork } from './artworksApi'
@@ -12,7 +11,7 @@ export async function fetchCircleFeed({
   limit = 20,
   offset = 0,
 }: CircleFeedParams = {}): Promise<Artwork[]> {
-  const url = `${API_BASE}/api/feed/circle?limit=${limit}&offset=${offset}`
+  const url = `/api/feed/circle?limit=${limit}&offset=${offset}`
   const res = await authFetch(url)
   if (!res.ok) {
     throw new Error(`Failed to load circle feed (${res.status})`)

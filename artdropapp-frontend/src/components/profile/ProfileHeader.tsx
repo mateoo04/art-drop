@@ -51,7 +51,7 @@ export function ProfileHeader({ user, action }: ProfileHeaderProps) {
             Add a bio to introduce your practice.
           </p>
         ) : null}
-        <dl className="flex gap-8 mt-6 font-label text-[11px] uppercase tracking-[0.15em] text-on-surface-variant">
+        <dl className="flex gap-8 mt-6 font-label text-[11px] uppercase tracking-[0.15em] text-on-surface-variant items-center">
           {showCounts ? (
             <>
               <div>
