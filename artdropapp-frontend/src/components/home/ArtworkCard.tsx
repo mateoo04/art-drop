@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom'
 import { useAuthPrompt } from '../../contexts/AuthPromptContext'
 import { useLikeArtwork } from '../../hooks/useLikeArtwork'
 import { getToken } from '../../lib/auth'
+import { cloudinarySrcSet, cloudinaryUrl } from '../../lib/cloudinary'
 import type { Artwork, ProgressStatus, SaleStatus } from '../../types/artwork'
+
+const CARD_WIDTHS = [240, 360, 480, 720, 960]
+const CARD_SIZES = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
 
 type ArtworkCardProps = {
   artwork: Artwork
@@ -105,7 +109,9 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
           <img
             alt={artwork.imageAlt}
             className="absolute inset-0 w-full h-full object-cover"
-            src={artwork.imageUrl}
+            src={artwork.coverPublicId ? cloudinaryUrl(artwork.coverPublicId, { width: 480 }) : artwork.imageUrl}
+            srcSet={artwork.coverPublicId ? cloudinarySrcSet(artwork.coverPublicId, CARD_WIDTHS) : undefined}
+            sizes={CARD_SIZES}
             loading="lazy"
           />
           {secondImage ? (
@@ -113,7 +119,9 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
               alt=""
               aria-hidden="true"
               className="hidden md:block absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out"
-              src={secondImage.imageUrl}
+              src={secondImage.publicId ? cloudinaryUrl(secondImage.publicId, { width: 480 }) : secondImage.imageUrl}
+              srcSet={secondImage.publicId ? cloudinarySrcSet(secondImage.publicId, CARD_WIDTHS) : undefined}
+              sizes={CARD_SIZES}
               loading="lazy"
             />
           ) : null}

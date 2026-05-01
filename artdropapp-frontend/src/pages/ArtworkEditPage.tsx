@@ -78,7 +78,7 @@ export function ArtworkEditPage() {
         title: title.trim(),
         medium: medium.trim(),
         description: description.trim(),
-        images: trimmedUrl ? [{ imageUrl: trimmedUrl, sortOrder: 0, isCover: true }] : undefined,
+        images: trimmedUrl ? [{ publicId: trimmedUrl, sortOrder: 0, isCover: true }] : undefined,
         price: isSeller ? priceNumber : undefined,
         saleStatus: isSeller ? (saleStatus === '' ? null : saleStatus) : undefined,
       })

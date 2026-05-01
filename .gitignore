@@ -57,3 +57,4 @@ stitch-downloads/
 
 # --- Local H2 file DB ---
 ArtDrop/data/
+artdropapp-frontend/.env

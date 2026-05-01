@@ -5,6 +5,6 @@ import jakarta.validation.constraints.Size;
 
 public record SubmitSellerApplicationCommand(
         @NotBlank
-        @Size(min = 30, max = 1000, message = "Message must be 30-1000 characters")
+        @Size(min = 30, max = 400, message = "Message must be 30-400 characters")
         String message
 ) {}

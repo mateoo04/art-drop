@@ -1,4 +1,5 @@
 import { authFetch } from '../lib/authFetch'
+import { cloudinaryUrl } from '../lib/cloudinary'
 import type {
   Artwork,
   ArtworkImage,
@@ -39,9 +40,11 @@ function parseImages(raw: unknown): ArtworkImage[] {
   if (!Array.isArray(raw)) return []
   return raw.map((entry): ArtworkImage => {
     const r = entry as Record<string, unknown>
+    const publicId = String(r.publicId ?? r.imageUrl ?? '')
     return {
       id: r.id == null ? null : Number(r.id),
-      imageUrl: String(r.imageUrl ?? ''),
+      publicId,
+      imageUrl: cloudinaryUrl(publicId, { width: 800 }),
       sortOrder: Number(r.sortOrder ?? 0),
       isCover: Boolean(r.isCover),
       caption: r.caption == null ? null : String(r.caption),
@@ -74,13 +77,16 @@ export function mapApiArtwork(raw: Record<string, unknown>): Artwork {
       : null
   const priceRaw = raw.price
   const images = parseImages(raw.images)
-  const cover = String(raw.coverImageUrl ?? raw.imageUrl ?? images[0]?.imageUrl ?? '')
+  const coverRaw = raw.coverPublicId ?? raw.coverImageUrl ?? raw.imageUrl
+  const coverPublicId = coverRaw != null ? String(coverRaw) : (images[0]?.publicId ?? '')
+  const cover = coverPublicId ? cloudinaryUrl(coverPublicId, { width: 800 }) : ''
   return {
     id: Number(raw.id),
     title,
     medium,
     description: raw.description == null ? null : String(raw.description),
     imageUrl: cover,
+    coverPublicId,
     imageAlt: String(raw.imageAlt ?? `${title} - ${medium}`),
     aspectRatio: Number(raw.aspectRatio ?? 1),
     images,
@@ -165,7 +171,7 @@ export async function unlikeArtwork(id: number): Promise<void> {
 }
 
 export type ArtworkImageInput = {
-  imageUrl: string
+  publicId: string
   sortOrder?: number
   isCover?: boolean
   caption?: string | null

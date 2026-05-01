@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS artwork_tags (
 CREATE TABLE IF NOT EXISTS artwork_image (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     artwork_id BIGINT NOT NULL,
-    image_url VARCHAR(1000) NOT NULL,
+    public_id VARCHAR(255) NOT NULL,
     sort_order INT DEFAULT 0,
     is_cover BOOLEAN DEFAULT FALSE,
     caption VARCHAR(255),

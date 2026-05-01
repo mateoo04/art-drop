@@ -9,7 +9,7 @@ public record ArtworkDTO(
         String title,
         String medium,
         String description,
-        String coverImageUrl,
+        String coverPublicId,
         String imageAlt,
         Double aspectRatio,
         List<ArtworkImageDTO> images,

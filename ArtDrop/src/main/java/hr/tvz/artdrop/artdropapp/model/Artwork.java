@@ -98,7 +98,7 @@ public class Artwork {
     @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    public String getCoverImageUrl() {
+    public String getCoverPublicId() {
         if (images == null || images.isEmpty()) return null;
         return images.stream()
                 .filter(img -> Boolean.TRUE.equals(img.getIsCover()))
@@ -107,7 +107,7 @@ public class Artwork {
                         .min(Comparator.comparing(
                                 ArtworkImage::getSortOrder,
                                 Comparator.nullsLast(Comparator.naturalOrder()))))
-                .map(ArtworkImage::getImageUrl)
+                .map(ArtworkImage::getPublicId)
                 .orElse(null);
     }
 }

@@ -9,7 +9,7 @@ type Props = {
 }
 
 const MIN_LEN = 30
-const MAX_LEN = 1000
+const MAX_LEN = 400
 
 export function SellerApplicationModal({ open, onClose, onSubmitted }: Props) {
   const [message, setMessage] = useState('')

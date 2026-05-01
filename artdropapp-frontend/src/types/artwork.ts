@@ -12,6 +12,7 @@ export interface Artist {
 export interface ArtworkImage {
   id: number | null
   imageUrl: string
+  publicId: string
   sortOrder: number
   isCover: boolean
   caption: string | null
@@ -23,6 +24,7 @@ export interface Artwork {
   medium: string
   description: string | null
   imageUrl: string
+  coverPublicId: string
   imageAlt: string
   aspectRatio: number
   images: ArtworkImage[]

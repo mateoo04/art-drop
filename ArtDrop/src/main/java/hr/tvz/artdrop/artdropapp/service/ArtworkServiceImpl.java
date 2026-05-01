@@ -293,7 +293,7 @@ public class ArtworkServiceImpl implements ArtworkService {
             ArtworkImageCommand c = commands.get(i);
             ArtworkImage img = new ArtworkImage();
             img.setArtwork(artwork);
-            img.setImageUrl(c.imageUrl());
+            img.setPublicId(c.publicId());
             img.setSortOrder(c.sortOrder() != null ? c.sortOrder() : i);
             boolean isCover = Boolean.TRUE.equals(c.isCover()) && !coverAssigned;
             if (isCover) coverAssigned = true;
@@ -336,7 +336,7 @@ public class ArtworkServiceImpl implements ArtworkService {
                 : artwork.getImages().stream()
                         .map(img -> new ArtworkImageDTO(
                                 img.getId(),
-                                img.getImageUrl(),
+                                img.getPublicId(),
                                 img.getSortOrder(),
                                 Boolean.TRUE.equals(img.getIsCover()),
                                 img.getCaption()
@@ -347,7 +347,7 @@ public class ArtworkServiceImpl implements ArtworkService {
                 artwork.getTitle(),
                 artwork.getMedium(),
                 artwork.getDescription(),
-                artwork.getCoverImageUrl(),
+                artwork.getCoverPublicId(),
                 artwork.getTitle() + " - " + artwork.getMedium(),
                 estimateAspectRatio(artwork),
                 imageDtos,
@@ -382,7 +382,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     private double estimateAspectRatio(Artwork artwork) {
-        if (artwork.getCoverImageUrl() == null) {
+        if (artwork.getCoverPublicId() == null) {
             return 1.0;
         }
         long selector = (artwork.getId() == null ? 0 : artwork.getId()) % 5;
