@@ -10,6 +10,8 @@ public interface CommentService {
 
     List<CommentDTO> listForArtwork(Long artworkId, String viewerUsername, int limit, int offset);
 
+    List<CommentDTO> listReplies(Long parentId, String viewerUsername, int limit, int offset);
+
     Optional<CommentDTO> create(Long artworkId, String authorUsername, CreateCommentCommand command);
 
     enum DeleteResult { OK, NOT_FOUND, FORBIDDEN }

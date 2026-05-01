@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,8 @@ import java.util.Optional;
 
 @Service
 public class CommentServiceImpl implements CommentService {
+
+    private static final int REPLY_PREVIEW_COUNT = 2;
 
     private final CommentJpaRepository commentRepository;
     private final ArtworkJpaRepository artworkRepository;
@@ -41,12 +44,50 @@ public class CommentServiceImpl implements CommentService {
         int safeLimit = Math.max(1, Math.min(limit, 100));
         int safeOffset = Math.max(0, offset);
         int page = safeOffset / safeLimit;
-        List<Comment> comments = commentRepository.findTopLevelByArtwork(artworkId, PageRequest.of(page, safeLimit));
+        List<Comment> topLevel = commentRepository.findTopLevelByArtwork(artworkId, PageRequest.of(page, safeLimit));
         Long viewerId = viewerUsername == null
                 ? null
                 : userRepository.findByUsername(viewerUsername).map(User::getId).orElse(null);
         Map<Long, User> authorCache = new HashMap<>();
-        return comments.stream().map(c -> toDTO(c, viewerId, authorCache)).toList();
+
+        if (topLevel.isEmpty()) {
+            return List.of();
+        }
+        List<Long> parentIds = topLevel.stream().map(Comment::getId).toList();
+        List<Comment> replies = commentRepository.findRepliesByParentIds(parentIds);
+        Map<Long, List<Comment>> repliesByParent = new HashMap<>();
+        for (Comment reply : replies) {
+            repliesByParent
+                    .computeIfAbsent(reply.getParentCommentId(), k -> new ArrayList<>())
+                    .add(reply);
+        }
+
+        return topLevel.stream()
+                .map(c -> {
+                    List<Comment> all = repliesByParent.getOrDefault(c.getId(), List.of());
+                    List<CommentDTO> preview = all.stream()
+                            .limit(REPLY_PREVIEW_COUNT)
+                            .map(r -> toDTO(r, viewerId, authorCache, 0, List.of()))
+                            .toList();
+                    return toDTO(c, viewerId, authorCache, all.size(), preview);
+                })
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentDTO> listReplies(Long parentId, String viewerUsername, int limit, int offset) {
+        int safeLimit = Math.max(1, Math.min(limit, 100));
+        int safeOffset = Math.max(0, offset);
+        int page = safeOffset / safeLimit;
+        List<Comment> replies = commentRepository.findRepliesByParentId(parentId, PageRequest.of(page, safeLimit));
+        Long viewerId = viewerUsername == null
+                ? null
+                : userRepository.findByUsername(viewerUsername).map(User::getId).orElse(null);
+        Map<Long, User> authorCache = new HashMap<>();
+        return replies.stream()
+                .map(r -> toDTO(r, viewerId, authorCache, 0, List.of()))
+                .toList();
     }
 
     @Override
@@ -59,11 +100,28 @@ public class CommentServiceImpl implements CommentService {
         }
         Artwork artwork = maybeArtwork.get();
         User author = maybeAuthor.get();
+
+        Long parentId = command.parentCommentId();
+        if (parentId != null) {
+            Optional<Comment> maybeParent = commentRepository.findById(parentId);
+            if (maybeParent.isEmpty()) {
+                return Optional.empty();
+            }
+            Comment parent = maybeParent.get();
+            boolean parentBelongsToArtwork = parent.getArtwork() != null
+                    && artworkId.equals(parent.getArtwork().getId());
+            boolean parentIsTopLevel = parent.getParentCommentId() == null;
+            boolean parentIsActive = !Boolean.TRUE.equals(parent.getIsDeleted());
+            if (!parentBelongsToArtwork || !parentIsTopLevel || !parentIsActive) {
+                return Optional.empty();
+            }
+        }
+
         LocalDateTime now = LocalDateTime.now();
-        Comment comment = new Comment(null, artwork, author.getId(), command.text(), null, now, now, false);
+        Comment comment = new Comment(null, artwork, author.getId(), command.text(), parentId, now, now, false);
         Comment saved = commentRepository.save(comment);
         Map<Long, User> cache = new HashMap<>();
-        return Optional.of(toDTO(saved, author.getId(), cache));
+        return Optional.of(toDTO(saved, author.getId(), cache, 0, List.of()));
     }
 
     @Override
@@ -87,7 +145,13 @@ public class CommentServiceImpl implements CommentService {
         return DeleteResult.OK;
     }
 
-    private CommentDTO toDTO(Comment comment, Long viewerId, Map<Long, User> authorCache) {
+    private CommentDTO toDTO(
+            Comment comment,
+            Long viewerId,
+            Map<Long, User> authorCache,
+            int replyCount,
+            List<CommentDTO> replies
+    ) {
         User author = null;
         if (comment.getAuthorId() != null) {
             author = authorCache.get(comment.getAuthorId());
@@ -107,7 +171,10 @@ public class CommentServiceImpl implements CommentService {
                 author == null ? null : author.getDisplayName(),
                 author == null ? null : author.getSlug(),
                 author == null ? null : author.getAvatarUrl(),
-                isAuthor
+                isAuthor,
+                comment.getParentCommentId(),
+                replyCount,
+                replies
         );
     }
 }

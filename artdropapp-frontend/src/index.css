@@ -138,3 +138,7 @@ body {
 .gallery-pagination .swiper-pagination-bullet-active {
   width: 12px;
 }
+
+button:not(:disabled) {
+  cursor: pointer;
+}

@@ -414,12 +414,27 @@ export function ArtworkDetailComponent({
             {comments.error}
           </p>
         ) : (
-          <CommentList
-            comments={comments.data}
-            onDelete={(id) => {
-              void comments.remove(id)
-            }}
-          />
+          <>
+            <CommentList
+              comments={comments.data}
+              onReply={(text, parentId) => comments.add(text, parentId)}
+              onDelete={(id) => comments.remove(id)}
+              onLoadMoreReplies={(parentId) => comments.loadMoreReplies(parentId)}
+              loadingRepliesFor={comments.loadingRepliesFor}
+            />
+            {comments.hasMore ? (
+              <div className="mt-12 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => void comments.loadMore()}
+                  disabled={comments.loadingMore}
+                  className="inline-flex items-center justify-center px-6 py-3 border border-on-surface font-label text-[11px] uppercase tracking-[0.2em] font-semibold text-on-surface hover:bg-on-surface hover:text-surface transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {comments.loadingMore ? 'Loading…' : 'Load more comments'}
+                </button>
+              </div>
+            ) : null}
+          </>
         )}
       </section>
     </article>

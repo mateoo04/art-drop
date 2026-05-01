@@ -236,9 +236,78 @@ INSERT INTO artwork_image (id, artwork_id, image_url, sort_order, is_cover, capt
 (70, 60, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXeoCVAfeolMJiXQkv8U1H8Gxn6cRbSYsiMQ&s',                                                                     0, TRUE,  'Cover image',     CURRENT_TIMESTAMP());
 
 INSERT INTO comment (id, artwork_id, author_id, text, parent_comment_id, created_at, updated_at, is_deleted) VALUES
-(1, 1, 2, 'Prekrasan rad!',           NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), FALSE),
-(2, 1, 3, 'Nastavak serije?',         NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), FALSE),
-(3, 2, 1, 'Odlican kontrast i linije.', NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), FALSE);
+-- Artwork 1: 10 top-level comments (id 1..10)
+(1,  1, 2, 'Prekrasan rad! Boje su nestvarne.',                             NULL, DATEADD('MINUTE',  -5, CURRENT_TIMESTAMP()), DATEADD('MINUTE',  -5, CURRENT_TIMESTAMP()), FALSE),
+(2,  1, 3, 'Postoji li nastavak ove serije?',                               NULL, DATEADD('MINUTE', -22, CURRENT_TIMESTAMP()), DATEADD('MINUTE', -22, CURRENT_TIMESTAMP()), FALSE),
+(3,  1, 4, 'The texture work here is incredible — what tools did you use?', NULL, DATEADD('HOUR',   -1, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -1, CURRENT_TIMESTAMP()), FALSE),
+(4,  1, 5, 'Reminds me of long Tokyo nights, beautiful mood.',              NULL, DATEADD('HOUR',   -2, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -2, CURRENT_TIMESTAMP()), FALSE),
+(5,  1, 6, 'The composition is so balanced. Great work.',                   NULL, DATEADD('HOUR',   -3, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -3, CURRENT_TIMESTAMP()), FALSE),
+(6,  1, 2, 'I keep coming back to this one.',                               NULL, DATEADD('HOUR',   -5, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -5, CURRENT_TIMESTAMP()), FALSE),
+(7,  1, 3, 'Would love a print of this.',                                   NULL, DATEADD('HOUR',   -7, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -7, CURRENT_TIMESTAMP()), FALSE),
+(8,  1, 4, 'How long did this take to render?',                             NULL, DATEADD('HOUR',  -10, CURRENT_TIMESTAMP()), DATEADD('HOUR',  -10, CURRENT_TIMESTAMP()), FALSE),
+(9,  1, 5, 'The light handling reminds me of Hiroshi Nagai.',               NULL, DATEADD('HOUR',  -14, CURRENT_TIMESTAMP()), DATEADD('HOUR',  -14, CURRENT_TIMESTAMP()), FALSE),
+(10, 1, 6, 'Subtle but striking. Bravo.',                                   NULL, DATEADD('HOUR',  -18, CURRENT_TIMESTAMP()), DATEADD('HOUR',  -18, CURRENT_TIMESTAMP()), FALSE),
+
+-- Replies to comment 1 (5 replies, exercises "View 3 more replies" after preview of 2)
+(11, 1, 1, 'Hvala puno! Drago mi je da ti se sviđa.',                    1, DATEADD('MINUTE',  -3, CURRENT_TIMESTAMP()), DATEADD('MINUTE',  -3, CURRENT_TIMESTAMP()), FALSE),
+(12, 1, 4, 'Slažem se, paleta je top.',                                  1, DATEADD('MINUTE',  -2, CURRENT_TIMESTAMP()), DATEADD('MINUTE',  -2, CURRENT_TIMESTAMP()), FALSE),
+(13, 1, 5, 'Kako si dobio taj tonalitet plave?',                         1, DATEADD('MINUTE',  -1, CURRENT_TIMESTAMP()), DATEADD('MINUTE',  -1, CURRENT_TIMESTAMP()), FALSE),
+(14, 1, 1, 'Veliki dio je ručno bojanje preko procedural backgroundsa.', 1, DATEADD('HOUR',    -1, CURRENT_TIMESTAMP()), DATEADD('HOUR',    -1, CURRENT_TIMESTAMP()), FALSE),
+(15, 1, 6, 'Ima nešto noir-ovsko u tome, sviđa mi se.',                  1, DATEADD('HOUR',    -2, CURRENT_TIMESTAMP()), DATEADD('HOUR',    -2, CURRENT_TIMESTAMP()), FALSE),
+
+-- Artwork 2: a few comments (id 16..18)
+(16, 2, 1, 'Odlican kontrast i linije.',                                NULL, DATEADD('HOUR', -2, CURRENT_TIMESTAMP()), DATEADD('HOUR', -2, CURRENT_TIMESTAMP()), FALSE),
+(17, 2, 3, 'The bone-like finish you mentioned really comes through.',  NULL, DATEADD('HOUR', -6, CURRENT_TIMESTAMP()), DATEADD('HOUR', -6, CURRENT_TIMESTAMP()), FALSE),
+(18, 2, 4, 'Curious to see this from another angle.',                   NULL, DATEADD('DAY',  -1, CURRENT_TIMESTAMP()), DATEADD('DAY',  -1, CURRENT_TIMESTAMP()), FALSE),
+
+-- Reply on artwork 2 comment 16
+(19, 2, 2, 'Hvala! Trenutno ručno radim peglanje površine.',             16, DATEADD('HOUR', -1, CURRENT_TIMESTAMP()), DATEADD('HOUR', -1, CURRENT_TIMESTAMP()), FALSE),
+
+-- Artwork 5: 22 top-level comments (id 20..41) — exercises multi-page "Load more comments"
+(20, 5, 1, 'Fluid dynamics done so right.',                              NULL, DATEADD('MINUTE', -10, CURRENT_TIMESTAMP()), DATEADD('MINUTE', -10, CURRENT_TIMESTAMP()), FALSE),
+(21, 5, 2, 'The blues here are mesmerising.',                            NULL, DATEADD('MINUTE', -45, CURRENT_TIMESTAMP()), DATEADD('MINUTE', -45, CURRENT_TIMESTAMP()), FALSE),
+(22, 5, 3, 'Heavy body acrylics for the win.',                           NULL, DATEADD('HOUR',   -1, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -1, CURRENT_TIMESTAMP()), FALSE),
+(23, 5, 4, 'Reminds me of currents at dusk.',                            NULL, DATEADD('HOUR',   -2, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -2, CURRENT_TIMESTAMP()), FALSE),
+(24, 5, 6, 'I could stare at this for hours.',                           NULL, DATEADD('HOUR',   -3, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -3, CURRENT_TIMESTAMP()), FALSE),
+(25, 5, 1, 'How thick are the impasto layers?',                          NULL, DATEADD('HOUR',   -4, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -4, CURRENT_TIMESTAMP()), FALSE),
+(26, 5, 2, 'Did you tilt the canvas during the pour?',                   NULL, DATEADD('HOUR',   -5, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -5, CURRENT_TIMESTAMP()), FALSE),
+(27, 5, 3, 'A masterclass in restraint.',                                NULL, DATEADD('HOUR',   -7, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -7, CURRENT_TIMESTAMP()), FALSE),
+(28, 5, 4, 'Curious about the underpainting.',                           NULL, DATEADD('HOUR',   -9, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -9, CURRENT_TIMESTAMP()), FALSE),
+(29, 5, 6, 'I''d hang this in my studio in a heartbeat.',                NULL, DATEADD('HOUR',  -12, CURRENT_TIMESTAMP()), DATEADD('HOUR',  -12, CURRENT_TIMESTAMP()), FALSE),
+(30, 5, 1, 'The transitions read like breath.',                          NULL, DATEADD('HOUR',  -16, CURRENT_TIMESTAMP()), DATEADD('HOUR',  -16, CURRENT_TIMESTAMP()), FALSE),
+(31, 5, 2, 'Beautiful color theory work.',                               NULL, DATEADD('HOUR',  -20, CURRENT_TIMESTAMP()), DATEADD('HOUR',  -20, CURRENT_TIMESTAMP()), FALSE),
+(32, 5, 3, 'How long did the cure take?',                                NULL, DATEADD('DAY',   -1, CURRENT_TIMESTAMP()), DATEADD('DAY',   -1, CURRENT_TIMESTAMP()), FALSE),
+(33, 5, 4, 'Reminds me of Atlantic mornings.',                           NULL, DATEADD('DAY',   -2, CURRENT_TIMESTAMP()), DATEADD('DAY',   -2, CURRENT_TIMESTAMP()), FALSE),
+(34, 5, 6, 'The texture is what really sells it.',                       NULL, DATEADD('DAY',   -3, CURRENT_TIMESTAMP()), DATEADD('DAY',   -3, CURRENT_TIMESTAMP()), FALSE),
+(35, 5, 1, 'Wonderful, calming piece.',                                  NULL, DATEADD('DAY',   -4, CURRENT_TIMESTAMP()), DATEADD('DAY',   -4, CURRENT_TIMESTAMP()), FALSE),
+(36, 5, 2, 'Saving for inspiration.',                                    NULL, DATEADD('DAY',   -5, CURRENT_TIMESTAMP()), DATEADD('DAY',   -5, CURRENT_TIMESTAMP()), FALSE),
+(37, 5, 3, 'Would love to see this in person.',                          NULL, DATEADD('DAY',   -6, CURRENT_TIMESTAMP()), DATEADD('DAY',   -6, CURRENT_TIMESTAMP()), FALSE),
+(38, 5, 4, 'The motion is convincing — feels alive.',                    NULL, DATEADD('DAY',   -7, CURRENT_TIMESTAMP()), DATEADD('DAY',   -7, CURRENT_TIMESTAMP()), FALSE),
+(39, 5, 6, 'Absolutely floored by the depth.',                           NULL, DATEADD('DAY',   -8, CURRENT_TIMESTAMP()), DATEADD('DAY',   -8, CURRENT_TIMESTAMP()), FALSE),
+(40, 5, 1, 'Are originals available?',                                   NULL, DATEADD('DAY',   -9, CURRENT_TIMESTAMP()), DATEADD('DAY',   -9, CURRENT_TIMESTAMP()), FALSE),
+(41, 5, 2, 'A definite favourite of the month.',                         NULL, DATEADD('DAY',  -10, CURRENT_TIMESTAMP()), DATEADD('DAY',  -10, CURRENT_TIMESTAMP()), FALSE),
+
+-- Artwork 12: 8 top-level comments (id 42..49)
+(42, 12, 1, 'The suspension is mesmerising in person.',                  NULL, DATEADD('HOUR', -3, CURRENT_TIMESTAMP()), DATEADD('HOUR', -3, CURRENT_TIMESTAMP()), FALSE),
+(43, 12, 3, 'How heavy is this piece?',                                  NULL, DATEADD('HOUR', -8, CURRENT_TIMESTAMP()), DATEADD('HOUR', -8, CURRENT_TIMESTAMP()), FALSE),
+(44, 12, 4, 'Steel offcuts have such honest character.',                 NULL, DATEADD('DAY',  -1, CURRENT_TIMESTAMP()), DATEADD('DAY',  -1, CURRENT_TIMESTAMP()), FALSE),
+(45, 12, 5, 'Where is this installed?',                                  NULL, DATEADD('DAY',  -2, CURRENT_TIMESTAMP()), DATEADD('DAY',  -2, CURRENT_TIMESTAMP()), FALSE),
+(46, 12, 6, 'The shadow patterns on the floor must be incredible.',      NULL, DATEADD('DAY',  -3, CURRENT_TIMESTAMP()), DATEADD('DAY',  -3, CURRENT_TIMESTAMP()), FALSE),
+(47, 12, 1, 'Welds are clean, very controlled.',                         NULL, DATEADD('DAY',  -4, CURRENT_TIMESTAMP()), DATEADD('DAY',  -4, CURRENT_TIMESTAMP()), FALSE),
+(48, 12, 3, 'A perfect counterweight piece.',                            NULL, DATEADD('DAY',  -5, CURRENT_TIMESTAMP()), DATEADD('DAY',  -5, CURRENT_TIMESTAMP()), FALSE),
+(49, 12, 4, 'Are the edges intentionally left rough?',                   NULL, DATEADD('DAY',  -6, CURRENT_TIMESTAMP()), DATEADD('DAY',  -6, CURRENT_TIMESTAMP()), FALSE),
+
+-- 10 replies on artwork 12 comment 42 — exercises "View 8 more replies"
+(50, 12, 2, 'Thanks! It''s lighter than it looks.',                      42, DATEADD('HOUR',   -2, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -2, CURRENT_TIMESTAMP()), FALSE),
+(51, 12, 3, 'How does the suspension cable terminate?',                  42, DATEADD('HOUR',   -2, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -2, CURRENT_TIMESTAMP()), FALSE),
+(52, 12, 2, 'Two anchor points in the ceiling joists, hidden behind the form.', 42, DATEADD('HOUR', -1, CURRENT_TIMESTAMP()), DATEADD('HOUR', -1, CURRENT_TIMESTAMP()), FALSE),
+(53, 12, 4, 'Does it move at all in a draft?',                           42, DATEADD('HOUR',   -1, CURRENT_TIMESTAMP()), DATEADD('HOUR',   -1, CURRENT_TIMESTAMP()), FALSE),
+(54, 12, 2, 'Slight rotation, intentional.',                             42, DATEADD('MINUTE', -50, CURRENT_TIMESTAMP()), DATEADD('MINUTE', -50, CURRENT_TIMESTAMP()), FALSE),
+(55, 12, 5, 'I love that it breathes.',                                  42, DATEADD('MINUTE', -40, CURRENT_TIMESTAMP()), DATEADD('MINUTE', -40, CURRENT_TIMESTAMP()), FALSE),
+(56, 12, 6, 'How does it hold up outdoors?',                             42, DATEADD('MINUTE', -30, CURRENT_TIMESTAMP()), DATEADD('MINUTE', -30, CURRENT_TIMESTAMP()), FALSE),
+(57, 12, 2, 'Indoor only — corten would be needed for outdoor siting.',  42, DATEADD('MINUTE', -25, CURRENT_TIMESTAMP()), DATEADD('MINUTE', -25, CURRENT_TIMESTAMP()), FALSE),
+(58, 12, 1, 'Have you considered an outdoor companion piece?',           42, DATEADD('MINUTE', -15, CURRENT_TIMESTAMP()), DATEADD('MINUTE', -15, CURRENT_TIMESTAMP()), FALSE),
+(59, 12, 2, 'Sketching one now, actually.',                              42, DATEADD('MINUTE',  -5, CURRENT_TIMESTAMP()), DATEADD('MINUTE',  -5, CURRENT_TIMESTAMP()), FALSE);
 
 INSERT INTO artwork_like (id, artwork_id, user_id, created_at) VALUES
 (1,  1,  2, CURRENT_TIMESTAMP()),
@@ -290,7 +359,7 @@ ALTER TABLE app_user             ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE authority            ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE artwork              ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE artwork_image        ALTER COLUMN id RESTART WITH 100;
-ALTER TABLE comment              ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE comment              ALTER COLUMN id RESTART WITH 200;
 ALTER TABLE artwork_like         ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE collection           ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE challenge            ALTER COLUMN id RESTART WITH 100;

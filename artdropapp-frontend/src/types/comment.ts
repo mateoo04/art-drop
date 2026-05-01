@@ -11,4 +11,7 @@ export interface Comment {
   createdAt: string
   author: CommentAuthor
   isAuthor: boolean
+  parentId: number | null
+  replyCount: number
+  replies: Comment[]
 }

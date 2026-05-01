@@ -12,6 +12,7 @@ function normalizeCreatedAt(value: unknown): string {
 }
 
 function mapComment(raw: Record<string, unknown>): Comment {
+  const repliesRaw = Array.isArray(raw.replies) ? raw.replies : []
   return {
     id: Number(raw.id),
     text: String(raw.text ?? ''),
@@ -23,11 +24,20 @@ function mapComment(raw: Record<string, unknown>): Comment {
       avatarUrl: raw.authorAvatarUrl == null ? null : String(raw.authorAvatarUrl),
     },
     isAuthor: Boolean(raw.isAuthor),
+    parentId: raw.parentCommentId == null ? null : Number(raw.parentCommentId),
+    replyCount: Number(raw.replyCount ?? 0),
+    replies: repliesRaw.map((r) => mapComment(r as Record<string, unknown>)),
   }
 }
 
-export async function fetchComments(artworkId: number): Promise<Comment[]> {
-  const res = await authFetch(`/api/artworks/${artworkId}/comments`)
+export async function fetchComments(
+  artworkId: number,
+  limit = 10,
+  offset = 0,
+): Promise<Comment[]> {
+  const res = await authFetch(
+    `/api/artworks/${artworkId}/comments?limit=${limit}&offset=${offset}`,
+  )
   if (!res.ok) {
     throw new Error(`Failed to load comments (${res.status})`)
   }
@@ -38,11 +48,35 @@ export async function fetchComments(artworkId: number): Promise<Comment[]> {
   return json.map((item) => mapComment(item as Record<string, unknown>))
 }
 
-export async function postComment(artworkId: number, text: string): Promise<Comment> {
+export async function fetchReplies(
+  parentId: number,
+  limit = 20,
+  offset = 0,
+): Promise<Comment[]> {
+  const res = await authFetch(
+    `/api/comments/${parentId}/replies?limit=${limit}&offset=${offset}`,
+  )
+  if (!res.ok) {
+    throw new Error(`Failed to load replies (${res.status})`)
+  }
+  const json: unknown = await res.json()
+  if (!Array.isArray(json)) {
+    throw new Error('Unexpected server response')
+  }
+  return json.map((item) => mapComment(item as Record<string, unknown>))
+}
+
+export async function postComment(
+  artworkId: number,
+  text: string,
+  parentCommentId?: number | null,
+): Promise<Comment> {
+  const body: { text: string; parentCommentId?: number } = { text }
+  if (parentCommentId != null) body.parentCommentId = parentCommentId
   const res = await authFetch(`/api/artworks/${artworkId}/comments`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) {
     throw new Error(`Failed to post comment (${res.status})`)

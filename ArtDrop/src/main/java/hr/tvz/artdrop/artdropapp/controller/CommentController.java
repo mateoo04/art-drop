@@ -53,6 +53,17 @@ public class CommentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/comments/{id}/replies")
+    public ResponseEntity<List<CommentDTO>> listReplies(
+            @PathVariable Long id,
+            Authentication authentication,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset
+    ) {
+        String viewer = authentication == null ? null : authentication.getName();
+        return ResponseEntity.ok(commentService.listReplies(id, viewer, limit, offset));
+    }
+
     @DeleteMapping("/comments/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id, Authentication authentication) {
         if (authentication == null) {

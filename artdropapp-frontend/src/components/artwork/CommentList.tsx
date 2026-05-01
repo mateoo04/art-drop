@@ -1,9 +1,17 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Comment } from '../../types/comment'
+import { getToken } from '../../lib/auth'
+import { useAuthPrompt } from '../../contexts/AuthPromptContext'
+import { ConfirmModal } from '../ui/ConfirmModal'
+import { CommentComposer } from './CommentComposer'
 
 type CommentListProps = {
   comments: Comment[]
-  onDelete: (id: number) => void
+  onReply: (text: string, parentId: number) => Promise<unknown>
+  onDelete: (id: number) => Promise<unknown> | void
+  onLoadMoreReplies: (parentId: number) => Promise<unknown>
+  loadingRepliesFor: number | null
 }
 
 function formatRelative(iso: string): string {
@@ -20,20 +28,24 @@ function formatRelative(iso: string): string {
   return d.toLocaleDateString()
 }
 
-function AuthorAvatar({ comment }: { comment: Comment }) {
+function AuthorAvatar({ comment, size = 'md' }: { comment: Comment; size?: 'md' | 'sm' }) {
+  const dim = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10'
+  const fontSize = size === 'sm' ? 'text-xs' : 'text-sm'
   const { author } = comment
   if (author.avatarUrl) {
     return (
       <img
         src={author.avatarUrl}
         alt={author.displayName ?? ''}
-        className="w-10 h-10 rounded-full object-cover bg-surface-container-low flex-shrink-0"
+        className={`${dim} rounded-full object-cover bg-surface-container-low flex-shrink-0`}
       />
     )
   }
   const initial = (author.displayName ?? '?').slice(0, 1).toUpperCase()
   return (
-    <div className="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center font-headline text-sm text-on-surface flex-shrink-0">
+    <div
+      className={`${dim} rounded-full bg-surface-container-low flex items-center justify-center font-headline ${fontSize} text-on-surface flex-shrink-0`}
+    >
       {initial}
     </div>
   )
@@ -55,7 +67,81 @@ function AuthorName({ comment }: { comment: Comment }) {
   return <span className="font-body text-sm text-on-surface">{name}</span>
 }
 
-export function CommentList({ comments, onDelete }: CommentListProps) {
+type CommentRowProps = {
+  comment: Comment
+  isReply?: boolean
+  onReplyClick?: () => void
+  onDeleteClick: () => void
+}
+
+function CommentRow({ comment, isReply = false, onReplyClick, onDeleteClick }: CommentRowProps) {
+  return (
+    <div className="flex gap-4">
+      <AuthorAvatar comment={comment} size={isReply ? 'sm' : 'md'} />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-3">
+          <AuthorName comment={comment} />
+          <span className="font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant">
+            {formatRelative(comment.createdAt)}
+          </span>
+          {comment.isAuthor ? (
+            <button
+              type="button"
+              onClick={onDeleteClick}
+              className="ml-auto font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant hover:text-error transition-colors"
+            >
+              Delete
+            </button>
+          ) : null}
+        </div>
+        <p className="mt-2 font-body text-sm text-on-surface whitespace-pre-line">
+          {comment.text}
+        </p>
+        {!isReply && onReplyClick ? (
+          <button
+            type="button"
+            onClick={onReplyClick}
+            className="mt-2 text-left font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant hover:text-on-surface transition-colors"
+          >
+            Reply
+          </button>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+export function CommentList({
+  comments,
+  onReply,
+  onDelete,
+  onLoadMoreReplies,
+  loadingRepliesFor,
+}: CommentListProps) {
+  const [replyingTo, setReplyingTo] = useState<number | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<number | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const { promptToAuth } = useAuthPrompt()
+
+  const handleReplyClick = (commentId: number) => {
+    if (!getToken()) {
+      promptToAuth('reply to a comment')
+      return
+    }
+    setReplyingTo((current) => (current === commentId ? null : commentId))
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (pendingDelete == null) return
+    setDeleting(true)
+    try {
+      await onDelete(pendingDelete)
+      setPendingDelete(null)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (comments.length === 0) {
     return (
       <p className="py-6 text-center text-on-surface-variant italic font-body text-sm">
@@ -65,32 +151,81 @@ export function CommentList({ comments, onDelete }: CommentListProps) {
   }
 
   return (
-    <ul className="space-y-6" aria-label="Comments">
-      {comments.map((c) => (
-        <li key={c.id} className="flex gap-4">
-          <AuthorAvatar comment={c} />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3">
-              <AuthorName comment={c} />
-              <span className="font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant">
-                {formatRelative(c.createdAt)}
-              </span>
-              {c.isAuthor ? (
+    <>
+      <ul className="space-y-8" aria-label="Comments">
+        {comments.map((c) => {
+          const remainingReplies = Math.max(0, c.replyCount - c.replies.length)
+          const isLoadingMore = loadingRepliesFor === c.id
+          return (
+            <li key={c.id}>
+              <CommentRow
+                comment={c}
+                onReplyClick={() => handleReplyClick(c.id)}
+                onDeleteClick={() => setPendingDelete(c.id)}
+              />
+
+              {replyingTo === c.id ? (
+                <div className="mt-4 ml-14">
+                  <CommentComposer
+                    compact
+                    autoFocus
+                    authPromptReason="reply to a comment"
+                    placeholder={`Reply to ${c.author.displayName ?? 'this comment'}…`}
+                    submitLabel="Reply"
+                    onCancel={() => setReplyingTo(null)}
+                    onSubmit={async (text) => {
+                      await onReply(text, c.id)
+                      setReplyingTo(null)
+                    }}
+                  />
+                </div>
+              ) : null}
+
+              {c.replies.length > 0 ? (
+                <ul
+                  className="mt-6 ml-14 space-y-6 border-l border-outline-variant/15 pl-6"
+                  aria-label="Replies"
+                >
+                  {c.replies.map((r) => (
+                    <li key={r.id}>
+                      <CommentRow
+                        comment={r}
+                        isReply
+                        onDeleteClick={() => setPendingDelete(r.id)}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              {remainingReplies > 0 ? (
                 <button
                   type="button"
-                  onClick={() => onDelete(c.id)}
-                  className="ml-auto font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant hover:text-error transition-colors"
+                  onClick={() => void onLoadMoreReplies(c.id)}
+                  disabled={isLoadingMore}
+                  className="mt-4 ml-14 font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-50"
                 >
-                  Delete
+                  {isLoadingMore
+                    ? 'Loading…'
+                    : `View ${remainingReplies} more ${remainingReplies === 1 ? 'reply' : 'replies'}`}
                 </button>
               ) : null}
-            </div>
-            <p className="mt-2 font-body text-sm text-on-surface whitespace-pre-line">
-              {c.text}
-            </p>
-          </div>
-        </li>
-      ))}
-    </ul>
+            </li>
+          )
+        })}
+      </ul>
+      <ConfirmModal
+        open={pendingDelete != null}
+        title="Delete comment?"
+        message="This will remove your comment from the discussion. You can't undo this."
+        confirmLabel="Delete"
+        destructive
+        busy={deleting}
+        onConfirm={() => void handleDeleteConfirm()}
+        onCancel={() => {
+          if (!deleting) setPendingDelete(null)
+        }}
+      />
+    </>
   )
 }
