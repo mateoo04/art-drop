@@ -1,44 +1,51 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
+import { InfiniteScrollSentinel } from '../components/home/InfiniteScrollSentinel'
 import { MasonryFeed } from '../components/home/MasonryFeed'
 import { MediumFilterBar } from '../components/home/MediumFilterBar'
-import { useArtworks } from '../hooks/useArtworks'
+import { useDiscoverFeed } from '../hooks/useArtworks'
+
+const MEDIUMS = ['Digital', 'Sculpture', 'Mixed Media', 'Acrylic', 'Photography', 'Oil']
 
 export function HomePage() {
-  const { data, loading, error } = useArtworks()
   const [activeMedium, setActiveMedium] = useState<string>('All')
-
-  const mediums = useMemo(() => {
-    const set = new Set<string>()
-    for (const a of data ?? []) set.add(a.medium)
-    return Array.from(set).sort()
-  }, [data])
-
-  const artworks = useMemo(() => {
-    const list = data ?? []
-    const filtered = activeMedium === 'All' ? list : list.filter((a) => a.medium === activeMedium)
-    return [...filtered].sort(
-      (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-    )
-  }, [activeMedium, data])
+  const {
+    artworks,
+    isLoading,
+    isFetchingNextPage,
+    error,
+    hasNextPage,
+    fetchNextPage,
+  } = useDiscoverFeed(activeMedium)
 
   return (
-    <main className="max-w-[1440px] mx-auto px-8 pt-4">
-      <MediumFilterBar mediums={mediums} active={activeMedium} onChange={setActiveMedium} />
+    <main className="max-w-[1440px] mx-auto px-8 pt-4 pb-24">
+      <MediumFilterBar mediums={MEDIUMS} active={activeMedium} onChange={setActiveMedium} />
 
-      {loading ? (
+      {isLoading ? (
         <p className="py-12 text-center text-on-surface-variant italic" role="status">
           Loading artworks…
         </p>
-      ) : null}
-      {error ? (
+      ) : error ? (
         <p
           className="py-12 text-center text-error border border-error-container/40 bg-error-container/10"
           role="alert"
         >
           {error}
         </p>
-      ) : null}
-      {!loading && !error ? <MasonryFeed artworks={artworks} /> : null}
+      ) : artworks.length === 0 ? (
+        <p className="py-24 text-center text-on-surface-variant italic">
+          No artworks in this medium yet.
+        </p>
+      ) : (
+        <>
+          <MasonryFeed artworks={artworks} />
+          <InfiniteScrollSentinel
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={() => void fetchNextPage()}
+          />
+        </>
+      )}
     </main>
   )
 }

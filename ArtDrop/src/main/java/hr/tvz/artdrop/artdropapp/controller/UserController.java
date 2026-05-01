@@ -63,8 +63,9 @@ public class UserController {
         if (authentication == null) {
             return ResponseEntity.status(401).build();
         }
-        return userRepository.findByUsername(authentication.getName())
-                .map(user -> ResponseEntity.ok(artworkService.findByAuthorId(user.getId())))
+        String viewer = authentication.getName();
+        return userRepository.findByUsername(viewer)
+                .map(user -> ResponseEntity.ok(artworkService.findByAuthorId(user.getId(), viewer)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -77,9 +78,10 @@ public class UserController {
     }
 
     @GetMapping("/{slug}/artworks")
-    public ResponseEntity<List<ArtworkDTO>> getArtworksBySlug(@PathVariable String slug) {
+    public ResponseEntity<List<ArtworkDTO>> getArtworksBySlug(@PathVariable String slug, Authentication authentication) {
+        String viewer = authentication == null ? null : authentication.getName();
         return userRepository.findBySlug(slug)
-                .map(user -> ResponseEntity.ok(artworkService.findByAuthorId(user.getId())))
+                .map(user -> ResponseEntity.ok(artworkService.findByAuthorId(user.getId(), viewer)))
                 .orElse(ResponseEntity.notFound().build());
     }
 

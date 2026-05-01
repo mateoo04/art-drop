@@ -3,13 +3,13 @@ package hr.tvz.artdrop.artdropapp.controller;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommentCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
-import hr.tvz.artdrop.artdropapp.dto.ArtworkLikeCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkUpdateCommand;
 import hr.tvz.artdrop.artdropapp.service.ArtworkService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,27 +25,31 @@ public class ArtworkController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ArtworkDTO>> getArtworks(@RequestParam(required = false) String medium) {
+    public ResponseEntity<List<ArtworkDTO>> getArtworks(
+            @RequestParam(required = false) String medium,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset,
+            Authentication authentication
+    ) {
+        String viewer = authentication == null ? null : authentication.getName();
         if (medium != null && !medium.isBlank()) {
-            List<ArtworkDTO> list = artworkService.findByMedium(medium);
-            if (list.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(list);
+            return ResponseEntity.ok(artworkService.findByMedium(medium, viewer, limit, offset));
         }
-        return ResponseEntity.ok(artworkService.findAll());
+        return ResponseEntity.ok(artworkService.findAll(viewer, limit, offset));
     }
 
     @GetMapping("/id/{id}")
-    public ResponseEntity<ArtworkDTO> getArtworkById(@PathVariable Long id) {
-        return artworkService.findById(id)
+    public ResponseEntity<ArtworkDTO> getArtworkById(@PathVariable Long id, Authentication authentication) {
+        String viewer = authentication == null ? null : authentication.getName();
+        return artworkService.findById(id, viewer)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/title/{title}")
-    public ResponseEntity<ArtworkDTO> getByTitle(@PathVariable String title) {
-        return artworkService.findOneByTitle(title)
+    public ResponseEntity<ArtworkDTO> getByTitle(@PathVariable String title, Authentication authentication) {
+        String viewer = authentication == null ? null : authentication.getName();
+        return artworkService.findOneByTitle(title, viewer)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -58,12 +62,27 @@ public class ArtworkController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("/likes")
-    public ResponseEntity<Void> createArtworkLike(@Valid @RequestBody ArtworkLikeCommand command) {
-        if (!artworkService.createArtworkLike(command)) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @PostMapping("/{id}/likes")
+    public ResponseEntity<Void> like(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) return ResponseEntity.status(401).build();
+        return switch (artworkService.like(id, authentication.getName())) {
+            case LIKED -> ResponseEntity.status(HttpStatus.CREATED).build();
+            case ALREADY_LIKED -> ResponseEntity.noContent().build();
+            case NOT_FOUND -> ResponseEntity.notFound().build();
+            case UNAUTHENTICATED -> ResponseEntity.status(401).build();
+            default -> ResponseEntity.internalServerError().build();
+        };
+    }
+
+    @DeleteMapping("/{id}/likes")
+    public ResponseEntity<Void> unlike(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) return ResponseEntity.status(401).build();
+        return switch (artworkService.unlike(id, authentication.getName())) {
+            case UNLIKED, NOT_LIKED -> ResponseEntity.noContent().build();
+            case NOT_FOUND -> ResponseEntity.notFound().build();
+            case UNAUTHENTICATED -> ResponseEntity.status(401).build();
+            default -> ResponseEntity.internalServerError().build();
+        };
     }
 
     @PostMapping("/comments")

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthPrompt } from '../../contexts/AuthPromptContext'
+import { useLikeArtwork } from '../../hooks/useLikeArtwork'
 import { getToken } from '../../lib/auth'
 import type { Artwork, ProgressStatus, SaleStatus } from '../../types/artwork'
 
@@ -73,9 +74,10 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
   const progress = progressLabel(artwork.progressStatus)
   const sale = saleLabel(artwork.saleStatus)
   const { promptToAuth } = useAuthPrompt()
-  const [liked, setLiked] = useState(false)
-  const [likeBump, setLikeBump] = useState(0)
+  const likeMutation = useLikeArtwork()
   const [animating, setAnimating] = useState(false)
+
+  const liked = artwork.likedByMe
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -84,15 +86,12 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
       promptToAuth('like this artwork')
       return
     }
-    setLiked((wasLiked) => {
-      const next = !wasLiked
-      setLikeBump((b) => b + (next ? 1 : -1))
-      if (next) {
-        setAnimating(true)
-        window.setTimeout(() => setAnimating(false), 320)
-      }
-      return next
-    })
+    const next = !liked
+    if (next) {
+      setAnimating(true)
+      window.setTimeout(() => setAnimating(false), 320)
+    }
+    likeMutation.mutate({ artworkId: artwork.id, like: next })
   }
 
   return (
@@ -180,7 +179,7 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
               >
                 favorite
               </span>
-              {formatCount(artwork.likeCount + likeBump)}
+              {formatCount(artwork.likeCount)}
             </button>
             <Link
               to={`/details/${artwork.id}#comments`}

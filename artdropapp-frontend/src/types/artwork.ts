@@ -24,4 +24,5 @@ export interface Artwork {
   publishedAt: string
   likeCount: number
   commentCount: number
+  likedByMe: boolean
 }

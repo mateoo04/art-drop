@@ -1,47 +1,26 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchCircleFeed } from '../api/feedApi'
 import type { Artwork } from '../types/artwork'
 
-const PAGE_SIZE = 20
+export const CIRCLE_PAGE_SIZE = 20
 
 export function useCircleFeed() {
-  const [data, setData] = useState<Artwork[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [hasMore, setHasMore] = useState(true)
+  const query = useInfiniteQuery<Artwork[], Error>({
+    queryKey: ['artworks', 'circle'],
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
+      fetchCircleFeed({ limit: CIRCLE_PAGE_SIZE, offset: pageParam as number }),
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < CIRCLE_PAGE_SIZE ? undefined : allPages.length * CIRCLE_PAGE_SIZE,
+  })
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const list = await fetchCircleFeed({ limit: PAGE_SIZE, offset: 0 })
-      setData(list)
-      setHasMore(list.length === PAGE_SIZE)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unknown error')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    void load()
-  }, [load])
-
-  const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore) return
-    setLoadingMore(true)
-    try {
-      const list = await fetchCircleFeed({ limit: PAGE_SIZE, offset: data.length })
-      setData((prev) => [...prev, ...list])
-      setHasMore(list.length === PAGE_SIZE)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unknown error')
-    } finally {
-      setLoadingMore(false)
-    }
-  }, [data.length, hasMore, loadingMore])
-
-  return { data, loading, loadingMore, error, hasMore, refetch: load, loadMore }
+  return {
+    artworks: query.data?.pages.flat() ?? [],
+    isLoading: query.isLoading,
+    isFetchingNextPage: query.isFetchingNextPage,
+    error: query.error?.message ?? null,
+    hasNextPage: query.hasNextPage ?? false,
+    fetchNextPage: query.fetchNextPage,
+    refetch: query.refetch,
+  }
 }

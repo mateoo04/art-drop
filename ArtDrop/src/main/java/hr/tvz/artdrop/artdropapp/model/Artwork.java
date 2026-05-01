@@ -18,6 +18,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -72,7 +73,7 @@ public class Artwork {
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
 
-    @Column(name = "like_count")
+    @Formula("(SELECT COUNT(*) FROM artwork_like al WHERE al.artwork_id = id)")
     private Integer likeCount;
 
     @Column(name = "created_at")

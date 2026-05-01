@@ -35,15 +35,27 @@ CREATE TABLE IF NOT EXISTS artwork (
     progress_status VARCHAR(20),
     sale_status VARCHAR(20),
     published_at TIMESTAMP,
-    like_count INT DEFAULT 0,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES app_user(id)
 );
 
+CREATE TABLE IF NOT EXISTS artwork_like (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    artwork_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    UNIQUE (artwork_id, user_id),
+    FOREIGN KEY (artwork_id) REFERENCES artwork(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_artwork_like_artwork ON artwork_like(artwork_id);
+CREATE INDEX IF NOT EXISTS idx_artwork_like_user ON artwork_like(user_id);
+
 CREATE TABLE IF NOT EXISTS artwork_tags (
     artwork_id BIGINT NOT NULL,
     tag VARCHAR(255) NOT NULL,
+    UNIQUE (artwork_id, tag),
     FOREIGN KEY (artwork_id) REFERENCES artwork(id) ON DELETE CASCADE
 );
 
@@ -101,6 +113,7 @@ CREATE TABLE IF NOT EXISTS collection (
 CREATE TABLE IF NOT EXISTS collection_artwork (
     collection_id BIGINT NOT NULL,
     artwork_id BIGINT NOT NULL,
+    UNIQUE (collection_id, artwork_id),
     FOREIGN KEY (collection_id) REFERENCES collection(id) ON DELETE CASCADE,
     FOREIGN KEY (artwork_id) REFERENCES artwork(id) ON DELETE CASCADE
 );

@@ -57,11 +57,26 @@ export function mapApiArtwork(raw: Record<string, unknown>): Artwork {
     publishedAt: normalizePublishedAt(raw.publishedAt),
     likeCount: Number(raw.likeCount ?? 0),
     commentCount: Number(raw.commentCount ?? 0),
+    likedByMe: Boolean(raw.likedByMe),
   }
 }
 
-export async function fetchArtworks(): Promise<Artwork[]> {
-  const res = await fetch(`${API_BASE}/api/artworks`)
+export type FetchArtworksParams = {
+  medium?: string | null
+  limit?: number
+  offset?: number
+}
+
+export async function fetchArtworks({
+  medium,
+  limit = 20,
+  offset = 0,
+}: FetchArtworksParams = {}): Promise<Artwork[]> {
+  const params = new URLSearchParams()
+  params.set('limit', String(limit))
+  params.set('offset', String(offset))
+  if (medium && medium !== 'All') params.set('medium', medium)
+  const res = await authFetch(`${API_BASE}/api/artworks?${params.toString()}`)
   if (!res.ok) {
     throw new Error(`Failed to load artworks (${res.status})`)
   }
@@ -73,7 +88,7 @@ export async function fetchArtworks(): Promise<Artwork[]> {
 }
 
 export async function fetchArtworkById(id: number): Promise<Artwork> {
-  const res = await fetch(`${API_BASE}/api/artworks/id/${id}`)
+  const res = await authFetch(`${API_BASE}/api/artworks/id/${id}`)
   if (res.status === 404) {
     throw new Error('NOT_FOUND')
   }
@@ -84,27 +99,17 @@ export async function fetchArtworkById(id: number): Promise<Artwork> {
   return mapApiArtwork(json as Record<string, unknown>)
 }
 
-export type CreateArtworkPayload = {
-  title: string
-  medium: string
-  description: string
-  imageUrl: string
+export async function likeArtwork(id: number): Promise<void> {
+  const res = await authFetch(`${API_BASE}/api/artworks/${id}/likes`, { method: 'POST' })
+  if (!res.ok && res.status !== 204) {
+    throw new Error(`Failed to like (${res.status})`)
+  }
 }
 
-export async function createArtwork(payload: CreateArtworkPayload): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/artworks`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ...payload,
-      catalogSequence: 0,
-    }),
-  })
-  if (res.status === 409) {
-    throw new Error('An artwork with this title already exists')
-  }
-  if (!res.ok) {
-    throw new Error(`Save failed (${res.status})`)
+export async function unlikeArtwork(id: number): Promise<void> {
+  const res = await authFetch(`${API_BASE}/api/artworks/${id}/likes`, { method: 'DELETE' })
+  if (!res.ok && res.status !== 204) {
+    throw new Error(`Failed to unlike (${res.status})`)
   }
 }
 
@@ -131,15 +136,3 @@ export async function updateArtwork(id: number, payload: UpdateArtworkPayload): 
   return mapApiArtwork(json as Record<string, unknown>)
 }
 
-export async function deleteArtworkByTitle(title: string): Promise<void> {
-  const encoded = encodeURIComponent(title)
-  const res = await authFetch(`${API_BASE}/api/artworks/${encoded}`, {
-    method: 'DELETE',
-  })
-  if (res.status === 404) {
-    throw new Error('Artwork not found')
-  }
-  if (!res.ok) {
-    throw new Error(`Delete failed (${res.status})`)
-  }
-}

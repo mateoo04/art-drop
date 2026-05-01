@@ -5,7 +5,6 @@ import { AccountPage } from './pages/AccountPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { ArtworkDetailPage } from './pages/ArtworkDetailPage'
 import { ArtworkEditPage } from './pages/ArtworkEditPage'
-import { ArtworksPage } from './pages/ArtworksPage'
 import { ChallengesPage } from './pages/ChallengesPage'
 import { CirclePage } from './pages/CirclePage'
 import { CollectionsPage } from './pages/CollectionsPage'
@@ -30,7 +29,6 @@ function App() {
           }
         />
         <Route path="/challenges" element={<ChallengesPage />} />
-        <Route path="/artworks" element={<ArtworksPage />} />
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/details/:id" element={<ArtworkDetailPage />} />
         <Route path="/edit/:id" element={<ArtworkEditPage />} />

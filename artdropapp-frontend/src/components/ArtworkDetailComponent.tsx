@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Artwork } from '../types/artwork'
 import { useComments } from '../hooks/useComments'
+import { useLikeArtwork } from '../hooks/useLikeArtwork'
 import { useAuthPrompt } from '../contexts/AuthPromptContext'
 import { getToken } from '../lib/auth'
 import { CommentComposer } from './artwork/CommentComposer'
@@ -25,18 +26,23 @@ export function ArtworkDetailComponent({
 }: ArtworkDetailComponentProps) {
   const comments = useComments(artwork?.id ?? null)
   const { promptToAuth } = useAuthPrompt()
-  const [liked, setLiked] = useState(false)
-  const [likeBump, setLikeBump] = useState(0)
+  const likeMutation = useLikeArtwork()
+  const [animating, setAnimating] = useState(false)
+
+  const liked = artwork?.likedByMe ?? false
 
   const handleLike = () => {
+    if (!artwork) return
     if (!getToken()) {
       promptToAuth('like this artwork')
       return
     }
-    setLiked((v) => {
-      setLikeBump((b) => b + (v ? -1 : 1))
-      return !v
-    })
+    const next = !liked
+    if (next) {
+      setAnimating(true)
+      window.setTimeout(() => setAnimating(false), 320)
+    }
+    likeMutation.mutate({ artworkId: artwork.id, like: next })
   }
 
   if (loading) {
@@ -96,19 +102,29 @@ export function ArtworkDetailComponent({
       <div className="mt-6 flex items-center gap-3">
         <button
           type="button"
-          onClick={handleLike}
+          onClick={() => void handleLike()}
           aria-pressed={liked}
           className={`inline-flex items-center gap-2 px-5 py-3 border font-label text-[11px] uppercase tracking-[0.2em] font-semibold transition-all duration-200 ${
             liked
-              ? 'bg-on-surface text-surface border-on-surface'
+              ? 'bg-error/10 text-error border-error'
               : 'bg-transparent text-on-surface border-on-surface hover:bg-on-surface hover:text-surface'
           }`}
         >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
+          <span
+            className={`material-symbols-outlined text-base transition-transform duration-300 ease-out will-change-transform ${
+              animating ? 'scale-150' : 'scale-100'
+            }`}
+            style={{
+              fontVariationSettings: liked
+                ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24"
+                : undefined,
+            }}
+            aria-hidden="true"
+          >
             favorite
           </span>
           <span>{liked ? 'Liked' : 'Like'}</span>
-          <span className="ml-1 text-xs opacity-80">{artwork.likeCount + likeBump}</span>
+          <span className="ml-1 text-xs opacity-80">{artwork.likeCount}</span>
         </button>
       </div>
 

@@ -54,3 +54,6 @@ dist-ssr
 
 # --- Local scratch ---
 stitch-downloads/
+
+# --- Local H2 file DB ---
+ArtDrop/data/

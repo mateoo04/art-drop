@@ -22,5 +22,6 @@ public record ArtworkDTO(
         List<String> tags,
         LocalDateTime publishedAt,
         Integer likeCount,
-        Integer commentCount
+        Integer commentCount,
+        boolean likedByMe
 ) {}

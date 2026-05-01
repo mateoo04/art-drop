@@ -3,85 +3,110 @@ package hr.tvz.artdrop.artdropapp.service;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommentCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
-import hr.tvz.artdrop.artdropapp.dto.ArtworkLikeCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkUpdateCommand;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.ArtworkImage;
+import hr.tvz.artdrop.artdropapp.model.ArtworkLike;
 import hr.tvz.artdrop.artdropapp.model.Comment;
 import hr.tvz.artdrop.artdropapp.model.ProgressStatus;
 import hr.tvz.artdrop.artdropapp.model.SaleStatus;
 import hr.tvz.artdrop.artdropapp.model.User;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.ArtworkLikeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class ArtworkServiceImpl implements ArtworkService {
 
     private final ArtworkJpaRepository artworkRepository;
+    private final ArtworkLikeJpaRepository likeRepository;
     private final UserJpaRepository userRepository;
     private final Map<String, List<ArtworkCommentCommand>> commentsByTitle = new HashMap<>();
     private final Map<String, List<ArtworkReviewCommand>> reviewsByTitle = new HashMap<>();
 
-    public ArtworkServiceImpl(ArtworkJpaRepository artworkRepository, UserJpaRepository userRepository) {
+    public ArtworkServiceImpl(
+            ArtworkJpaRepository artworkRepository,
+            ArtworkLikeJpaRepository likeRepository,
+            UserJpaRepository userRepository
+    ) {
         this.artworkRepository = artworkRepository;
+        this.likeRepository = likeRepository;
         this.userRepository = userRepository;
     }
 
     @Override
-    public List<ArtworkDTO> findAll() {
-        return artworkRepository.findAll()
-                .stream()
-                .map(this::mapToDTO)
-                .toList();
+    public List<ArtworkDTO> findAll(String viewerUsername) {
+        return mapMany(artworkRepository.findAll(), viewerUsername);
     }
 
     @Override
-    public Optional<ArtworkDTO> findById(Long id) {
+    public List<ArtworkDTO> findAll(String viewerUsername, int limit, int offset) {
+        Pageable page = paged(limit, offset, Sort.by(Sort.Direction.DESC, "publishedAt"));
+        List<Artwork> rows = artworkRepository.findAll(page).getContent();
+        return mapMany(rows, viewerUsername);
+    }
+
+    @Override
+    public Optional<ArtworkDTO> findById(Long id, String viewerUsername) {
         return artworkRepository.findById(id)
-                .map(this::mapToDTO);
+                .map(a -> mapToDTO(a, likedSetFor(viewerUsername, List.of(a))));
     }
 
     @Override
-    public List<ArtworkDTO> findByMedium(String medium) {
-        return artworkRepository.findByMediumContainingIgnoreCase(medium)
-                .stream()
-                .map(this::mapToDTO)
-                .toList();
+    public List<ArtworkDTO> findByMedium(String medium, String viewerUsername) {
+        return mapMany(artworkRepository.findByMediumContainingIgnoreCase(medium), viewerUsername);
     }
 
     @Override
-    public List<ArtworkDTO> findByAuthorId(Long authorId) {
-        return artworkRepository.findByAuthor_IdOrderByPublishedAtDesc(authorId)
-                .stream()
-                .map(this::mapToDTO)
-                .toList();
+    public List<ArtworkDTO> findByMedium(String medium, String viewerUsername, int limit, int offset) {
+        Pageable page = paged(limit, offset);
+        List<Artwork> rows = artworkRepository.findByMediumContainingIgnoreCase(medium, page);
+        return mapMany(rows, viewerUsername);
+    }
+
+    private static Pageable paged(int limit, int offset) {
+        return paged(limit, offset, Sort.unsorted());
+    }
+
+    private static Pageable paged(int limit, int offset, Sort sort) {
+        int safeLimit = Math.max(1, Math.min(limit, 100));
+        int safeOffset = Math.max(0, offset);
+        return PageRequest.of(safeOffset / safeLimit, safeLimit, sort);
+    }
+
+    @Override
+    public List<ArtworkDTO> findByAuthorId(Long authorId, String viewerUsername) {
+        return mapMany(artworkRepository.findByAuthor_IdOrderByPublishedAtDesc(authorId), viewerUsername);
     }
 
     @Override
     public List<ArtworkDTO> findCircleFeed(Long viewerId, int limit, int offset) {
-        int safeLimit = Math.max(1, Math.min(limit, 100));
-        int safeOffset = Math.max(0, offset);
-        int page = safeOffset / safeLimit;
-        return artworkRepository.findCircleFeed(viewerId, org.springframework.data.domain.PageRequest.of(page, safeLimit))
-                .stream()
-                .map(this::mapToDTO)
-                .toList();
+        List<Artwork> rows = artworkRepository.findCircleFeed(viewerId, paged(limit, offset));
+        Set<Long> likedSet = rows.isEmpty() ? Set.of() : new HashSet<>(
+                likeRepository.findArtworkIdsLikedByUser(viewerId, rows.stream().map(Artwork::getId).toList())
+        );
+        return rows.stream().map(a -> mapToDTO(a, likedSet)).toList();
     }
 
     @Override
-    public Optional<ArtworkDTO> findOneByTitle(String title) {
+    public Optional<ArtworkDTO> findOneByTitle(String title, String viewerUsername) {
         return artworkRepository.findByTitleIgnoreCase(title)
-                .map(this::mapToDTO);
+                .map(a -> mapToDTO(a, likedSetFor(viewerUsername, List.of(a))));
     }
 
     @Override
@@ -101,7 +126,6 @@ public class ArtworkServiceImpl implements ArtworkService {
         artwork.setSaleStatus(SaleStatus.AVAILABLE);
         artwork.setTags(List.of());
         artwork.setPublishedAt(LocalDateTime.now());
-        artwork.setLikeCount(0);
         artwork.setCreatedAt(LocalDateTime.now());
         artwork.setUpdatedAt(LocalDateTime.now());
         ArtworkImage cover = new ArtworkImage(null, artwork, command.imageUrl(), 0, true, "Cover image", LocalDateTime.now());
@@ -112,23 +136,26 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     @Override
     @Transactional
-    public boolean createArtworkLike(ArtworkLikeCommand command) {
-        Optional<Artwork> maybeArtwork = artworkRepository.findByTitleIgnoreCase(command.title());
-        if (maybeArtwork.isEmpty()) {
-            return false;
+    public LikeResult like(Long artworkId, String username) {
+        Optional<User> viewer = userRepository.findByUsername(username);
+        if (viewer.isEmpty()) return LikeResult.UNAUTHENTICATED;
+        if (!artworkRepository.existsById(artworkId)) return LikeResult.NOT_FOUND;
+        Long userId = viewer.get().getId();
+        if (likeRepository.existsByArtworkIdAndUserId(artworkId, userId)) {
+            return LikeResult.ALREADY_LIKED;
         }
+        likeRepository.save(new ArtworkLike(null, artworkId, userId, LocalDateTime.now()));
+        return LikeResult.LIKED;
+    }
 
-        Artwork artwork = maybeArtwork.get();
-        int current = artwork.getLikeCount() == null ? 0 : artwork.getLikeCount();
-        int delta = command.delta() == null ? 1 : command.delta();
-
-        if ("UNLIKE".equalsIgnoreCase(command.action())) {
-            artwork.setLikeCount(Math.max(0, current - delta));
-            return true;
-        }
-
-        artwork.setLikeCount(current + delta);
-        return true;
+    @Override
+    @Transactional
+    public LikeResult unlike(Long artworkId, String username) {
+        Optional<User> viewer = userRepository.findByUsername(username);
+        if (viewer.isEmpty()) return LikeResult.UNAUTHENTICATED;
+        if (!artworkRepository.existsById(artworkId)) return LikeResult.NOT_FOUND;
+        long removed = likeRepository.deleteByArtworkIdAndUserId(artworkId, viewer.get().getId());
+        return removed > 0 ? LikeResult.UNLIKED : LikeResult.NOT_LIKED;
     }
 
     @Override
@@ -207,7 +234,7 @@ public class ArtworkServiceImpl implements ArtworkService {
         }
         artwork.setUpdatedAt(LocalDateTime.now());
         artworkRepository.save(artwork);
-        return Optional.of(mapToDTO(artwork));
+        return Optional.of(mapToDTO(artwork, Set.of()));
     }
 
     @Override
@@ -222,7 +249,20 @@ public class ArtworkServiceImpl implements ArtworkService {
         return deleted;
     }
 
-    private ArtworkDTO mapToDTO(Artwork artwork) {
+    private List<ArtworkDTO> mapMany(List<Artwork> rows, String viewerUsername) {
+        Set<Long> likedSet = likedSetFor(viewerUsername, rows);
+        return rows.stream().map(a -> mapToDTO(a, likedSet)).toList();
+    }
+
+    private Set<Long> likedSetFor(String viewerUsername, List<Artwork> rows) {
+        if (viewerUsername == null || rows.isEmpty()) return Set.of();
+        Optional<User> viewer = userRepository.findByUsername(viewerUsername);
+        if (viewer.isEmpty()) return Set.of();
+        List<Long> ids = rows.stream().map(Artwork::getId).toList();
+        return new HashSet<>(likeRepository.findArtworkIdsLikedByUser(viewer.get().getId(), ids));
+    }
+
+    private ArtworkDTO mapToDTO(Artwork artwork, Set<Long> likedByViewer) {
         User author = artwork.getAuthor();
         return new ArtworkDTO(
                 artwork.getId(),
@@ -241,8 +281,9 @@ public class ArtworkServiceImpl implements ArtworkService {
                 author == null ? null : author.getAvatarUrl(),
                 artwork.getTags(),
                 artwork.getPublishedAt(),
-                artwork.getLikeCount(),
-                artwork.getComments() == null ? getCommentCount(artwork.getTitle()) : artwork.getComments().size()
+                artwork.getLikeCount() == null ? 0 : artwork.getLikeCount(),
+                artwork.getComments() == null ? getCommentCount(artwork.getTitle()) : artwork.getComments().size(),
+                likedByViewer.contains(artwork.getId())
         );
     }
 

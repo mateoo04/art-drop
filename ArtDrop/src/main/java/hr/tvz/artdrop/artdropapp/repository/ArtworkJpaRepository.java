@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
     List<Artwork> findByMediumContainingIgnoreCase(String medium);
 
+    List<Artwork> findByMediumContainingIgnoreCase(String medium, Pageable pageable);
+
     Optional<Artwork> findByTitleIgnoreCase(String title);
 
     boolean existsByTitleIgnoreCase(String title);

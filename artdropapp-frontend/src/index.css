@@ -83,6 +83,19 @@ body {
   margin-bottom: 2rem;
 }
 
+.masonry-grid-mc {
+  display: flex;
+  margin-left: -2rem;
+  width: auto;
+}
+.masonry-grid-mc__column {
+  padding-left: 2rem;
+  background-clip: padding-box;
+}
+.masonry-grid-mc__column > * {
+  margin-bottom: 2rem;
+}
+
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-weight: normal;

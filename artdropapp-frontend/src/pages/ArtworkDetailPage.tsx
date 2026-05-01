@@ -1,59 +1,46 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useLocation, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { fetchArtworkById } from '../api/artworksApi'
 import { ArtworkDetailComponent } from '../components/ArtworkDetailComponent'
 import type { Artwork } from '../types/artwork'
 
 export function ArtworkDetailPage() {
   const { id: idParam } = useParams<{ id: string }>()
+  const { hash } = useLocation()
   const id = idParam ? Number.parseInt(idParam, 10) : Number.NaN
-  const [artwork, setArtwork] = useState<Artwork | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const enabled = Number.isFinite(id)
+
+  const { data, isLoading, error } = useQuery<Artwork, Error>({
+    queryKey: ['artworks', 'detail', id],
+    queryFn: () => fetchArtworkById(id),
+    enabled,
+  })
 
   useEffect(() => {
-    if (!Number.isFinite(id)) {
-      setArtwork(null)
-      setError('Invalid ID')
-      setLoading(false)
-      return
+    if (isLoading || !hash) return
+    const target = document.getElementById(hash.slice(1))
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+  }, [isLoading, hash, data?.id])
 
-    let cancelled = false
-    setLoading(true)
-    setError(null)
-
-    fetchArtworkById(id)
-      .then((data) => {
-        if (!cancelled) {
-          setArtwork(data)
-        }
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          if (err instanceof Error && err.message === 'NOT_FOUND') {
-            setError('Artwork not found.')
-          } else {
-            setError(err instanceof Error ? err.message : 'Failed to load artwork')
-          }
-          setArtwork(null)
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false)
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [id])
+  const errorMessage = !enabled
+    ? 'Invalid ID'
+    : error
+      ? error.message === 'NOT_FOUND'
+        ? 'Artwork not found.'
+        : error.message
+      : null
 
   return (
     <main className="app-main">
       <h1>Artwork details</h1>
-      <ArtworkDetailComponent artwork={artwork} loading={loading} error={error} />
+      <ArtworkDetailComponent
+        artwork={data ?? null}
+        loading={enabled && isLoading}
+        error={errorMessage}
+      />
     </main>
   )
 }
