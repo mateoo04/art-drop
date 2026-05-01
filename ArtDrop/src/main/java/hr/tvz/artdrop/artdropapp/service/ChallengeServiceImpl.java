@@ -84,7 +84,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 submission.getId(),
                 artwork == null ? null : artwork.getId(),
                 artwork == null ? null : artwork.getTitle(),
-                artwork == null ? null : artwork.getImageUrl(),
+                artwork == null ? null : artwork.getCoverImageUrl(),
                 artwork == null ? null : artwork.getTitle() + " - " + artwork.getMedium(),
                 author == null ? null : author.getDisplayName(),
                 author == null ? null : author.getSlug()

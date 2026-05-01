@@ -120,3 +120,21 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.gallery-pagination .swiper-pagination-bullet {
+  width: 8px;
+  height: 1px;
+  border-radius: 0;
+  margin-inline: 2px;
+  position: relative;
+  transition: background-color 200ms, opacity 200ms, width 200ms;
+}
+.gallery-pagination .swiper-pagination-bullet::after {
+  content: '';
+  position: absolute;
+  inset: -12px -2px;
+  background: transparent;
+}
+.gallery-pagination .swiper-pagination-bullet-active {
+  width: 12px;
+}

@@ -94,17 +94,30 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
     likeMutation.mutate({ artworkId: artwork.id, like: next })
   }
 
+  const secondImage = artwork.images.find(
+    (img) => img.imageUrl && img.imageUrl !== artwork.imageUrl,
+  )
+
   return (
     <article className="masonry-item group">
       <Link to={`/details/${artwork.id}`} className="block cursor-pointer">
-        <div className="relative bg-surface-container-lowest overflow-hidden">
+        <div className={`relative bg-surface-container-lowest overflow-hidden ${aspectClass(artwork.aspectRatio)}`}>
           <img
             alt={artwork.imageAlt}
-            className={`w-full object-cover ${aspectClass(artwork.aspectRatio)}`}
+            className="absolute inset-0 w-full h-full object-cover"
             src={artwork.imageUrl}
             loading="lazy"
           />
-          <div className="absolute top-4 left-4 flex gap-2">
+          {secondImage ? (
+            <img
+              alt=""
+              aria-hidden="true"
+              className="hidden md:block absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out"
+              src={secondImage.imageUrl}
+              loading="lazy"
+            />
+          ) : null}
+          <div className="absolute top-4 left-4 flex gap-2 z-10">
             {progress ? (
               <span className="bg-surface/90 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-on-surface">
                 {progress}

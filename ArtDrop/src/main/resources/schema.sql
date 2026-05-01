@@ -30,7 +30,10 @@ CREATE TABLE IF NOT EXISTS artwork (
     title VARCHAR(255) NOT NULL,
     medium VARCHAR(255) NOT NULL,
     description VARCHAR(2000),
-    image_url VARCHAR(1000) NOT NULL,
+    width_value DECIMAL(10, 2),
+    height_value DECIMAL(10, 2),
+    depth_value DECIMAL(10, 2),
+    dimension_unit VARCHAR(8),
     price DECIMAL(12, 2),
     progress_status VARCHAR(20),
     sale_status VARCHAR(20),
@@ -39,6 +42,12 @@ CREATE TABLE IF NOT EXISTS artwork (
     updated_at TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES app_user(id)
 );
+
+ALTER TABLE artwork ADD COLUMN IF NOT EXISTS width_value DECIMAL(10, 2);
+ALTER TABLE artwork ADD COLUMN IF NOT EXISTS height_value DECIMAL(10, 2);
+ALTER TABLE artwork ADD COLUMN IF NOT EXISTS depth_value DECIMAL(10, 2);
+ALTER TABLE artwork ADD COLUMN IF NOT EXISTS dimension_unit VARCHAR(8);
+ALTER TABLE artwork DROP COLUMN IF EXISTS image_url;
 
 CREATE TABLE IF NOT EXISTS artwork_like (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

@@ -3,12 +3,15 @@ package hr.tvz.artdrop.artdropapp.service;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommentCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
+import hr.tvz.artdrop.artdropapp.dto.ArtworkImageCommand;
+import hr.tvz.artdrop.artdropapp.dto.ArtworkImageDTO;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkUpdateCommand;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.ArtworkImage;
 import hr.tvz.artdrop.artdropapp.model.ArtworkLike;
 import hr.tvz.artdrop.artdropapp.model.Comment;
+import hr.tvz.artdrop.artdropapp.model.DimensionUnit;
 import hr.tvz.artdrop.artdropapp.model.ProgressStatus;
 import hr.tvz.artdrop.artdropapp.model.SaleStatus;
 import hr.tvz.artdrop.artdropapp.model.User;
@@ -121,15 +124,14 @@ public class ArtworkServiceImpl implements ArtworkService {
         artwork.setTitle(command.title());
         artwork.setMedium(command.medium());
         artwork.setDescription(command.description());
-        artwork.setImageUrl(command.imageUrl());
         artwork.setProgressStatus(ProgressStatus.FINISHED);
         artwork.setSaleStatus(SaleStatus.AVAILABLE);
         artwork.setTags(List.of());
         artwork.setPublishedAt(LocalDateTime.now());
         artwork.setCreatedAt(LocalDateTime.now());
         artwork.setUpdatedAt(LocalDateTime.now());
-        ArtworkImage cover = new ArtworkImage(null, artwork, command.imageUrl(), 0, true, "Cover image", LocalDateTime.now());
-        artwork.setImages(new ArrayList<>(List.of(cover)));
+        applyDimensions(artwork, command.width(), command.height(), command.depth(), command.dimensionUnit());
+        artwork.setImages(buildImages(artwork, command.images()));
         artworkRepository.save(artwork);
         return true;
     }
@@ -229,8 +231,14 @@ public class ArtworkServiceImpl implements ArtworkService {
         if (command.description() != null) {
             artwork.setDescription(command.description());
         }
-        if (command.imageUrl() != null && !command.imageUrl().isBlank()) {
-            artwork.setImageUrl(command.imageUrl());
+        if (command.images() != null && !command.images().isEmpty()) {
+            List<ArtworkImage> rebuilt = buildImages(artwork, command.images());
+            artwork.getImages().clear();
+            artwork.getImages().addAll(rebuilt);
+        }
+        if (command.width() != null || command.height() != null
+                || command.depth() != null || command.dimensionUnit() != null) {
+            applyDimensions(artwork, command.width(), command.height(), command.depth(), command.dimensionUnit());
         }
         artwork.setUpdatedAt(LocalDateTime.now());
         artworkRepository.save(artwork);
@@ -249,6 +257,36 @@ public class ArtworkServiceImpl implements ArtworkService {
         return deleted;
     }
 
+    private List<ArtworkImage> buildImages(Artwork artwork, List<ArtworkImageCommand> commands) {
+        List<ArtworkImage> result = new ArrayList<>();
+        boolean coverAssigned = false;
+        for (int i = 0; i < commands.size(); i++) {
+            ArtworkImageCommand c = commands.get(i);
+            ArtworkImage img = new ArtworkImage();
+            img.setArtwork(artwork);
+            img.setImageUrl(c.imageUrl());
+            img.setSortOrder(c.sortOrder() != null ? c.sortOrder() : i);
+            boolean isCover = Boolean.TRUE.equals(c.isCover()) && !coverAssigned;
+            if (isCover) coverAssigned = true;
+            img.setIsCover(isCover);
+            img.setCaption(c.caption());
+            img.setCreatedAt(LocalDateTime.now());
+            result.add(img);
+        }
+        if (!coverAssigned && !result.isEmpty()) {
+            result.get(0).setIsCover(true);
+        }
+        return result;
+    }
+
+    private void applyDimensions(Artwork artwork, java.math.BigDecimal w, java.math.BigDecimal h,
+                                 java.math.BigDecimal d, String unit) {
+        artwork.setWidthValue(w);
+        artwork.setHeightValue(h);
+        artwork.setDepthValue(d);
+        artwork.setDimensionUnit(unit == null ? null : DimensionUnit.valueOf(unit));
+    }
+
     private List<ArtworkDTO> mapMany(List<Artwork> rows, String viewerUsername) {
         Set<Long> likedSet = likedSetFor(viewerUsername, rows);
         return rows.stream().map(a -> mapToDTO(a, likedSet)).toList();
@@ -264,14 +302,30 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     private ArtworkDTO mapToDTO(Artwork artwork, Set<Long> likedByViewer) {
         User author = artwork.getAuthor();
+        List<ArtworkImageDTO> imageDtos = artwork.getImages() == null
+                ? List.of()
+                : artwork.getImages().stream()
+                        .map(img -> new ArtworkImageDTO(
+                                img.getId(),
+                                img.getImageUrl(),
+                                img.getSortOrder(),
+                                Boolean.TRUE.equals(img.getIsCover()),
+                                img.getCaption()
+                        ))
+                        .toList();
         return new ArtworkDTO(
                 artwork.getId(),
                 artwork.getTitle(),
                 artwork.getMedium(),
                 artwork.getDescription(),
-                artwork.getImageUrl(),
+                artwork.getCoverImageUrl(),
                 artwork.getTitle() + " - " + artwork.getMedium(),
                 estimateAspectRatio(artwork),
+                imageDtos,
+                artwork.getWidthValue(),
+                artwork.getHeightValue(),
+                artwork.getDepthValue(),
+                artwork.getDimensionUnit() == null ? null : artwork.getDimensionUnit().name(),
                 artwork.getPrice(),
                 artwork.getProgressStatus() == null ? null : artwork.getProgressStatus().name(),
                 artwork.getSaleStatus() == null ? null : artwork.getSaleStatus().name(),
@@ -299,7 +353,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     private double estimateAspectRatio(Artwork artwork) {
-        if (artwork.getImageUrl() == null) {
+        if (artwork.getCoverImageUrl() == null) {
             return 1.0;
         }
         long selector = (artwork.getId() == null ? 0 : artwork.getId()) % 5;

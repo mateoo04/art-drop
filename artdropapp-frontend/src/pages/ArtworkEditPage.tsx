@@ -58,11 +58,14 @@ export function ArtworkEditPage() {
     setSaving(true)
     setMessage(null)
     try {
+      const trimmedUrl = imageUrl.trim()
       await updateArtwork(id, {
         title: title.trim(),
         medium: medium.trim(),
         description: description.trim(),
-        imageUrl: imageUrl.trim(),
+        images: trimmedUrl
+          ? [{ imageUrl: trimmedUrl, sortOrder: 0, isCover: true }]
+          : undefined,
       })
       setMessage('Saved.')
       navigate(`/details/${id}`)

@@ -34,8 +34,7 @@ export function ArtworkDetailPage() {
       : null
 
   return (
-    <main className="app-main">
-      <h1>Artwork details</h1>
+    <main>
       <ArtworkDetailComponent
         artwork={data ?? null}
         loading={enabled && isLoading}

@@ -1,14 +1,23 @@
 package hr.tvz.artdrop.artdropapp.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 public record ArtworkUpdateCommand(
         String title,
         String medium,
         @Size(max = 2000)
         String description,
-        @Pattern(regexp = "(?i)^https?://\\S+$", message = "imageUrl must be an http(s) URL")
-        String imageUrl
+        @Valid
+        List<ArtworkImageCommand> images,
+        BigDecimal width,
+        BigDecimal height,
+        BigDecimal depth,
+        @Pattern(regexp = "CM|MM|IN", message = "dimensionUnit must be CM, MM or IN")
+        String dimensionUnit
 ) {
 }

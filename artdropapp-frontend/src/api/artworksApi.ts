@@ -1,9 +1,16 @@
 import { API_BASE } from '../config'
 import { authFetch } from '../lib/authFetch'
-import type { Artwork, ProgressStatus, SaleStatus } from '../types/artwork'
+import type {
+  Artwork,
+  ArtworkImage,
+  DimensionUnit,
+  ProgressStatus,
+  SaleStatus,
+} from '../types/artwork'
 
 const PROGRESS_VALUES: ProgressStatus[] = ['WIP', 'FINISHED']
 const SALE_VALUES: SaleStatus[] = ['ORIGINAL', 'EDITION', 'AVAILABLE', 'SOLD']
+const UNIT_VALUES: DimensionUnit[] = ['CM', 'MM', 'IN']
 
 function parseProgress(value: unknown): ProgressStatus | null {
   return typeof value === 'string' && (PROGRESS_VALUES as string[]).includes(value)
@@ -15,6 +22,32 @@ function parseSale(value: unknown): SaleStatus | null {
   return typeof value === 'string' && (SALE_VALUES as string[]).includes(value)
     ? (value as SaleStatus)
     : null
+}
+
+function parseUnit(value: unknown): DimensionUnit | null {
+  return typeof value === 'string' && (UNIT_VALUES as string[]).includes(value)
+    ? (value as DimensionUnit)
+    : null
+}
+
+function parseNumber(value: unknown): number | null {
+  if (value == null) return null
+  const n = Number(value)
+  return Number.isFinite(n) ? n : null
+}
+
+function parseImages(raw: unknown): ArtworkImage[] {
+  if (!Array.isArray(raw)) return []
+  return raw.map((entry): ArtworkImage => {
+    const r = entry as Record<string, unknown>
+    return {
+      id: r.id == null ? null : Number(r.id),
+      imageUrl: String(r.imageUrl ?? ''),
+      sortOrder: Number(r.sortOrder ?? 0),
+      isCover: Boolean(r.isCover),
+      caption: r.caption == null ? null : String(r.caption),
+    }
+  })
 }
 
 function normalizePublishedAt(value: unknown): string {
@@ -41,14 +74,21 @@ export function mapApiArtwork(raw: Record<string, unknown>): Artwork {
         }
       : null
   const priceRaw = raw.price
+  const images = parseImages(raw.images)
+  const cover = String(raw.coverImageUrl ?? raw.imageUrl ?? images[0]?.imageUrl ?? '')
   return {
     id: Number(raw.id),
     title,
     medium,
     description: raw.description == null ? null : String(raw.description),
-    imageUrl: String(raw.imageUrl ?? ''),
+    imageUrl: cover,
     imageAlt: String(raw.imageAlt ?? `${title} - ${medium}`),
     aspectRatio: Number(raw.aspectRatio ?? 1),
+    images,
+    width: parseNumber(raw.width),
+    height: parseNumber(raw.height),
+    depth: parseNumber(raw.depth),
+    dimensionUnit: parseUnit(raw.dimensionUnit),
     price: priceRaw == null ? null : Number(priceRaw),
     progressStatus: parseProgress(raw.progressStatus),
     saleStatus: parseSale(raw.saleStatus),
@@ -113,11 +153,22 @@ export async function unlikeArtwork(id: number): Promise<void> {
   }
 }
 
+export type ArtworkImageInput = {
+  imageUrl: string
+  sortOrder?: number
+  isCover?: boolean
+  caption?: string | null
+}
+
 export type UpdateArtworkPayload = {
   title?: string
   medium?: string
   description?: string
-  imageUrl?: string
+  images?: ArtworkImageInput[]
+  width?: number | null
+  height?: number | null
+  depth?: number | null
+  dimensionUnit?: DimensionUnit | null
 }
 
 export async function updateArtwork(id: number, payload: UpdateArtworkPayload): Promise<Artwork> {
@@ -135,4 +186,3 @@ export async function updateArtwork(id: number, payload: UpdateArtworkPayload): 
   const json: unknown = await res.json()
   return mapApiArtwork(json as Record<string, unknown>)
 }
-
