@@ -42,7 +42,7 @@ export function useLikeArtwork() {
 
       const snapshots = queryClient.getQueriesData<unknown>({ queryKey: ['artworks'] })
 
-      queryClient.setQueriesData<unknown>({ queryKey: ['artworks'] }, (old) => {
+      queryClient.setQueriesData<unknown>({ queryKey: ['artworks'] }, (old: unknown) => {
         if (old == null) return old
         if (isInfiniteArtworkData(old)) {
           return { ...old, pages: old.pages.map((page) => page.map(apply)) }

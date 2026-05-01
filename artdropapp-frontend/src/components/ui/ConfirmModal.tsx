@@ -72,19 +72,13 @@ export function ConfirmModal({
           <Button variant="secondary" onClick={onCancel} disabled={busy}>
             {cancelLabel}
           </Button>
-          <button
-            type="button"
+          <Button
+            variant={destructive ? 'destructive' : 'primary'}
             onClick={onConfirm}
-            disabled={busy}
-            aria-busy={busy}
-            className={`inline-flex items-center justify-center py-5 px-6 font-label text-[11px] uppercase tracking-[0.2em] font-semibold transition-all duration-200 rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-on-surface focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
-              destructive
-                ? 'bg-error text-on-error hover:opacity-90'
-                : 'bg-on-surface text-surface hover:opacity-90'
-            } active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed`}
+            loading={busy}
           >
-            {busy ? 'Please wait…' : confirmLabel}
-          </button>
+            {confirmLabel}
+          </Button>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { SellerSection } from '../components/account/SellerSection'
 import { MasonryFeed } from '../components/home/MasonryFeed'
 import { ProfileEditSidebar } from '../components/profile/ProfileEditSidebar'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
@@ -51,6 +52,8 @@ export function AccountPage() {
             </button>
           }
         />
+
+        <SellerSection />
 
         <section className="pt-12">
           <h2 className="font-headline text-2xl text-on-surface mb-8">Your drops</h2>

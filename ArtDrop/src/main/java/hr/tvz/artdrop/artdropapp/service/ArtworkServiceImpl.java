@@ -216,12 +216,26 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     @Override
     @Transactional
-    public Optional<ArtworkDTO> updateArtwork(Long id, ArtworkUpdateCommand command) {
+    public UpdateResult updateArtwork(Long id, ArtworkUpdateCommand command, String editorUsername) {
         Optional<Artwork> maybeArtwork = artworkRepository.findById(id);
         if (maybeArtwork.isEmpty()) {
-            return Optional.empty();
+            return new UpdateResult(UpdateOutcome.NOT_FOUND, null);
         }
         Artwork artwork = maybeArtwork.get();
+
+        boolean wantsSetSale = command.price() != null || command.saleStatus() != null;
+        boolean wantsClearSale = Boolean.TRUE.equals(command.unlist());
+        if (wantsSetSale) {
+            Optional<User> editor = userRepository.findByUsername(editorUsername);
+            boolean isSeller = editor.isPresent()
+                    && editor.get().getAuthorities() != null
+                    && editor.get().getAuthorities().stream()
+                            .anyMatch(a -> "ROLE_SELLER".equals(a.getName()));
+            if (!isSeller) {
+                return new UpdateResult(UpdateOutcome.FORBIDDEN_SALE_GATE, null);
+            }
+        }
+
         if (command.title() != null && !command.title().isBlank()) {
             artwork.setTitle(command.title());
         }
@@ -240,9 +254,19 @@ public class ArtworkServiceImpl implements ArtworkService {
                 || command.depth() != null || command.dimensionUnit() != null) {
             applyDimensions(artwork, command.width(), command.height(), command.depth(), command.dimensionUnit());
         }
+        if (wantsClearSale) {
+            artwork.setPrice(null);
+            artwork.setSaleStatus(null);
+        }
+        if (command.price() != null) {
+            artwork.setPrice(command.price());
+        }
+        if (command.saleStatus() != null) {
+            artwork.setSaleStatus(SaleStatus.valueOf(command.saleStatus()));
+        }
         artwork.setUpdatedAt(LocalDateTime.now());
         artworkRepository.save(artwork);
-        return Optional.of(mapToDTO(artwork, Set.of()));
+        return new UpdateResult(UpdateOutcome.OK, mapToDTO(artwork, Set.of()));
     }
 
     @Override

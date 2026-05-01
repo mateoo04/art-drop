@@ -1,12 +1,14 @@
-import { Navigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { MasonryFeed } from '../components/home/MasonryFeed'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
+import { Button } from '../components/ui/Button'
 import { useAuthPrompt } from '../contexts/AuthPromptContext'
 import { useProfile } from '../hooks/useProfile'
 import { getToken } from '../lib/auth'
 
 export function ProfilePage() {
   const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
   const { profile, artworks, inCircle, loading, error, toggleCircle } = useProfile(slug)
   const { promptToAuth } = useAuthPrompt()
 
@@ -55,24 +57,31 @@ export function ProfilePage() {
       <ProfileHeader
         user={profile}
         action={
-          <button
-            type="button"
-            onClick={() => {
-              if (!isAuthed) {
-                promptToAuth(`follow ${profile.displayName}`)
-                return
-              }
-              void toggleCircle()
-            }}
-            aria-pressed={inCircle === true}
-            className={`font-label text-[11px] uppercase tracking-[0.2em] font-semibold px-6 py-3 border transition-all duration-200 ${
-              isAuthed && inCircle
-                ? 'bg-on-surface text-surface border-on-surface hover:opacity-90'
-                : 'bg-transparent text-on-surface border-on-surface hover:bg-on-surface hover:text-surface'
-            }`}
-          >
-            {isAuthed ? circleActionLabel : 'Join Circle'}
-          </button>
+          <div className="flex items-center gap-2">
+            {profile.isSelf && (profile.sellerStatus === 'NONE' || profile.sellerStatus === 'REJECTED' || profile.sellerStatus === 'REVOKED') ? (
+              <Button variant="secondary" onClick={() => navigate('/account')}>
+                Become a seller
+              </Button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                if (!isAuthed) {
+                  promptToAuth(`follow ${profile.displayName}`)
+                  return
+                }
+                void toggleCircle()
+              }}
+              aria-pressed={inCircle === true}
+              className={`font-label text-[11px] uppercase tracking-[0.2em] font-semibold px-6 py-3 border transition-all duration-200 ${
+                isAuthed && inCircle
+                  ? 'bg-on-surface text-surface border-on-surface hover:opacity-90'
+                  : 'bg-transparent text-on-surface border-on-surface hover:bg-on-surface hover:text-surface'
+              }`}
+            >
+              {isAuthed ? circleActionLabel : 'Join Circle'}
+            </button>
+          </div>
         }
       />
 

@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { getToken } from '../../lib/auth'
+import { useCurrentUser } from '../../hooks/useCurrentUser'
 
 const navItems = [
   { to: '/', label: 'Discover' },
@@ -9,6 +10,8 @@ const navItems = [
 
 export function AppHeader() {
   const navigate = useNavigate()
+  const { user } = useCurrentUser()
+  const isAdmin = (user?.roles ?? []).includes('ROLE_ADMIN')
 
   const handleAccountClick = () => {
     navigate(getToken() ? '/account' : '/login')
@@ -55,6 +58,16 @@ export function AppHeader() {
         >
           shopping_bag
         </button>
+        {isAdmin ? (
+          <button
+            type="button"
+            aria-label="Admin"
+            onClick={() => navigate('/admin')}
+            className="material-symbols-outlined text-on-surface transition-transform active:scale-95"
+          >
+            shield_person
+          </button>
+        ) : null}
         <button
           type="button"
           aria-label="Account"

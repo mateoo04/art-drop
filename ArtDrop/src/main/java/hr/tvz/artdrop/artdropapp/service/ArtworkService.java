@@ -39,7 +39,11 @@ public interface ArtworkService {
 
     boolean createArtworkReview(ArtworkReviewCommand command);
 
-    Optional<ArtworkDTO> updateArtwork(Long id, ArtworkUpdateCommand command);
+    enum UpdateOutcome { OK, NOT_FOUND, FORBIDDEN_SALE_GATE }
+
+    record UpdateResult(UpdateOutcome outcome, ArtworkDTO artwork) {}
+
+    UpdateResult updateArtwork(Long id, ArtworkUpdateCommand command, String editorUsername);
 
     boolean deleteByTitle(String title);
 

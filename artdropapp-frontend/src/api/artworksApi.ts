@@ -180,6 +180,9 @@ export type UpdateArtworkPayload = {
   height?: number | null
   depth?: number | null
   dimensionUnit?: DimensionUnit | null
+  price?: number | null
+  saleStatus?: 'ORIGINAL' | 'EDITION' | 'AVAILABLE' | 'SOLD' | null
+  unlist?: boolean
 }
 
 export async function updateArtwork(id: number, payload: UpdateArtworkPayload): Promise<Artwork> {
@@ -190,6 +193,22 @@ export async function updateArtwork(id: number, payload: UpdateArtworkPayload): 
   })
   if (res.status === 404) {
     throw new Error('Artwork not found')
+  }
+  if (res.status === 403) {
+    let body: unknown = null
+    try {
+      body = await res.json()
+    } catch {
+      body = null
+    }
+    if (
+      body != null &&
+      typeof body === 'object' &&
+      (body as Record<string, unknown>).error === 'FORBIDDEN_SALE_GATE'
+    ) {
+      throw new Error('FORBIDDEN_SALE_GATE')
+    }
+    throw new Error(`Update failed (${res.status})`)
   }
   if (!res.ok) {
     throw new Error(`Update failed (${res.status})`)

@@ -107,10 +107,20 @@ public class ArtworkController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ArtworkDTO> updateArtwork(@PathVariable Long id, @Valid @RequestBody ArtworkUpdateCommand command) {
-        return artworkService.updateArtwork(id, command)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> updateArtwork(
+            @PathVariable Long id,
+            @Valid @RequestBody ArtworkUpdateCommand command,
+            Authentication authentication
+    ) {
+        String name = authentication == null ? null : authentication.getName();
+        ArtworkService.UpdateResult result = artworkService.updateArtwork(id, command, name);
+        return switch (result.outcome()) {
+            case OK -> ResponseEntity.ok(result.artwork());
+            case NOT_FOUND -> ResponseEntity.notFound().build();
+            case FORBIDDEN_SALE_GATE -> ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(java.util.Map.of("error", "FORBIDDEN_SALE_GATE"));
+        };
     }
 
     @DeleteMapping("/{title}")

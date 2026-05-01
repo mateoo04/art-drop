@@ -20,6 +20,8 @@ function normalizeCreatedAt(value: unknown): string {
 }
 
 function mapUserProfile(raw: Record<string, unknown>): UserProfile {
+  const rolesRaw = raw.roles
+  const roles = Array.isArray(rolesRaw) ? rolesRaw.map((r) => String(r)) : []
   return {
     id: Number(raw.id),
     username: String(raw.username ?? ''),
@@ -32,6 +34,8 @@ function mapUserProfile(raw: Record<string, unknown>): UserProfile {
     circleSize: raw.circleSize == null ? null : Number(raw.circleSize),
     followingCount: raw.followingCount == null ? null : Number(raw.followingCount),
     isSelf: Boolean(raw.isSelf),
+    roles,
+    sellerStatus: (String(raw.sellerStatus ?? 'NONE')) as UserProfile['sellerStatus'],
   }
 }
 

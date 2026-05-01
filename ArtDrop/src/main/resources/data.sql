@@ -1,21 +1,16 @@
 INSERT INTO app_user (id, username, email, password_hash, display_name, slug, bio, avatar_url, created_at, updated_at) VALUES
-(1, 'admin', 'mateo@artdrop.local', '$2a$10$DHyrHBq54bpG6zJP2AHGG.mRPzvFTONCNQY3Qfg/wsvYjBeAoBF2m', 'Mateo', 'mateo', 'Abstract painter exploring light and texture.', 'https://i.pravatar.cc/160?img=47', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
-(2, 'user', 'user@artdrop.local', '$2y$12$OYLYVeDx36mPNwI6gK55K.9Ocq/OvVhiJD47KT3dEt5RYnL9Vy4cS', 'Julian Vane', 'julian-vane', 'Sculptor working in matte clay and bronze.', 'https://i.pravatar.cc/160?img=12', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
-(3, 'sarah', 'sarah@artdrop.local', '$2y$12$OYLYVeDx36mPNwI6gK55K.9Ocq/OvVhiJD47KT3dEt5RYnL9Vy4cS', 'Sarah Millay', 'sarah-millay', 'Mixed media artist based in Lisbon.', 'https://i.pravatar.cc/160?img=32', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
-(4, 'marc', 'marc@artdrop.local', '$2y$12$OYLYVeDx36mPNwI6gK55K.9Ocq/OvVhiJD47KT3dEt5RYnL9Vy4cS', 'Marc Zheng', 'marc-zheng', '3D artist rendering tactile virtual surfaces.', 'https://i.pravatar.cc/160?img=15', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
-(5, 'claire', 'claire@artdrop.local', '$2y$12$OYLYVeDx36mPNwI6gK55K.9Ocq/OvVhiJD47KT3dEt5RYnL9Vy4cS', 'Claire Durand', 'claire-durand', 'Heavy body acrylic pours and color theory studies.', 'https://i.pravatar.cc/160?img=49', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
-(6, 'thomas', 'thomas@artdrop.local', '$2y$12$OYLYVeDx36mPNwI6gK55K.9Ocq/OvVhiJD47KT3dEt5RYnL9Vy4cS', 'Thomas Reade', 'thomas-reade', 'Architectural photographer, silver gelatin prints.', 'https://i.pravatar.cc/160?img=8', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());
-
-UPDATE app_user
-   SET email = 'mateo@artdrop.local',
-       password_hash = '$2a$10$DHyrHBq54bpG6zJP2AHGG.mRPzvFTONCNQY3Qfg/wsvYjBeAoBF2m',
-       display_name = 'Mateo',
-       slug = 'mateo'
- WHERE username = 'admin';
+(1, 'mateo', 'mateo@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Mateo', 'mateo', 'Abstract painter exploring light and texture.', 'https://i.pravatar.cc/160?img=67', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
+(2, 'user', 'user@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Julian Vane', 'julian-vane', 'Sculptor working in matte clay and bronze.', 'https://i.pravatar.cc/160?img=12', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
+(3, 'sarah', 'sarah@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Sarah Millay', 'sarah-millay', 'Mixed media artist based in Lisbon.', 'https://i.pravatar.cc/160?img=32', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
+(4, 'marc', 'marc@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Marc Zheng', 'marc-zheng', '3D artist rendering tactile virtual surfaces.', 'https://i.pravatar.cc/160?img=15', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
+(5, 'claire', 'claire@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Claire Durand', 'claire-durand', 'Heavy body acrylic pours and color theory studies.', 'https://i.pravatar.cc/160?img=49', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
+(6, 'thomas', 'thomas@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Thomas Reade', 'thomas-reade', 'Architectural photographer, silver gelatin prints.', 'https://i.pravatar.cc/160?img=8', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());
+-- all seeded users have password: admin6060
 
 INSERT INTO authority (id, name) VALUES
 (1, 'ROLE_ADMIN'),
-(2, 'ROLE_USER');
+(2, 'ROLE_USER'),
+(3, 'ROLE_SELLER');
 
 INSERT INTO user_authority (user_id, authority_id) VALUES
 (1, 1),
@@ -357,6 +352,7 @@ INSERT INTO challenge_submission (id, challenge_id, artwork_id, submitted_by, su
 
 ALTER TABLE app_user             ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE authority            ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE seller_application   ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE artwork              ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE artwork_image        ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE comment              ALTER COLUMN id RESTART WITH 200;

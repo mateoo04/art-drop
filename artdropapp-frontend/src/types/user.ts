@@ -1,3 +1,5 @@
+import type { SellerStatus } from './seller'
+
 export interface UserProfile {
   id: number
   username: string
@@ -10,4 +12,6 @@ export interface UserProfile {
   circleSize: number | null
   followingCount: number | null
   isSelf: boolean
+  roles: string[]
+  sellerStatus: SellerStatus
 }

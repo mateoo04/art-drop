@@ -20,15 +20,18 @@ public class UserServiceImpl implements UserService {
     private final UserJpaRepository userRepository;
     private final ArtworkJpaRepository artworkRepository;
     private final UserFollowJpaRepository followRepository;
+    private final SellerApplicationServiceImpl sellerApplicationService;
 
     public UserServiceImpl(
             UserJpaRepository userRepository,
             ArtworkJpaRepository artworkRepository,
-            UserFollowJpaRepository followRepository
+            UserFollowJpaRepository followRepository,
+            SellerApplicationServiceImpl sellerApplicationService
     ) {
         this.userRepository = userRepository;
         this.artworkRepository = artworkRepository;
         this.followRepository = followRepository;
+        this.sellerApplicationService = sellerApplicationService;
     }
 
     @Override
@@ -122,6 +125,10 @@ public class UserServiceImpl implements UserService {
         int artworkCount = (int) artworkRepository.countByAuthor_Id(user.getId());
         Integer circleSize = isSelf ? (int) followRepository.countByFolloweeId(user.getId()) : null;
         Integer followingCount = isSelf ? (int) followRepository.countByFollowerId(user.getId()) : null;
+        java.util.List<String> roles = user.getAuthorities() == null
+                ? java.util.List.of()
+                : user.getAuthorities().stream().map(a -> a.getName()).sorted().toList();
+        String sellerStatus = sellerApplicationService.deriveSellerStatusForUser(user);
         return new UserProfileDTO(
                 user.getId(),
                 user.getUsername(),
@@ -133,7 +140,9 @@ public class UserServiceImpl implements UserService {
                 artworkCount,
                 circleSize,
                 followingCount,
-                isSelf
+                isSelf,
+                roles,
+                sellerStatus
         );
     }
 }

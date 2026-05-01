@@ -149,3 +149,22 @@ CREATE TABLE IF NOT EXISTS challenge_submission (
     FOREIGN KEY (challenge_id) REFERENCES challenge(id) ON DELETE CASCADE,
     FOREIGN KEY (artwork_id) REFERENCES artwork(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS seller_application (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    message VARCHAR(1000) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    submitted_at TIMESTAMP NOT NULL,
+    decided_at TIMESTAMP,
+    decided_by_user_id BIGINT,
+    decision_reason VARCHAR(500),
+    revoked_at TIMESTAMP,
+    revoked_by_user_id BIGINT,
+    revoke_reason VARCHAR(500),
+    FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (decided_by_user_id) REFERENCES app_user(id) ON DELETE SET NULL,
+    FOREIGN KEY (revoked_by_user_id) REFERENCES app_user(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_seller_application_user ON seller_application(user_id, submitted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_seller_application_status ON seller_application(status, submitted_at);

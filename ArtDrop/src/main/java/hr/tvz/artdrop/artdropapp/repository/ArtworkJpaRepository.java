@@ -3,8 +3,10 @@ package hr.tvz.artdrop.artdropapp.repository;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,4 +33,12 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
 
     @Query("SELECT DISTINCT a.medium FROM Artwork a WHERE a.medium IS NOT NULL ORDER BY a.medium")
     List<String> findDistinctMediums();
+
+    @Query("SELECT COUNT(a) FROM Artwork a WHERE a.author.id = :authorId AND (a.saleStatus IS NOT NULL OR a.price IS NOT NULL)")
+    long countListedByAuthorId(Long authorId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Artwork a SET a.saleStatus = NULL, a.price = NULL, a.updatedAt = CURRENT_TIMESTAMP WHERE a.author.id = :authorId AND (a.saleStatus IS NOT NULL OR a.price IS NOT NULL)")
+    int unlistAllForAuthor(Long authorId);
 }

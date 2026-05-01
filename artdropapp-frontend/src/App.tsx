@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { AdminRoute } from './components/AdminRoute'
 import { MainLayout } from './components/layout/MainLayout'
 import { AccountPage } from './pages/AccountPage'
 import { ProfilePage } from './pages/ProfilePage'
@@ -11,6 +12,9 @@ import { CollectionsPage } from './pages/CollectionsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
+import { AdminLayoutPage } from './pages/admin/AdminLayoutPage'
+import { AdminUsersPage } from './pages/admin/AdminUsersPage'
+import { AdminUserDetailPage } from './pages/admin/AdminUserDetailPage'
 import './App.css'
 
 function App() {
@@ -41,6 +45,18 @@ function App() {
           }
         />
         <Route path="/u/:slug" element={<ProfilePage />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminLayoutPage />
+            </AdminRoute>
+          }
+        >
+          <Route index element={<AdminUsersPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="users/:id" element={<AdminUserDetailPage />} />
+        </Route>
       </Route>
     </Routes>
   )
