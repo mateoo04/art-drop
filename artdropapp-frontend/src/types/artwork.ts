@@ -1,6 +1,6 @@
 export type ProgressStatus = 'WIP' | 'FINISHED'
 export type SaleStatus = 'ORIGINAL' | 'EDITION' | 'AVAILABLE' | 'SOLD'
-export type DimensionUnit = 'CM' | 'MM' | 'IN'
+export type DimensionUnit = 'CM' | 'MM' | 'IN' | 'PX'
 
 export interface Artist {
   id: number

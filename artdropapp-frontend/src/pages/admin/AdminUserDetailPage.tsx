@@ -4,6 +4,7 @@ import { useAdminUserDetail } from '../../hooks/useAdminUserDetail'
 import { SellerStatusBadge } from '../../components/SellerStatusBadge'
 import { RevokeSellerModal } from '../../components/admin/RevokeSellerModal'
 import { Button } from '../../components/ui/Button'
+import { Spinner } from '../../components/ui/Spinner'
 
 function formatDate(value: string | null) {
   if (!value) return ''
@@ -19,7 +20,7 @@ export function AdminUserDetailPage() {
   const [toast, setToast] = useState<string | null>(null)
 
   if (loading) {
-    return <p className="text-on-surface-variant italic" role="status">Loading…</p>
+    return <Spinner />
   }
   if (error) {
     return <p className="text-error" role="alert">{error}</p>

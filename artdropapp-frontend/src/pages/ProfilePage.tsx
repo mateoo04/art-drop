@@ -2,6 +2,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { MasonryFeed } from '../components/home/MasonryFeed'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
 import { Button } from '../components/ui/Button'
+import { Spinner } from '../components/ui/Spinner'
 import { useAuthPrompt } from '../contexts/AuthPromptContext'
 import { useProfile } from '../hooks/useProfile'
 import { getToken } from '../lib/auth'
@@ -15,9 +16,9 @@ export function ProfilePage() {
   if (loading) {
     return (
       <main className="max-w-[1440px] mx-auto px-8 pt-4">
-        <p className="py-24 text-center text-on-surface-variant italic" role="status">
-          Loading profile…
-        </p>
+        <div className="py-24 flex justify-center">
+          <Spinner label="Loading profile" />
+        </div>
       </main>
     )
   }

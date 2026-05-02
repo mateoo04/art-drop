@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchListedArtworkCount, revokeSeller } from '../../api/adminApi'
 import { Button } from '../ui/Button'
+import { Spinner } from '../ui/Spinner'
 
 type Props = {
   open: boolean
@@ -64,7 +65,7 @@ export function RevokeSellerModal({ open, userId, username, onClose, onRevoked }
         <p className="font-body text-sm text-on-surface-variant leading-relaxed mb-6">
           You're about to revoke <strong>@{username}</strong>'s seller status.{' '}
           {count == null
-            ? 'Loading listed artwork count…'
+            ? <Spinner label="Loading listed artwork count" />
             : count === 0
             ? 'No artworks are currently listed.'
             : `This will unlist ${count} artwork${count === 1 ? '' : 's'}.`}

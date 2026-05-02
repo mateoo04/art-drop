@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getToken } from '../../lib/auth'
 import { useCurrentUser } from '../../hooks/useCurrentUser'
@@ -17,7 +18,7 @@ export function NewDropFab() {
       aria-label="New drop"
       className="fixed bottom-8 right-8 z-40 flex items-center gap-2 bg-on-surface text-surface font-label text-sm uppercase tracking-[0.1em] px-6 py-4 shadow-lg hover:bg-primary transition-colors active:scale-95"
     >
-      <span className="material-symbols-outlined text-[20px]">add</span>
+      <Plus size={20} />
       New Drop
     </button>
   )

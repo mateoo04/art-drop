@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { getToken } from '../lib/auth'
+import { Spinner } from './ui/Spinner'
 
 export function AdminRoute({ children }: { children: ReactNode }) {
   if (!getToken()) {
@@ -10,9 +11,9 @@ export function AdminRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useCurrentUser()
   if (loading && !user) {
     return (
-      <p className="py-24 text-center text-on-surface-variant italic" role="status">
-        Loading…
-      </p>
+      <div className="py-24 flex justify-center">
+        <Spinner />
+      </div>
     )
   }
   const isAdmin = (user?.roles ?? []).includes('ROLE_ADMIN')

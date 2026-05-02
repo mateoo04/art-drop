@@ -1,9 +1,11 @@
+import { ArrowRight, ChevronDown, ImagePlus, Loader, Plus, X } from 'lucide-react'
 import { type FormEvent, type KeyboardEvent, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { createArtwork, fetchMediums } from '../api/artworksApi'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useMySellerApplication } from '../hooks/useMySellerApplication'
 import { SellerApplicationModal } from '../components/SellerApplicationModal'
+import { BackButton } from '../components/ui/BackButton'
 import { cloudinaryUrl, openCloudinaryUpload } from '../lib/cloudinary'
 import type { DimensionUnit, SaleStatus } from '../types/artwork'
 
@@ -210,15 +212,7 @@ export function ArtworkDropPage() {
     <>
       <main className="w-full max-w-[640px] mx-auto flex flex-col pt-16 pb-32 px-6">
         <header className="mb-12">
-          <Link
-            to="/"
-            className="inline-flex items-center text-on-surface-variant hover:text-on-surface transition-colors mb-8 group"
-          >
-            <span className="material-symbols-outlined mr-2 text-xl group-hover:-translate-x-1 transition-transform">
-              arrow_back
-            </span>
-            <span className="font-label text-sm uppercase tracking-[0.1em]">Cancel Drop</span>
-          </Link>
+          <BackButton to="/" label="Cancel Drop" className="mb-8" />
           <h1 className="font-display text-4xl md:text-5xl text-on-surface mb-4 tracking-tight leading-tight">
             Drop a new artwork
           </h1>
@@ -246,9 +240,17 @@ export function ArtworkDropPage() {
                 disabled={uploading}
                 className="w-full h-80 border border-dashed border-outline-variant/40 bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col items-center justify-center group disabled:cursor-wait"
               >
-                <span className="material-symbols-outlined text-4xl text-on-surface-variant mb-4 group-hover:scale-110 transition-transform duration-300">
-                  {uploading ? 'progress_activity' : 'add_photo_alternate'}
-                </span>
+                {uploading ? (
+                  <Loader
+                    size={36}
+                    className="text-on-surface-variant mb-4 animate-spin"
+                  />
+                ) : (
+                  <ImagePlus
+                    size={36}
+                    className="text-on-surface-variant mb-4 group-hover:scale-110 transition-transform duration-300"
+                  />
+                )}
                 <p className="font-body text-sm text-on-surface text-center px-4">
                   {uploading ? 'Opening uploader…' : 'Click to upload images'}
                 </p>
@@ -304,9 +306,11 @@ export function ArtworkDropPage() {
                     disabled={uploading}
                     className="aspect-square border border-dashed border-outline-variant/40 bg-surface-container-low hover:bg-surface-container-highest transition-colors flex flex-col items-center justify-center disabled:cursor-wait"
                   >
-                    <span className="material-symbols-outlined text-3xl text-on-surface-variant">
-                      {uploading ? 'progress_activity' : 'add'}
-                    </span>
+                    {uploading ? (
+                      <Loader size={30} className="text-on-surface-variant animate-spin" />
+                    ) : (
+                      <Plus size={30} className="text-on-surface-variant" />
+                    )}
                     <span className="font-label text-[10px] uppercase tracking-[0.1em] text-on-surface-variant mt-1">
                       {uploading ? 'Uploading…' : 'Add more'}
                     </span>
@@ -363,9 +367,10 @@ export function ArtworkDropPage() {
                     </option>
                   ))}
                 </select>
-                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
-                  expand_more
-                </span>
+                <ChevronDown
+                  size={20}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
+                />
               </div>
             </section>
 
@@ -434,9 +439,9 @@ export function ArtworkDropPage() {
                     type="button"
                     onClick={() => removeTag(t)}
                     aria-label={`Remove ${t}`}
-                    className="material-symbols-outlined text-[14px] hover:text-error"
+                    className="hover:text-error"
                   >
-                    close
+                    <X size={14} />
                   </button>
                 </span>
               ))}
@@ -460,9 +465,10 @@ export function ArtworkDropPage() {
                   Add Dimensions{' '}
                   <span className="text-on-surface-variant lowercase">(optional)</span>
                 </span>
-                <span className="material-symbols-outlined text-on-surface-variant group-open:-scale-y-100 transition-transform">
-                  expand_more
-                </span>
+                <ChevronDown
+                  size={20}
+                  className="text-on-surface-variant group-open:-scale-y-100 transition-transform"
+                />
               </summary>
               <div className="pt-6 grid grid-cols-3 gap-4">
                 {[
@@ -490,7 +496,7 @@ export function ArtworkDropPage() {
                     className="flex border border-outline-variant/30 text-[10px] font-label uppercase"
                     role="tablist"
                   >
-                    {(['CM', 'IN'] as const).map((u) => (
+                    {(['CM', 'MM', 'IN', 'PX'] as const).map((u) => (
                       <button
                         key={u}
                         type="button"
@@ -613,9 +619,10 @@ export function ArtworkDropPage() {
                         </option>
                       ))}
                     </select>
-                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
-                      expand_more
-                    </span>
+                    <ChevronDown
+                      size={20}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
+                    />
                   </div>
                 </div>
               </div>
@@ -646,7 +653,7 @@ export function ArtworkDropPage() {
             className="bg-on-surface text-surface font-label text-sm uppercase tracking-[0.1em] px-8 py-4 hover:bg-primary transition-colors flex items-center disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? 'Dropping…' : 'Drop Artwork'}
-            <span className="material-symbols-outlined ml-2 text-[18px]">arrow_forward</span>
+            <ArrowRight size={18} className="ml-2" />
           </button>
         </div>
       </div>

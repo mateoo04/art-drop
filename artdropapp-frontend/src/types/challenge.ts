@@ -1,4 +1,4 @@
-export type ChallengeKind = 'FEATURED' | 'COMMUNITY_CHOICE' | 'OPEN'
+export type ChallengeKind = 'FEATURED' | 'OPEN'
 export type ChallengeStatus = 'UPCOMING' | 'ACTIVE' | 'ENDED'
 
 export interface SubmissionThumbnail {

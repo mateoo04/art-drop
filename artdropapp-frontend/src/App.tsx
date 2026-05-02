@@ -7,6 +7,7 @@ import { ProfilePage } from './pages/ProfilePage'
 import { ArtworkDetailPage } from './pages/ArtworkDetailPage'
 import { ArtworkDropPage } from './pages/ArtworkDropPage'
 import { ArtworkEditPage } from './pages/ArtworkEditPage'
+import { ChallengeDetailPage } from './pages/ChallengeDetailPage'
 import { ChallengesPage } from './pages/ChallengesPage'
 import { CirclePage } from './pages/CirclePage'
 import { CollectionsPage } from './pages/CollectionsPage'
@@ -34,6 +35,7 @@ function App() {
           }
         />
         <Route path="/challenges" element={<ChallengesPage />} />
+        <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/details/:id" element={<ArtworkDetailPage />} />
         <Route path="/edit/:id" element={<ArtworkEditPage />} />

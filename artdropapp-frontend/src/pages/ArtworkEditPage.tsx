@@ -4,6 +4,7 @@ import { fetchArtworkById, updateArtwork } from '../api/artworksApi'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useMySellerApplication } from '../hooks/useMySellerApplication'
 import { SellerApplicationModal } from '../components/SellerApplicationModal'
+import { Spinner } from '../components/ui/Spinner'
 
 type SaleStatus = 'ORIGINAL' | 'EDITION' | 'AVAILABLE' | 'SOLD' | ''
 
@@ -98,7 +99,11 @@ export function ArtworkEditPage() {
   return (
     <main className="app-main">
       <h1>Edit artwork</h1>
-      {loading ? <p role="status">Loading…</p> : null}
+      {loading ? (
+        <div className="py-12 flex justify-center">
+          <Spinner label="Loading artwork" />
+        </div>
+      ) : null}
       {error ? <p className="artwork-form__message" role="alert">{error}</p> : null}
       {!loading && !error ? (
         <form className="artwork-form" onSubmit={(e) => void handleSubmit(e)}>

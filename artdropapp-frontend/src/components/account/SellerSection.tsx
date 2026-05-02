@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { SellerApplicationModal } from '../SellerApplicationModal'
 import { SellerStatusBadge } from '../SellerStatusBadge'
 import { Button } from '../ui/Button'
+import { Spinner } from '../ui/Spinner'
 import { useMySellerApplication } from '../../hooks/useMySellerApplication'
 
 function formatDate(value: string | null) {
@@ -32,7 +33,7 @@ export function SellerSection() {
       </div>
 
       {loading ? (
-        <p className="text-on-surface-variant italic" role="status">Loading…</p>
+        <Spinner />
       ) : error ? (
         <p className="text-error" role="alert">{error}</p>
       ) : status === 'NONE' ? (

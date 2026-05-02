@@ -4,6 +4,7 @@ import { useAdminUsers } from '../../hooks/useAdminUsers'
 import { SellerStatusBadge } from '../../components/SellerStatusBadge'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import { Spinner } from '../../components/ui/Spinner'
 import { AdminFiltersDrawer } from '../../components/admin/AdminFiltersDrawer'
 import { DecisionModal } from '../../components/admin/DecisionModal'
 import { approveApplication, rejectApplication, type AdminUserFilters } from '../../api/adminApi'
@@ -56,7 +57,7 @@ export function AdminUsersPage() {
       {toast ? <p className="text-sm text-on-surface mb-4">{toast}</p> : null}
 
       {loading ? (
-        <p className="text-on-surface-variant italic" role="status">Loading…</p>
+        <Spinner />
       ) : error ? (
         <p className="text-error" role="alert">{error}</p>
       ) : !data || data.content.length === 0 ? (

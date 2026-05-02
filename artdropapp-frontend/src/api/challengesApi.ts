@@ -5,7 +5,7 @@ import type {
   SubmissionThumbnail,
 } from '../types/challenge'
 
-const KIND_VALUES: ChallengeKind[] = ['FEATURED', 'COMMUNITY_CHOICE', 'OPEN']
+const KIND_VALUES: ChallengeKind[] = ['FEATURED', 'OPEN']
 const STATUS_VALUES: ChallengeStatus[] = ['UPCOMING', 'ACTIVE', 'ENDED']
 
 function parseKind(value: unknown): ChallengeKind | null {
@@ -76,14 +76,28 @@ export async function fetchChallenges(): Promise<Challenge[]> {
   return json.map((item) => mapChallenge(item as Record<string, unknown>))
 }
 
+export async function fetchChallenge(challengeId: number): Promise<Challenge> {
+  const res = await fetch(`/api/challenges/${challengeId}`)
+  if (!res.ok) {
+    throw new Error(`Failed to load challenge (${res.status})`)
+  }
+  const json = (await res.json()) as Record<string, unknown>
+  return mapChallenge(json)
+}
+
+export type SubmissionSort = 'top' | 'recent'
+
 export async function fetchChallengeSubmissions(
   challengeId: number,
-  limit = 12,
-  offset = 0,
+  options: { limit?: number; offset?: number; sort?: SubmissionSort } = {},
 ): Promise<SubmissionThumbnail[]> {
-  const res = await fetch(
-    `/api/challenges/${challengeId}/submissions?limit=${limit}&offset=${offset}`,
-  )
+  const { limit = 24, offset = 0, sort = 'recent' } = options
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+    sort,
+  })
+  const res = await fetch(`/api/challenges/${challengeId}/submissions?${params}`)
   if (!res.ok) {
     throw new Error(`Failed to load submissions (${res.status})`)
   }

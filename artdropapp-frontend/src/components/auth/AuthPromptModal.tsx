@@ -1,3 +1,4 @@
+import { X } from 'lucide-react'
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -53,9 +54,7 @@ export function AuthPromptModal({ open, onClose }: AuthPromptModalProps) {
           onClick={onClose}
           className="absolute top-4 right-4 text-on-surface hover:text-outline transition-colors p-2 flex items-center justify-center"
         >
-          <span className="material-symbols-outlined text-2xl" aria-hidden="true">
-            close
-          </span>
+          <X size={24} aria-hidden="true" />
         </button>
         <h1
           id="auth-prompt-title"

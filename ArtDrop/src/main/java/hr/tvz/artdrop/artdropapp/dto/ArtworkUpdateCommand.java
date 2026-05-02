@@ -17,7 +17,7 @@ public record ArtworkUpdateCommand(
         BigDecimal width,
         BigDecimal height,
         BigDecimal depth,
-        @Pattern(regexp = "CM|MM|IN", message = "dimensionUnit must be CM, MM or IN")
+        @Pattern(regexp = "CM|MM|IN|PX", message = "dimensionUnit must be CM, MM, IN or PX")
         String dimensionUnit,
         BigDecimal price,
         @Pattern(regexp = "ORIGINAL|EDITION|AVAILABLE|SOLD", message = "saleStatus must be ORIGINAL, EDITION, AVAILABLE or SOLD")

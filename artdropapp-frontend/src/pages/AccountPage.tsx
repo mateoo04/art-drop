@@ -1,8 +1,10 @@
+import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { SellerSection } from '../components/account/SellerSection'
 import { MasonryFeed } from '../components/home/MasonryFeed'
 import { ProfileEditSidebar } from '../components/profile/ProfileEditSidebar'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
+import { Spinner } from '../components/ui/Spinner'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useMyArtworks } from '../hooks/useMyArtworks'
 
@@ -14,9 +16,9 @@ export function AccountPage() {
   if (loading && !user) {
     return (
       <main className="max-w-[1440px] mx-auto px-8 pt-4">
-        <p className="py-24 text-center text-on-surface-variant italic" role="status">
-          Loading your profile…
-        </p>
+        <div className="py-24 flex justify-center">
+          <Spinner label="Loading your profile" />
+        </div>
       </main>
     )
   }
@@ -46,9 +48,9 @@ export function AccountPage() {
               type="button"
               aria-label="Edit profile"
               onClick={() => setEditOpen(true)}
-              className="material-symbols-outlined text-on-surface-variant hover:text-on-surface p-2"
+              className="text-on-surface-variant hover:text-on-surface p-2"
             >
-              edit
+              <Pencil size={20} />
             </button>
           }
         />
@@ -58,9 +60,9 @@ export function AccountPage() {
         <section className="pt-12">
           <h2 className="font-headline text-2xl text-on-surface mb-8">Your drops</h2>
           {artworks.loading ? (
-            <p className="py-12 text-center text-on-surface-variant italic" role="status">
-              Loading…
-            </p>
+            <div className="py-12 flex justify-center">
+              <Spinner label="Loading your drops" />
+            </div>
           ) : artworks.error ? (
             <p
               className="py-12 text-center text-error border border-error-container/40 bg-error-container/10"

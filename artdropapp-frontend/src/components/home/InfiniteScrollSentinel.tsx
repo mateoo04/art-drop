@@ -1,16 +1,19 @@
 import { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'
+import { Spinner } from '../ui/Spinner'
 
 type InfiniteScrollSentinelProps = {
   hasNextPage: boolean
   isFetchingNextPage: boolean
   onLoadMore: () => void
+  label?: string
 }
 
 export function InfiniteScrollSentinel({
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
+  label = 'Loading more artworks',
 }: InfiniteScrollSentinelProps) {
   const { ref, inView } = useInView({ rootMargin: '600px 0px' })
 
@@ -24,11 +27,7 @@ export function InfiniteScrollSentinel({
 
   return (
     <div ref={ref} className="py-12 flex justify-center" aria-hidden={!isFetchingNextPage}>
-      {isFetchingNextPage ? (
-        <p className="font-body text-sm text-on-surface-variant italic" role="status">
-          Loading more…
-        </p>
-      ) : null}
+      {isFetchingNextPage ? <Spinner label={label} /> : null}
     </div>
   )
 }

@@ -11,5 +11,5 @@ public interface ChallengeService {
 
     Optional<ChallengeDTO> findById(Long id);
 
-    List<SubmissionThumbnailDTO> findSubmissions(Long challengeId, int limit, int offset);
+    List<SubmissionThumbnailDTO> findSubmissions(Long challengeId, int limit, int offset, String sort);
 }

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -118,9 +119,9 @@ export function ProfileEditSidebar({ open, user, onClose, onSaved }: ProfileEdit
             type="button"
             aria-label="Close edit profile"
             onClick={onClose}
-            className="material-symbols-outlined text-on-surface-variant hover:text-on-surface"
+            className="text-on-surface-variant hover:text-on-surface"
           >
-            close
+            <X size={20} />
           </button>
         </div>
 

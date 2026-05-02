@@ -1,3 +1,4 @@
+import { Bookmark, Heart, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthPrompt } from '../../contexts/AuthPromptContext'
@@ -188,18 +189,13 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
                 liked ? 'text-error' : 'hover:text-on-surface'
               }`}
             >
-              <span
-                className={`material-symbols-outlined text-sm transition-transform duration-300 ease-out will-change-transform ${
+              <Heart
+                size={14}
+                fill={liked ? 'currentColor' : 'none'}
+                className={`transition-transform duration-300 ease-out will-change-transform ${
                   animating ? 'scale-150' : 'scale-100'
                 }`}
-                style={{
-                  fontVariationSettings: liked
-                    ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24"
-                    : undefined,
-                }}
-              >
-                favorite
-              </span>
+              />
               {formatCount(artwork.likeCount)}
             </button>
             <Link
@@ -207,16 +203,16 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
               aria-label="Open comments"
               className="flex items-center gap-1.5 text-xs hover:text-on-surface transition-colors"
             >
-              <span className="material-symbols-outlined text-sm">chat_bubble</span>
+              <MessageCircle size={14} />
               {formatCount(artwork.commentCount)}
             </Link>
           </div>
           <button
             type="button"
             aria-label="Bookmark"
-            className="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors"
+            className="text-on-surface-variant hover:text-on-surface transition-colors"
           >
-            bookmark
+            <Bookmark size={20} />
           </button>
         </div>
       </div>

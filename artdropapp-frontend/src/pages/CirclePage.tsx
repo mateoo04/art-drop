@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { InfiniteScrollSentinel } from '../components/home/InfiniteScrollSentinel'
 import { MasonryFeed } from '../components/home/MasonryFeed'
+import { Spinner } from '../components/ui/Spinner'
 import { useCircleFeed } from '../hooks/useCircleFeed'
 
 export function CirclePage() {
@@ -23,9 +24,9 @@ export function CirclePage() {
       </header>
 
       {isLoading ? (
-        <p className="py-24 text-center text-on-surface-variant italic" role="status">
-          Loading your Circle…
-        </p>
+        <div className="py-24 flex justify-center">
+          <Spinner label="Loading your Circle" />
+        </div>
       ) : error ? (
         <p
           className="py-24 text-center text-error border border-error-container/40 bg-error-container/10"

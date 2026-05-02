@@ -10,7 +10,7 @@ import type {
 
 const PROGRESS_VALUES: ProgressStatus[] = ['WIP', 'FINISHED']
 const SALE_VALUES: SaleStatus[] = ['ORIGINAL', 'EDITION', 'AVAILABLE', 'SOLD']
-const UNIT_VALUES: DimensionUnit[] = ['CM', 'MM', 'IN']
+const UNIT_VALUES: DimensionUnit[] = ['CM', 'MM', 'IN', 'PX']
 
 function parseProgress(value: unknown): ProgressStatus | null {
   return typeof value === 'string' && (PROGRESS_VALUES as string[]).includes(value)

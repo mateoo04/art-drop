@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight, Heart, Minus, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -13,6 +14,7 @@ import { useAuthPrompt } from '../contexts/AuthPromptContext'
 import { getToken } from '../lib/auth'
 import { CommentComposer } from './artwork/CommentComposer'
 import { CommentList } from './artwork/CommentList'
+import { Spinner } from './ui/Spinner'
 
 export type ArtworkDetailComponentProps = {
   artwork: Artwork | null
@@ -99,8 +101,8 @@ export function ArtworkDetailComponent({
 
   if (loading) {
     return (
-      <div className="px-4 md:px-12 py-16 text-center text-on-surface-variant" role="status">
-        Loading details…
+      <div className="px-4 md:px-12 py-16 flex justify-center">
+        <Spinner label="Loading artwork" />
       </div>
     )
   }
@@ -195,9 +197,7 @@ export function ArtworkDetailComponent({
                   aria-label="Previous image"
                   className="w-10 h-10 flex items-center justify-center bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors shadow-sm"
                 >
-                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                    chevron_left
-                  </span>
+                  <ChevronLeft size={20} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
@@ -205,9 +205,7 @@ export function ArtworkDetailComponent({
                   aria-label="Next image"
                   className="w-10 h-10 flex items-center justify-center bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors shadow-sm"
                 >
-                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                    chevron_right
-                  </span>
+                  <ChevronRight size={20} aria-hidden="true" />
                 </button>
               </div>
             ) : null}
@@ -293,9 +291,7 @@ export function ArtworkDetailComponent({
                     aria-label="Decrease quantity"
                     className="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-container-low disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                      remove
-                    </span>
+                    <Minus size={18} aria-hidden="true" />
                   </button>
                   <span
                     className="min-w-[3rem] flex items-center justify-center font-label text-sm text-on-surface border-x border-outline-variant/40"
@@ -310,9 +306,7 @@ export function ArtworkDetailComponent({
                     aria-label="Increase quantity"
                     className="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-container-low disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                      add
-                    </span>
+                    <Plus size={18} aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -338,19 +332,14 @@ export function ArtworkDetailComponent({
                   liked ? 'text-error' : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
-                <span
-                  className={`material-symbols-outlined text-[20px] transition-transform duration-300 ease-out will-change-transform ${
+                <Heart
+                  size={20}
+                  fill={liked ? 'currentColor' : 'none'}
+                  aria-hidden="true"
+                  className={`transition-transform duration-300 ease-out will-change-transform ${
                     animating ? 'scale-150' : 'scale-100'
                   }`}
-                  style={{
-                    fontVariationSettings: liked
-                      ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24"
-                      : undefined,
-                  }}
-                  aria-hidden="true"
-                >
-                  favorite
-                </span>
+                />
                 <span className="font-label text-xs uppercase tracking-wide">
                   {liked ? 'Liked' : 'Like'}
                 </span>
@@ -398,12 +387,9 @@ export function ArtworkDetailComponent({
           />
         </div>
         {comments.loading ? (
-          <p
-            className="py-6 text-center text-on-surface-variant italic font-body text-sm"
-            role="status"
-          >
-            Loading comments…
-          </p>
+          <div className="py-6 flex justify-center">
+            <Spinner label="Loading comments" />
+          </div>
         ) : comments.error ? (
           <p
             className="py-6 text-center text-error border border-error-container/40 bg-error-container/10 font-body text-sm"
@@ -428,7 +414,11 @@ export function ArtworkDetailComponent({
                   disabled={comments.loadingMore}
                   className="inline-flex items-center justify-center px-6 py-3 border border-on-surface font-label text-[11px] uppercase tracking-[0.2em] font-semibold text-on-surface hover:bg-on-surface hover:text-surface transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {comments.loadingMore ? 'Loading…' : 'Load more comments'}
+                  {comments.loadingMore ? (
+                    <Spinner label="Loading more comments" />
+                  ) : (
+                    'Load more comments'
+                  )}
                 </button>
               </div>
             ) : null}

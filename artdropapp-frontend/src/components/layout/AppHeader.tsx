@@ -1,11 +1,12 @@
+import { Search, ShieldUser, ShoppingBag, User } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { getToken } from '../../lib/auth'
 import { useCurrentUser } from '../../hooks/useCurrentUser'
 
 const navItems = [
-  { to: '/', label: 'Discover' },
-  { to: '/circle', label: 'Circle' },
-  { to: '/challenges', label: 'Challenges' },
+  { to: '/', label: 'Discover', end: true },
+  { to: '/circle', label: 'Circle', end: false },
+  { to: '/challenges', label: 'Challenges', end: true },
 ]
 
 export function AppHeader() {
@@ -31,7 +32,7 @@ export function AppHeader() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === '/'}
+            end={item.end}
             className={({ isActive }) =>
               isActive
                 ? 'font-headline text-lg tracking-tight text-on-surface border-b-2 border-on-surface pb-1 transition-colors duration-300'
@@ -47,34 +48,34 @@ export function AppHeader() {
         <button
           type="button"
           aria-label="Search"
-          className="material-symbols-outlined text-on-surface transition-transform active:scale-95"
+          className="text-on-surface transition-transform active:scale-95"
         >
-          search
+          <Search size={20} />
         </button>
         <button
           type="button"
           aria-label="Bag"
-          className="material-symbols-outlined text-on-surface transition-transform active:scale-95"
+          className="text-on-surface transition-transform active:scale-95"
         >
-          shopping_bag
+          <ShoppingBag size={20} />
         </button>
         {isAdmin ? (
           <button
             type="button"
             aria-label="Admin"
             onClick={() => navigate('/admin')}
-            className="material-symbols-outlined text-on-surface transition-transform active:scale-95"
+            className="text-on-surface transition-transform active:scale-95"
           >
-            shield_person
+            <ShieldUser size={20} />
           </button>
         ) : null}
         <button
           type="button"
           aria-label="Account"
           onClick={handleAccountClick}
-          className="material-symbols-outlined text-on-surface transition-transform active:scale-95"
+          className="text-on-surface transition-transform active:scale-95"
         >
-          person
+          <User size={20} />
         </button>
       </div>
     </header>

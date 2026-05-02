@@ -1,52 +1,78 @@
-import { ChallengeBlock } from '../components/challenges/ChallengeBlock'
+import { ActiveChallengeRow } from '../components/challenges/ActiveChallengeRow'
+import { ChallengeHeroBanner } from '../components/challenges/ChallengeHeroBanner'
+import { PastChallengesList } from '../components/challenges/PastChallengesList'
+import { Spinner } from '../components/ui/Spinner'
 import { useChallenges } from '../hooks/useChallenges'
+import type { Challenge } from '../types/challenge'
+
+function partition(challenges: Challenge[]) {
+  let featured: Challenge | null = null
+  const activeOthers: Challenge[] = []
+  const past: Challenge[] = []
+
+  for (const challenge of challenges) {
+    if (challenge.status === 'ENDED') {
+      past.push(challenge)
+    } else if (challenge.kind === 'FEATURED' && !featured) {
+      featured = challenge
+    } else {
+      activeOthers.push(challenge)
+    }
+  }
+
+  return { featured, activeOthers, past }
+}
 
 export function ChallengesPage() {
   const { data, loading, error } = useChallenges()
 
-  return (
-    <main className="max-w-screen-2xl mx-auto px-8 py-12 md:py-20 flex flex-col gap-32">
-      <section className="max-w-4xl">
-        <h1 className="text-6xl md:text-8xl font-headline tracking-tighter leading-[0.9] mb-8">
-          Current
-          <br />
-          Exhibitions
-        </h1>
-        <p className="text-lg md:text-xl text-on-surface-variant max-w-2xl font-light leading-relaxed">
-          Our monthly curated challenges invite creators to explore specific themes through
-          the lens of modern minimalism. Submit your vision to be featured in the Digital
-          Gallery.
-        </p>
-      </section>
+  if (loading) {
+    return (
+      <main className="max-w-[1920px] mx-auto py-32 flex justify-center">
+        <Spinner label="Loading challenges" />
+      </main>
+    )
+  }
 
-      {loading ? (
-        <p className="py-12 text-center text-on-surface-variant italic" role="status">
-          Loading challenges…
-        </p>
-      ) : null}
-
-      {error ? (
+  if (error) {
+    return (
+      <main className="max-w-[1920px] mx-auto px-8 py-32">
         <p
           className="py-12 text-center text-error border border-error-container/40 bg-error-container/10"
           role="alert"
         >
           {error}
         </p>
-      ) : null}
+      </main>
+    )
+  }
 
-      {!loading && !error && data
-        ? data.map((challenge, index) => (
-            <div key={challenge.id}>
-              {index > 0 ? (
-                <div className="h-1 bg-surface-container-high w-1/4 mx-auto mb-32" />
-              ) : null}
-              <ChallengeBlock
-                challenge={challenge}
-                layout={index % 2 === 0 ? 'bento' : 'horizontal'}
-              />
-            </div>
-          ))
-        : null}
+  if (!data || data.length === 0) {
+    return (
+      <main className="max-w-[1920px] mx-auto px-8 py-32 text-center text-on-surface-variant">
+        No challenges yet — check back soon.
+      </main>
+    )
+  }
+
+  const { featured, activeOthers, past } = partition(data)
+
+  return (
+    <main className="max-w-[1920px] mx-auto pb-20">
+      {featured ? (
+        <ChallengeHeroBanner
+          challenge={featured}
+          secondaryAction={{ label: 'Learn More', to: `/challenges/${featured.id}` }}
+        />
+      ) : null}
+      {activeOthers.map((challenge, i) => (
+        <ActiveChallengeRow
+          key={challenge.id}
+          challenge={challenge}
+          bordered={i > 0 || featured !== null}
+        />
+      ))}
+      <PastChallengesList challenges={past} />
     </main>
   )
 }

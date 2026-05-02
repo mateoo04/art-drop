@@ -37,9 +37,10 @@ public class ChallengeController {
     @GetMapping("/{id}/submissions")
     public ResponseEntity<List<SubmissionThumbnailDTO>> getSubmissions(
             @PathVariable Long id,
-            @RequestParam(defaultValue = "12") int limit,
-            @RequestParam(defaultValue = "0") int offset
+            @RequestParam(defaultValue = "24") int limit,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "recent") String sort
     ) {
-        return ResponseEntity.ok(challengeService.findSubmissions(id, limit, offset));
+        return ResponseEntity.ok(challengeService.findSubmissions(id, limit, offset, sort));
     }
 }

@@ -4,6 +4,7 @@ import type { Comment } from '../../types/comment'
 import { getToken } from '../../lib/auth'
 import { useAuthPrompt } from '../../contexts/AuthPromptContext'
 import { ConfirmModal } from '../ui/ConfirmModal'
+import { Spinner } from '../ui/Spinner'
 import { CommentComposer } from './CommentComposer'
 
 type CommentListProps = {
@@ -205,9 +206,11 @@ export function CommentList({
                   disabled={isLoadingMore}
                   className="mt-4 ml-14 font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-50"
                 >
-                  {isLoadingMore
-                    ? 'Loading…'
-                    : `View ${remainingReplies} more ${remainingReplies === 1 ? 'reply' : 'replies'}`}
+                  {isLoadingMore ? (
+                    <Spinner label="Loading replies" />
+                  ) : (
+                    `View ${remainingReplies} more ${remainingReplies === 1 ? 'reply' : 'replies'}`
+                  )}
                 </button>
               ) : null}
             </li>

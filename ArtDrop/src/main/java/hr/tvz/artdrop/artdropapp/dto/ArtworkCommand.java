@@ -27,7 +27,7 @@ public record ArtworkCommand(
         BigDecimal width,
         BigDecimal height,
         BigDecimal depth,
-        @Pattern(regexp = "CM|MM|IN", message = "dimensionUnit must be CM, MM or IN")
+        @Pattern(regexp = "CM|MM|IN|PX", message = "dimensionUnit must be CM, MM, IN or PX")
         String dimensionUnit,
         @PositiveOrZero
         Integer catalogSequence,

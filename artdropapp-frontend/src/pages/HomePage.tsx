@@ -4,6 +4,7 @@ import { fetchMediums } from '../api/artworksApi'
 import { InfiniteScrollSentinel } from '../components/home/InfiniteScrollSentinel'
 import { MasonryFeed } from '../components/home/MasonryFeed'
 import { MediumFilterBar } from '../components/home/MediumFilterBar'
+import { Spinner } from '../components/ui/Spinner'
 import { useDiscoverFeed } from '../hooks/useArtworks'
 
 export function HomePage() {
@@ -27,9 +28,9 @@ export function HomePage() {
       <MediumFilterBar mediums={mediums} active={activeMedium} onChange={setActiveMedium} />
 
       {isLoading ? (
-        <p className="py-12 text-center text-on-surface-variant italic" role="status">
-          Loading artworks…
-        </p>
+        <div className="py-12 flex justify-center">
+          <Spinner label="Loading artworks" />
+        </div>
       ) : error ? (
         <p
           className="py-12 text-center text-error border border-error-container/40 bg-error-container/10"

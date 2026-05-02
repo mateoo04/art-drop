@@ -4,6 +4,8 @@ import hr.tvz.artdrop.artdropapp.dto.ChallengeDTO;
 import hr.tvz.artdrop.artdropapp.dto.SubmissionThumbnailDTO;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.Challenge;
+import hr.tvz.artdrop.artdropapp.model.ChallengeKind;
+import hr.tvz.artdrop.artdropapp.model.ChallengeStatus;
 import hr.tvz.artdrop.artdropapp.model.ChallengeSubmission;
 import hr.tvz.artdrop.artdropapp.model.User;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository;
@@ -11,6 +13,8 @@ import hr.tvz.artdrop.artdropapp.repository.ChallengeSubmissionJpaRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,10 +36,24 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public List<ChallengeDTO> findAll() {
-        return challengeRepository.findAllByOrderByStatusAscStartsAtDesc()
+        Comparator<Challenge> byStatus = Comparator.comparingInt(c -> statusRank(c.getStatus()));
+        Comparator<Challenge> featuredFirst = Comparator.comparingInt(c ->
+                c.getKind() == ChallengeKind.FEATURED ? 0 : 1);
+        Comparator<Challenge> byStartsAtDesc = Comparator
+                .comparing((Challenge c) -> c.getStartsAt() == null ? LocalDateTime.MIN : c.getStartsAt())
+                .reversed();
+        return challengeRepository.findAll()
                 .stream()
+                .sorted(byStatus.thenComparing(featuredFirst).thenComparing(byStartsAtDesc))
                 .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS))
                 .toList();
+    }
+
+    private static int statusRank(ChallengeStatus status) {
+        if (status == ChallengeStatus.ACTIVE) return 0;
+        if (status == ChallengeStatus.UPCOMING) return 1;
+        if (status == ChallengeStatus.ENDED) return 2;
+        return 3;
     }
 
     @Override
@@ -44,14 +62,14 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public List<SubmissionThumbnailDTO> findSubmissions(Long challengeId, int limit, int offset) {
+    public List<SubmissionThumbnailDTO> findSubmissions(Long challengeId, int limit, int offset, String sort) {
         int safeLimit = Math.max(1, Math.min(limit, 50));
         int page = Math.max(0, offset) / safeLimit;
-        return submissionRepository
-                .findByChallengeIdOrderBySubmittedAtDesc(challengeId, PageRequest.of(page, safeLimit))
-                .stream()
-                .map(this::mapToThumbnail)
-                .toList();
+        PageRequest pageRequest = PageRequest.of(page, safeLimit);
+        List<ChallengeSubmission> submissions = "top".equalsIgnoreCase(sort)
+                ? submissionRepository.findByChallengeIdOrderByLikeCountDesc(challengeId, pageRequest)
+                : submissionRepository.findByChallengeIdOrderBySubmittedAtDesc(challengeId, pageRequest);
+        return submissions.stream().map(this::mapToThumbnail).toList();
     }
 
     private ChallengeDTO mapToDto(Challenge challenge, int previewLimit) {
