@@ -60,11 +60,22 @@ public class ArtworkController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createArtwork(@Valid @RequestBody ArtworkCommand command) {
-        if (!artworkService.createArtwork(command)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    public ResponseEntity<?> createArtwork(
+            @Valid @RequestBody ArtworkCommand command,
+            Authentication authentication
+    ) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        ArtworkService.CreateResult result = artworkService.createArtwork(command, authentication.getName());
+        return switch (result.outcome()) {
+            case CREATED -> ResponseEntity.status(HttpStatus.CREATED).body(result.artwork());
+            case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).build();
+            case FORBIDDEN_SALE_GATE -> ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(java.util.Map.of("error", "FORBIDDEN_SALE_GATE"));
+            case UNAUTHENTICATED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        };
     }
 
     @PostMapping("/{id}/likes")

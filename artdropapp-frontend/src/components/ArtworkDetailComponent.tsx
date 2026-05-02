@@ -148,16 +148,22 @@ export function ArtworkDetailComponent({
 
   return (
     <article aria-label="Selected artwork details">
-      <div className="w-full max-w-[1920px] mx-auto px-4 md:px-12 py-8 lg:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+      <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 xl:px-12 py-8 lg:py-16 xl:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 xl:gap-24">
         {/* Gallery */}
-        <section className="lg:col-span-7 flex flex-col gap-6">
+        <section className="lg:col-span-7 min-w-0 flex flex-col">
           <div className="w-full bg-surface-container-low relative group overflow-hidden">
             {galleryImages.length > 0 ? (
               <Swiper
                 modules={[Keyboard, A11y, Pagination]}
                 onSwiper={setSwiper}
                 keyboard={{ enabled: true }}
-                pagination={{ clickable: true, el: '.gallery-pagination' }}
+                loop={galleryImages.length > 1}
+                pagination={{
+                  clickable: true,
+                  el: '.gallery-pagination',
+                  bulletClass: 'gallery-progress__segment',
+                  bulletActiveClass: 'gallery-progress__segment--active',
+                }}
                 a11y={{
                   prevSlideMessage: 'Previous image',
                   nextSlideMessage: 'Next image',
@@ -182,45 +188,37 @@ export function ArtworkDetailComponent({
             ) : null}
 
             {galleryImages.length > 1 ? (
-              <>
-                <div className="hidden lg:flex absolute inset-0 items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
-                  <button
-                    type="button"
-                    onClick={() => swiper?.slidePrev()}
-                    aria-label="Previous image"
-                    className="pointer-events-auto w-10 h-10 flex items-center justify-center text-on-surface hover:text-on-surface-variant transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-on-surface" aria-hidden="true">
-                      chevron_left
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => swiper?.slideNext()}
-                    aria-label="Next image"
-                    className="pointer-events-auto w-10 h-10 flex items-center justify-center text-on-surface hover:text-on-surface-variant transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-on-surface" aria-hidden="true">
-                      chevron_right
-                    </span>
-                  </button>
-                </div>
-                <div
-                  className="gallery-pagination absolute bottom-3 left-3 lg:left-6 z-10"
-                  style={{
-                    ['--swiper-pagination-color' as string]: '#2d3435',
-                    ['--swiper-pagination-bullet-inactive-color' as string]: '#2d3435',
-                    ['--swiper-pagination-bullet-inactive-opacity' as string]: '0.35',
-                    ['--swiper-pagination-bullet-horizontal-gap' as string]: '1px',
-                  }}
-                />
-              </>
+              <div className="absolute bottom-3 right-3 flex gap-1 z-10">
+                <button
+                  type="button"
+                  onClick={() => swiper?.slidePrev()}
+                  aria-label="Previous image"
+                  className="w-10 h-10 flex items-center justify-center bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+                    chevron_left
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => swiper?.slideNext()}
+                  aria-label="Next image"
+                  className="w-10 h-10 flex items-center justify-center bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+                    chevron_right
+                  </span>
+                </button>
+              </div>
             ) : null}
           </div>
+          {galleryImages.length > 1 ? (
+            <div className="gallery-pagination" role="tablist" aria-label="Image navigation" />
+          ) : null}
         </section>
 
         {/* Content */}
-        <section className="lg:col-span-5 flex flex-col pt-0 lg:pt-4">
+        <section className="lg:col-span-5 min-w-0 flex flex-col pt-0 lg:pt-4">
           <div className="mb-10 lg:mb-12">
             <h1 className="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] tracking-tight mb-4 text-on-surface">
               {artwork.title}

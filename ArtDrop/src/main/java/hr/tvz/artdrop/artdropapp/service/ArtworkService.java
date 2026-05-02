@@ -29,6 +29,12 @@ public interface ArtworkService {
 
     boolean createArtwork(ArtworkCommand command);
 
+    enum CreateOutcome { CREATED, CONFLICT, FORBIDDEN_SALE_GATE, UNAUTHENTICATED }
+
+    record CreateResult(CreateOutcome outcome, ArtworkDTO artwork) {}
+
+    CreateResult createArtwork(ArtworkCommand command, String authorUsername);
+
     enum LikeResult { LIKED, ALREADY_LIKED, UNLIKED, NOT_LIKED, NOT_FOUND, UNAUTHENTICATED }
 
     LikeResult like(Long artworkId, String username);

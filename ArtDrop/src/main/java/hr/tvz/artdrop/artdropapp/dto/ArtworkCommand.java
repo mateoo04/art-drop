@@ -1,6 +1,8 @@
 package hr.tvz.artdrop.artdropapp.dto;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -28,6 +30,15 @@ public record ArtworkCommand(
         @Pattern(regexp = "CM|MM|IN", message = "dimensionUnit must be CM, MM or IN")
         String dimensionUnit,
         @PositiveOrZero
-        Integer catalogSequence
+        Integer catalogSequence,
+        @Pattern(regexp = "WIP|FINISHED", message = "progressStatus must be WIP or FINISHED")
+        String progressStatus,
+        @Size(max = 30, message = "at most 30 tags")
+        List<@Size(max = 60, message = "tag too long") String> tags,
+        @DecimalMin(value = "0.0", inclusive = true)
+        @Digits(integer = 10, fraction = 2)
+        BigDecimal price,
+        @Pattern(regexp = "ORIGINAL|EDITION|AVAILABLE|SOLD", message = "saleStatus must be ORIGINAL, EDITION, AVAILABLE or SOLD")
+        String saleStatus
 ) {
 }

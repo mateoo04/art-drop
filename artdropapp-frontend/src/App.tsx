@@ -5,6 +5,7 @@ import { MainLayout } from './components/layout/MainLayout'
 import { AccountPage } from './pages/AccountPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { ArtworkDetailPage } from './pages/ArtworkDetailPage'
+import { ArtworkDropPage } from './pages/ArtworkDropPage'
 import { ArtworkEditPage } from './pages/ArtworkEditPage'
 import { ChallengesPage } from './pages/ChallengesPage'
 import { CirclePage } from './pages/CirclePage'
@@ -36,6 +37,14 @@ function App() {
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/details/:id" element={<ArtworkDetailPage />} />
         <Route path="/edit/:id" element={<ArtworkEditPage />} />
+        <Route
+          path="/drop"
+          element={
+            <ProtectedRoute>
+              <ArtworkDropPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/account"
           element={

@@ -60,7 +60,12 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     public List<ArtworkDTO> findAll(String viewerUsername, int limit, int offset) {
         Pageable page = paged(limit, offset, Sort.by(Sort.Direction.DESC, "publishedAt"));
-        List<Artwork> rows = artworkRepository.findAll(page).getContent();
+        Long viewerId = viewerUsername == null
+                ? null
+                : userRepository.findByUsername(viewerUsername).map(User::getId).orElse(null);
+        List<Artwork> rows = viewerId == null
+                ? artworkRepository.findAll(page).getContent()
+                : artworkRepository.findAllExcludingAuthor(viewerId, paged(limit, offset));
         return mapMany(rows, viewerUsername);
     }
 
@@ -78,7 +83,12 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     public List<ArtworkDTO> findByMedium(String medium, String viewerUsername, int limit, int offset) {
         Pageable page = paged(limit, offset);
-        List<Artwork> rows = artworkRepository.findByMediumContainingIgnoreCase(medium, page);
+        Long viewerId = viewerUsername == null
+                ? null
+                : userRepository.findByUsername(viewerUsername).map(User::getId).orElse(null);
+        List<Artwork> rows = viewerId == null
+                ? artworkRepository.findByMediumContainingIgnoreCase(medium, page)
+                : artworkRepository.findByMediumExcludingAuthor(medium, viewerId, page);
         return mapMany(rows, viewerUsername);
     }
 
@@ -115,25 +125,57 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     @Transactional
     public boolean createArtwork(ArtworkCommand command) {
+        return createArtwork(command, null).outcome() == CreateOutcome.CREATED;
+    }
+
+    @Override
+    @Transactional
+    public CreateResult createArtwork(ArtworkCommand command, String authorUsername) {
         if (artworkRepository.existsByTitleIgnoreCase(command.title())) {
-            return false;
+            return new CreateResult(CreateOutcome.CONFLICT, null);
         }
+
+        User author = null;
+        if (authorUsername != null) {
+            author = userRepository.findByUsername(authorUsername).orElse(null);
+            if (author == null) {
+                return new CreateResult(CreateOutcome.UNAUTHENTICATED, null);
+            }
+        } else {
+            author = userRepository.findById(1L).orElse(null);
+        }
+
+        boolean wantsSale = command.price() != null || command.saleStatus() != null;
+        if (wantsSale) {
+            boolean isSeller = author != null
+                    && author.getAuthorities() != null
+                    && author.getAuthorities().stream()
+                            .anyMatch(a -> "ROLE_SELLER".equals(a.getName()));
+            if (!isSeller) {
+                return new CreateResult(CreateOutcome.FORBIDDEN_SALE_GATE, null);
+            }
+        }
+
         Artwork artwork = new Artwork();
-        User defaultAuthor = userRepository.findById(1L).orElse(null);
-        artwork.setAuthor(defaultAuthor);
+        artwork.setAuthor(author);
         artwork.setTitle(command.title());
         artwork.setMedium(command.medium());
         artwork.setDescription(command.description());
-        artwork.setProgressStatus(ProgressStatus.FINISHED);
-        artwork.setSaleStatus(SaleStatus.AVAILABLE);
-        artwork.setTags(List.of());
+        artwork.setProgressStatus(command.progressStatus() == null
+                ? ProgressStatus.FINISHED
+                : ProgressStatus.valueOf(command.progressStatus()));
+        artwork.setSaleStatus(command.saleStatus() == null
+                ? null
+                : SaleStatus.valueOf(command.saleStatus()));
+        artwork.setPrice(command.price());
+        artwork.setTags(command.tags() == null ? List.of() : List.copyOf(command.tags()));
         artwork.setPublishedAt(LocalDateTime.now());
         artwork.setCreatedAt(LocalDateTime.now());
         artwork.setUpdatedAt(LocalDateTime.now());
         applyDimensions(artwork, command.width(), command.height(), command.depth(), command.dimensionUnit());
         artwork.setImages(buildImages(artwork, command.images()));
-        artworkRepository.save(artwork);
-        return true;
+        Artwork saved = artworkRepository.save(artwork);
+        return new CreateResult(CreateOutcome.CREATED, mapToDTO(saved, Set.of()));
     }
 
     @Override

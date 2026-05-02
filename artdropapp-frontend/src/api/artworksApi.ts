@@ -177,6 +177,60 @@ export type ArtworkImageInput = {
   caption?: string | null
 }
 
+export type CreateArtworkPayload = {
+  title: string
+  medium: string
+  description?: string
+  images: ArtworkImageInput[]
+  width?: number | null
+  height?: number | null
+  depth?: number | null
+  dimensionUnit?: DimensionUnit | null
+  progressStatus?: ProgressStatus
+  tags?: string[]
+  price?: number | null
+  saleStatus?: SaleStatus | null
+}
+
+export async function createArtwork(payload: CreateArtworkPayload): Promise<Artwork | null> {
+  const res = await authFetch(`/api/artworks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (res.status === 409) {
+    throw new Error('TITLE_TAKEN')
+  }
+  if (res.status === 401) {
+    throw new Error('UNAUTHENTICATED')
+  }
+  if (res.status === 403) {
+    let body: unknown = null
+    try {
+      body = await res.json()
+    } catch {
+      body = null
+    }
+    if (
+      body != null &&
+      typeof body === 'object' &&
+      (body as Record<string, unknown>).error === 'FORBIDDEN_SALE_GATE'
+    ) {
+      throw new Error('FORBIDDEN_SALE_GATE')
+    }
+    throw new Error(`Create failed (${res.status})`)
+  }
+  if (res.status !== 201) {
+    throw new Error(`Create failed (${res.status})`)
+  }
+  try {
+    const json: unknown = await res.json()
+    return mapApiArtwork(json as Record<string, unknown>)
+  } catch {
+    return null
+  }
+}
+
 export type UpdateArtworkPayload = {
   title?: string
   medium?: string

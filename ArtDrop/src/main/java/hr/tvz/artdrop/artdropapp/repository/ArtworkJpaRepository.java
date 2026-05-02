@@ -34,6 +34,15 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
     @Query("SELECT DISTINCT a.medium FROM Artwork a WHERE a.medium IS NOT NULL ORDER BY a.medium")
     List<String> findDistinctMediums();
 
+    @Query("SELECT a FROM Artwork a WHERE a.author.id <> :viewerId ORDER BY a.publishedAt DESC")
+    List<Artwork> findAllExcludingAuthor(@Param("viewerId") Long viewerId, Pageable pageable);
+
+    @Query("SELECT a FROM Artwork a WHERE a.author.id <> :viewerId AND LOWER(a.medium) LIKE LOWER(CONCAT('%', :medium, '%')) ORDER BY a.publishedAt DESC")
+    List<Artwork> findByMediumExcludingAuthor(
+            @Param("medium") String medium,
+            @Param("viewerId") Long viewerId,
+            Pageable pageable);
+
     @Query("SELECT COUNT(a) FROM Artwork a WHERE a.author.id = :authorId AND (a.saleStatus IS NOT NULL OR a.price IS NOT NULL)")
     long countListedByAuthorId(Long authorId);
 
