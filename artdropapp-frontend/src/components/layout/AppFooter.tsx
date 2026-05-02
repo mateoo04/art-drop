@@ -1,7 +1,10 @@
 export function AppFooter() {
   const year = new Date().getFullYear()
   return (
-    <footer className="bg-surface-container-high w-full py-12 px-8 flex flex-col md:flex-row justify-between items-center mt-24">
+    <footer
+      id="app-footer"
+      className="bg-surface-container-high w-full py-12 px-8 flex flex-col md:flex-row justify-between items-center mt-24"
+    >
       <div className="font-headline text-sm text-on-surface mb-6 md:mb-0">ArtDrop</div>
       <p className="font-body text-xs tracking-widest uppercase text-primary">
         © {year} ArtDrop Digital Gallery. All rights reserved.

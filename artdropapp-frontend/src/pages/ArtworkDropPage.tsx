@@ -3,6 +3,7 @@ import { type FormEvent, type KeyboardEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createArtwork, fetchMediums } from '../api/artworksApi'
 import { useCurrentUser } from '../hooks/useCurrentUser'
+import { useFooterVisible } from '../hooks/useFooterVisible'
 import { useMySellerApplication } from '../hooks/useMySellerApplication'
 import { SellerApplicationModal } from '../components/SellerApplicationModal'
 import { BackButton } from '../components/ui/BackButton'
@@ -23,6 +24,7 @@ export function ArtworkDropPage() {
   const navigate = useNavigate()
   const { user } = useCurrentUser()
   const { application, refetch: refetchApp } = useMySellerApplication()
+  const footerVisible = useFooterVisible()
 
   type DropImage = { publicId: string; url: string }
   const [images, setImages] = useState<DropImage[]>([])
@@ -637,7 +639,12 @@ export function ArtworkDropPage() {
         </form>
       </main>
 
-      <div className="fixed bottom-0 left-0 w-full bg-surface/90 backdrop-blur-[20px] border-t border-outline-variant/10 z-40">
+      <div
+        aria-hidden={footerVisible}
+        className={`fixed bottom-0 left-0 w-full bg-surface/90 backdrop-blur-[20px] border-t border-outline-variant/10 z-40 transition-transform duration-300 ease-out ${
+          footerVisible ? 'translate-y-full pointer-events-none' : 'translate-y-0'
+        }`}
+      >
         <div className="max-w-[640px] mx-auto px-6 py-4 flex justify-between items-center">
           <button
             type="button"
