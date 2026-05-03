@@ -25,6 +25,8 @@ public interface ArtworkService {
 
     List<ArtworkDTO> findCircleFeed(Long viewerId, int limit, int offset);
 
+    List<ArtworkDTO> findByIdsOrdered(List<Long> ids, String viewerUsername);
+
     Optional<ArtworkDTO> findOneByTitle(String title, String viewerUsername);
 
     boolean createArtwork(ArtworkCommand command);

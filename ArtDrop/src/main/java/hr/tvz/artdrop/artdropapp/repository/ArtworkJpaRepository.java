@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +31,22 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
             "(SELECT f.followeeId FROM UserFollow f WHERE f.followerId = :viewerId) " +
             "ORDER BY a.publishedAt DESC")
     List<Artwork> findCircleFeed(@Param("viewerId") Long viewerId, Pageable pageable);
+
+    @Query("SELECT a FROM Artwork a " +
+            "WHERE a.author.id <> :viewerId " +
+            "AND (a.publishedAt >= :recentSince " +
+            "     OR (a.publishedAt >= :circleSince " +
+            "         AND a.author.id IN (SELECT f.followeeId FROM UserFollow f WHERE f.followerId = :viewerId))) " +
+            "AND (:medium IS NULL OR LOWER(a.medium) LIKE LOWER(CONCAT('%', :medium, '%'))) " +
+            "ORDER BY a.publishedAt DESC")
+    List<Artwork> findRankingCandidates(
+            @Param("viewerId") Long viewerId,
+            @Param("recentSince") java.time.LocalDateTime recentSince,
+            @Param("circleSince") java.time.LocalDateTime circleSince,
+            @Param("medium") String medium,
+            Pageable pageable);
+
+    List<Artwork> findByIdIn(Collection<Long> ids);
 
     @Query("SELECT DISTINCT a.medium FROM Artwork a WHERE a.medium IS NOT NULL ORDER BY a.medium")
     List<String> findDistinctMediums();

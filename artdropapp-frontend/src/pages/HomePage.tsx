@@ -8,7 +8,8 @@ import { MasonryFeed } from '../components/home/MasonryFeed'
 import { MasonryFeedSkeleton } from '../components/home/MasonryFeedSkeleton'
 import { MediumFilterBar } from '../components/home/MediumFilterBar'
 import { useChallenges } from '../hooks/useChallenges'
-import { useDiscoverFeed } from '../hooks/useArtworks'
+import { useHomeFeed } from '../hooks/useHomeFeed'
+import { useSeenReporter } from '../hooks/useSeenReporter'
 
 export function HomePage() {
   const { t } = useTranslation()
@@ -26,7 +27,8 @@ export function HomePage() {
     error,
     hasNextPage,
     fetchNextPage,
-  } = useDiscoverFeed(activeMedium)
+  } = useHomeFeed(activeMedium)
+  const { reportSeen } = useSeenReporter()
 
   return (
     <main className="max-w-[1440px] mx-auto px-8 pt-4 pb-24">
@@ -55,7 +57,7 @@ export function HomePage() {
           </p>
         ) : (
           <>
-            <MasonryFeed artworks={artworks} />
+            <MasonryFeed artworks={artworks} onCardSeen={reportSeen} />
             <InfiniteScrollSentinel
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}

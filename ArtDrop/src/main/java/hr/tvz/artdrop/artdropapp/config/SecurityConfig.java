@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/users/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/users/*/circle-status").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/feed/home").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/feed/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/**").authenticated()

@@ -117,6 +117,20 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
+    public List<ArtworkDTO> findByIdsOrdered(List<Long> ids, String viewerUsername) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        List<Artwork> rows = artworkRepository.findByIdIn(ids);
+        Map<Long, Artwork> byId = new HashMap<>();
+        for (Artwork a : rows) byId.put(a.getId(), a);
+        List<Artwork> ordered = new ArrayList<>(ids.size());
+        for (Long id : ids) {
+            Artwork a = byId.get(id);
+            if (a != null) ordered.add(a);
+        }
+        return mapMany(ordered, viewerUsername);
+    }
+
+    @Override
     public Optional<ArtworkDTO> findOneByTitle(String title, String viewerUsername) {
         return artworkRepository.findByTitleIgnoreCase(title)
                 .map(a -> mapToDTO(a, likedSetFor(viewerUsername, List.of(a))));

@@ -168,3 +168,14 @@ CREATE TABLE IF NOT EXISTS seller_application (
 );
 CREATE INDEX IF NOT EXISTS idx_seller_application_user ON seller_application(user_id, submitted_at DESC);
 CREATE INDEX IF NOT EXISTS idx_seller_application_status ON seller_application(status, submitted_at);
+
+CREATE TABLE IF NOT EXISTS feed_seen (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    viewer_id BIGINT NOT NULL,
+    artwork_id BIGINT NOT NULL,
+    seen_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (viewer_id) REFERENCES app_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (artwork_id) REFERENCES artwork(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_feed_seen_viewer_time ON feed_seen(viewer_id, seen_at DESC);
+CREATE INDEX IF NOT EXISTS idx_feed_seen_viewer_artwork ON feed_seen(viewer_id, artwork_id);

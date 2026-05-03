@@ -1,6 +1,7 @@
 import { Bookmark, Heart, MessageCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useInView } from 'react-intersection-observer'
 import { Link } from 'react-router-dom'
 import { useAuthPrompt } from '../../contexts/AuthPromptContext'
 import { useLikeArtwork } from '../../hooks/useLikeArtwork'
@@ -13,7 +14,11 @@ const CARD_SIZES = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
 
 type ArtworkCardProps = {
   artwork: Artwork
+  onSeen?: (artworkId: number) => void
 }
+
+const SEEN_DWELL_MS = 1000
+const SEEN_VISIBILITY_THRESHOLD = 0.5
 
 function formatCount(n: number): string {
   if (n >= 1000) {
@@ -76,7 +81,7 @@ function saleBadgeClasses(status: SaleStatus | null): string {
   }
 }
 
-export function ArtworkCard({ artwork }: ArtworkCardProps) {
+export function ArtworkCard({ artwork, onSeen }: ArtworkCardProps) {
   const { t } = useTranslation()
   const progressKey_ = progressKey(artwork.progressStatus)
   const saleKey_ = saleKey(artwork.saleStatus)
@@ -85,6 +90,24 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
   const { promptToAuth } = useAuthPrompt()
   const likeMutation = useLikeArtwork()
   const [animating, setAnimating] = useState(false)
+
+  const { ref: seenRef, inView: seenInView } = useInView({
+    threshold: SEEN_VISIBILITY_THRESHOLD,
+    skip: !onSeen,
+  })
+  const reportedRef = useRef(false)
+  useEffect(() => {
+    if (!onSeen || reportedRef.current) return
+    if (!seenInView) return
+    const id = artwork.id
+    const handle = window.setTimeout(() => {
+      if (!reportedRef.current) {
+        reportedRef.current = true
+        onSeen(id)
+      }
+    }, SEEN_DWELL_MS)
+    return () => window.clearTimeout(handle)
+  }, [seenInView, onSeen, artwork.id])
 
   const liked = artwork.likedByMe
 
@@ -108,7 +131,7 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
   )
 
   return (
-    <article className="masonry-item group">
+    <article ref={seenRef} className="masonry-item group">
       <Link to={`/details/${artwork.id}`} className="block cursor-pointer">
         <div className={`relative bg-surface-container-lowest overflow-hidden ${aspectClass(artwork.aspectRatio)}`}>
           <img

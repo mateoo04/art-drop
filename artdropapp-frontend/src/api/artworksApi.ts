@@ -106,30 +106,55 @@ export function mapApiArtwork(raw: Record<string, unknown>): Artwork {
   }
 }
 
-export type FetchArtworksParams = {
+export type FetchHomeFeedParams = {
   medium?: string | null
+  cursor?: string | null
   limit?: number
-  offset?: number
 }
 
-export async function fetchArtworks({
+export type HomeFeedPage = {
+  artworks: Artwork[]
+  nextCursor: string | null
+  hasMore: boolean
+}
+
+export async function fetchHomeFeed({
   medium,
+  cursor,
   limit = 20,
-  offset = 0,
-}: FetchArtworksParams = {}): Promise<Artwork[]> {
+}: FetchHomeFeedParams = {}): Promise<HomeFeedPage> {
   const params = new URLSearchParams()
   params.set('limit', String(limit))
-  params.set('offset', String(offset))
   if (medium && medium !== 'All') params.set('medium', medium)
-  const res = await authFetch(`/api/artworks?${params.toString()}`)
+  if (cursor) params.set('cursor', cursor)
+  const res = await authFetch(`/api/feed/home?${params.toString()}`)
   if (!res.ok) {
-    throw new Error(`Failed to load artworks (${res.status})`)
+    throw new Error(`Failed to load feed (${res.status})`)
   }
   const json: unknown = await res.json()
-  if (!Array.isArray(json)) {
+  if (json == null || typeof json !== 'object') {
     throw new Error('Unexpected server response')
   }
-  return json.map((item) => mapApiArtwork(item as Record<string, unknown>))
+  const obj = json as Record<string, unknown>
+  const items = Array.isArray(obj.items) ? obj.items : []
+  return {
+    artworks: items.map((item) => mapApiArtwork(item as Record<string, unknown>)),
+    nextCursor: obj.nextCursor == null ? null : String(obj.nextCursor),
+    hasMore: Boolean(obj.hasMore),
+  }
+}
+
+export async function postSeenArtworks(artworkIds: number[]): Promise<void> {
+  if (artworkIds.length === 0) return
+  const res = await authFetch(`/api/feed/seen`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ artworkIds }),
+  })
+  if (res.status === 401) return
+  if (!res.ok && res.status !== 204) {
+    throw new Error(`Failed to report seen (${res.status})`)
+  }
 }
 
 export async function fetchMediums(): Promise<string[]> {
