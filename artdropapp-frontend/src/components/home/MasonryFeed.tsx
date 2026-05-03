@@ -1,13 +1,7 @@
 import Masonry from 'react-masonry-css'
 import type { Artwork } from '../../types/artwork'
 import { ArtworkCard } from './ArtworkCard'
-
-const BREAKPOINTS = {
-  default: 3,
-  1024: 3,
-  768: 2,
-  0: 1,
-}
+import { MASONRY_BREAKPOINT_COLS } from './masonryFeedConfig'
 
 type MasonryFeedProps = {
   artworks: Artwork[]
@@ -16,7 +10,7 @@ type MasonryFeedProps = {
 export function MasonryFeed({ artworks }: MasonryFeedProps) {
   return (
     <Masonry
-      breakpointCols={BREAKPOINTS}
+      breakpointCols={MASONRY_BREAKPOINT_COLS}
       className="masonry-grid-mc"
       columnClassName="masonry-grid-mc__column"
     >

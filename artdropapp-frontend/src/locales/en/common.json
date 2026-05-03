@@ -121,6 +121,10 @@
     "empty": "No artworks in this medium yet.",
     "activeChallenges": {
       "allChallenges": "Challenges",
+      "loadingAria": "Loading challenges",
+      "loadError": "Could not load challenges.",
+      "empty": "No challenges are open right now.",
+      "emptyLink": "Browse all challenges",
       "timeLeft": {
         "ended": "Ended",
         "openEnded": "Open",

@@ -14,7 +14,7 @@ export function MediumFilterBar({ mediums, active, onChange }: MediumFilterBarPr
   const { t } = useTranslation()
   const options = [{ value: 'All', label: t('home.filters.all') }, ...mediums.map((m) => ({ value: m, label: m }))]
   return (
-    <div className="py-8 border-b border-outline-variant/10 mb-12 -mx-8">
+    <div className="-mx-8 pt-10 pb-3">
       <Swiper
         modules={[FreeMode, Mousewheel, Keyboard, A11y]}
         freeMode={{ enabled: true, momentum: true }}
