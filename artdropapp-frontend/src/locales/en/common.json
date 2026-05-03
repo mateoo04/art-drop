@@ -139,6 +139,14 @@
     "filters": {
       "all": "All"
     },
+    "challengePromo": {
+      "joinTitle": "Join: {{title}}",
+      "joinChallengeCta": "Join challenge",
+      "noDeadline": "Open now",
+      "submissionsCount_zero": "No submissions",
+      "submissionsCount_one": "{{count}} submission",
+      "submissionsCount_other": "{{count}} submissions"
+    },
     "card": {
       "by": "by",
       "likeArtwork": "Like artwork",

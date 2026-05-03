@@ -1,5 +1,6 @@
 import { authFetch } from '../lib/authFetch'
 import { cloudinaryUrl } from '../lib/cloudinary'
+import type { Challenge } from '../types/challenge'
 import type {
   Artwork,
   ArtworkImage,
@@ -7,6 +8,7 @@ import type {
   ProgressStatus,
   SaleStatus,
 } from '../types/artwork'
+import { mapChallenge } from './challengesApi'
 
 const PROGRESS_VALUES: ProgressStatus[] = ['WIP', 'FINISHED']
 const SALE_VALUES: SaleStatus[] = ['ORIGINAL', 'EDITION', 'AVAILABLE', 'SOLD']
@@ -112,10 +114,29 @@ export type FetchHomeFeedParams = {
   limit?: number
 }
 
+export type HomeFeedItem =
+  | { kind: 'ARTWORK'; artwork: Artwork }
+  | { kind: 'CHALLENGE_PROMO'; challenge: Challenge }
+
+export function homeFeedItemsFromArtworks(artworks: Artwork[]): HomeFeedItem[] {
+  return artworks.map((artwork) => ({ kind: 'ARTWORK' as const, artwork }))
+}
+
 export type HomeFeedPage = {
-  artworks: Artwork[]
+  items: HomeFeedItem[]
   nextCursor: string | null
   hasMore: boolean
+}
+
+function parseHomeFeedItem(raw: Record<string, unknown>): HomeFeedItem | null {
+  const kind = String(raw.kind ?? '')
+  if (kind === 'ARTWORK' && raw.artwork != null && typeof raw.artwork === 'object') {
+    return { kind: 'ARTWORK', artwork: mapApiArtwork(raw.artwork as Record<string, unknown>) }
+  }
+  if (kind === 'CHALLENGE_PROMO' && raw.challenge != null && typeof raw.challenge === 'object') {
+    return { kind: 'CHALLENGE_PROMO', challenge: mapChallenge(raw.challenge as Record<string, unknown>) }
+  }
+  return null
 }
 
 export async function fetchHomeFeed({
@@ -136,9 +157,16 @@ export async function fetchHomeFeed({
     throw new Error('Unexpected server response')
   }
   const obj = json as Record<string, unknown>
-  const items = Array.isArray(obj.items) ? obj.items : []
+  const rawItems = Array.isArray(obj.items) ? obj.items : []
+  const items: HomeFeedItem[] = []
+  for (const el of rawItems) {
+    if (el != null && typeof el === 'object') {
+      const parsed = parseHomeFeedItem(el as Record<string, unknown>)
+      if (parsed) items.push(parsed)
+    }
+  }
   return {
-    artworks: items.map((item) => mapApiArtwork(item as Record<string, unknown>)),
+    items,
     nextCursor: obj.nextCursor == null ? null : String(obj.nextCursor),
     hasMore: Boolean(obj.hasMore),
   }

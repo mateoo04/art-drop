@@ -18,7 +18,7 @@ export function useHomeFeed(medium: string | null) {
   })
 
   return {
-    artworks: query.data?.pages.flatMap((p) => p.artworks) ?? [],
+    items: query.data?.pages.flatMap((p) => p.items) ?? [],
     isLoading: query.isLoading,
     isFetchingNextPage: query.isFetchingNextPage,
     error: query.error?.message ?? null,

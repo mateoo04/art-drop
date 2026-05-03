@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SellerSection } from '../components/account/SellerSection'
 import { SettingsSidebar } from '../components/account/SettingsSidebar'
+import { homeFeedItemsFromArtworks } from '../api/artworksApi'
 import { MasonryFeed } from '../components/home/MasonryFeed'
 import { ProfileEditSidebar } from '../components/profile/ProfileEditSidebar'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
@@ -85,7 +86,7 @@ export function AccountPage() {
               {artworks.error}
             </p>
           ) : artworks.data && artworks.data.length > 0 ? (
-            <MasonryFeed artworks={artworks.data} />
+            <MasonryFeed items={homeFeedItemsFromArtworks(artworks.data)} />
           ) : (
             <p className="py-12 text-center text-on-surface-variant italic">
               {t('account.noDrops')}

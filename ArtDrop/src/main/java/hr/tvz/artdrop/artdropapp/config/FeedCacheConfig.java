@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import hr.tvz.artdrop.artdropapp.dto.FeedSnapshotEntry;
+
 import java.time.Duration;
 import java.util.List;
 
@@ -13,7 +15,7 @@ import java.util.List;
 public class FeedCacheConfig {
 
     @Bean
-    public Cache<String, List<Long>> feedSnapshotCache(
+    public Cache<String, List<FeedSnapshotEntry>> feedSnapshotCache(
             @Value("${feed.ranking.snapshot-ttl-minutes:5}") int ttlMinutes,
             @Value("${feed.ranking.snapshot-max-entries:10000}") int maxEntries
     ) {

@@ -1,23 +1,28 @@
 import Masonry from 'react-masonry-css'
-import type { Artwork } from '../../types/artwork'
+import type { HomeFeedItem } from '../../api/artworksApi'
 import { ArtworkCard } from './ArtworkCard'
+import { ChallengePromoCard } from './ChallengePromoCard'
 import { MASONRY_BREAKPOINT_COLS } from './masonryFeedConfig'
 
 type MasonryFeedProps = {
-  artworks: Artwork[]
+  items: HomeFeedItem[]
   onCardSeen?: (artworkId: number) => void
 }
 
-export function MasonryFeed({ artworks, onCardSeen }: MasonryFeedProps) {
+export function MasonryFeed({ items, onCardSeen }: MasonryFeedProps) {
   return (
     <Masonry
       breakpointCols={MASONRY_BREAKPOINT_COLS}
       className="masonry-grid-mc"
       columnClassName="masonry-grid-mc__column"
     >
-      {artworks.map((artwork) => (
-        <ArtworkCard key={artwork.id} artwork={artwork} onSeen={onCardSeen} />
-      ))}
+      {items.map((item) =>
+        item.kind === 'ARTWORK' ? (
+          <ArtworkCard key={`a-${item.artwork.id}`} artwork={item.artwork} onSeen={onCardSeen} />
+        ) : (
+          <ChallengePromoCard key={`c-${item.challenge.id}`} challenge={item.challenge} />
+        ),
+      )}
     </Masonry>
   )
 }

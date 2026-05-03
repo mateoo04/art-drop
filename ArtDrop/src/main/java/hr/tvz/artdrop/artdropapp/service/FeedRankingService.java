@@ -2,10 +2,17 @@ package hr.tvz.artdrop.artdropapp.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
+import hr.tvz.artdrop.artdropapp.dto.ChallengeDTO;
 import hr.tvz.artdrop.artdropapp.dto.FeedCursor;
+import hr.tvz.artdrop.artdropapp.dto.FeedSnapshotEntry;
+import hr.tvz.artdrop.artdropapp.dto.FeedSnapshotRowKind;
+import hr.tvz.artdrop.artdropapp.dto.HomeFeedItemDTO;
 import hr.tvz.artdrop.artdropapp.dto.HomeFeedResponse;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
+import hr.tvz.artdrop.artdropapp.model.ChallengeStatus;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.ChallengeSubmissionJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.FeedSeenJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserFollowJpaRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,12 +21,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class FeedRankingService {
@@ -28,7 +38,10 @@ public class FeedRankingService {
     private final UserFollowJpaRepository userFollowRepository;
     private final FeedSeenJpaRepository feedSeenRepository;
     private final ArtworkService artworkService;
-    private final Cache<String, List<Long>> feedSnapshotCache;
+    private final ChallengeJpaRepository challengeJpaRepository;
+    private final ChallengeSubmissionJpaRepository challengeSubmissionJpaRepository;
+    private final ChallengeService challengeService;
+    private final Cache<String, List<FeedSnapshotEntry>> feedSnapshotCache;
 
     private final double wCircle;
     private final double wEngage;
@@ -41,13 +54,18 @@ public class FeedRankingService {
     private final int circleWindowDays;
     private final int candidateCap;
     private final int seenWindowDays;
+    private final int challengeFirstAfterArtworks;
+    private final int challengeEveryNArtworks;
 
     public FeedRankingService(
             ArtworkJpaRepository artworkRepository,
             UserFollowJpaRepository userFollowRepository,
             FeedSeenJpaRepository feedSeenRepository,
             ArtworkService artworkService,
-            Cache<String, List<Long>> feedSnapshotCache,
+            ChallengeJpaRepository challengeJpaRepository,
+            ChallengeSubmissionJpaRepository challengeSubmissionJpaRepository,
+            ChallengeService challengeService,
+            Cache<String, List<FeedSnapshotEntry>> feedSnapshotCache,
             @Value("${feed.ranking.w-circle:1.5}") double wCircle,
             @Value("${feed.ranking.w-engage:1.0}") double wEngage,
             @Value("${feed.ranking.w-recency:2.0}") double wRecency,
@@ -58,12 +76,17 @@ public class FeedRankingService {
             @Value("${feed.ranking.candidate-window-days:30}") int candidateWindowDays,
             @Value("${feed.ranking.circle-window-days:90}") int circleWindowDays,
             @Value("${feed.ranking.candidate-cap:300}") int candidateCap,
-            @Value("${feed.ranking.seen-window-days:7}") int seenWindowDays
+            @Value("${feed.ranking.seen-window-days:7}") int seenWindowDays,
+            @Value("${feed.home.challenge.first-after-artworks:6}") int challengeFirstAfterArtworks,
+            @Value("${feed.home.challenge.every-n-artworks:12}") int challengeEveryNArtworks
     ) {
         this.artworkRepository = artworkRepository;
         this.userFollowRepository = userFollowRepository;
         this.feedSeenRepository = feedSeenRepository;
         this.artworkService = artworkService;
+        this.challengeJpaRepository = challengeJpaRepository;
+        this.challengeSubmissionJpaRepository = challengeSubmissionJpaRepository;
+        this.challengeService = challengeService;
         this.feedSnapshotCache = feedSnapshotCache;
         this.wCircle = wCircle;
         this.wEngage = wEngage;
@@ -76,6 +99,8 @@ public class FeedRankingService {
         this.circleWindowDays = circleWindowDays;
         this.candidateCap = candidateCap;
         this.seenWindowDays = seenWindowDays;
+        this.challengeFirstAfterArtworks = challengeFirstAfterArtworks;
+        this.challengeEveryNArtworks = challengeEveryNArtworks;
     }
 
     public HomeFeedResponse getHomeFeed(Long viewerId, String viewerUsername, String medium, String cursor, int limit) {
@@ -86,7 +111,7 @@ public class FeedRankingService {
         int offset;
         FeedCursor decoded = FeedCursor.decode(cursor).orElse(null);
         if (decoded != null) {
-            List<Long> cached = feedSnapshotCache.getIfPresent(decoded.snapshotId());
+            List<FeedSnapshotEntry> cached = feedSnapshotCache.getIfPresent(decoded.snapshotId());
             if (cached != null) {
                 active = new Snapshot(decoded.snapshotId(), cached);
                 offset = decoded.offset();
@@ -99,26 +124,128 @@ public class FeedRankingService {
             offset = 0;
         }
 
-        if (active.ids().isEmpty() || offset >= active.ids().size()) {
+        if (active.rows().isEmpty() || offset >= active.rows().size()) {
             return new HomeFeedResponse(List.of(), null, false);
         }
 
-        int end = Math.min(offset + safeLimit, active.ids().size());
-        List<Long> pageIds = active.ids().subList(offset, end);
-        List<ArtworkDTO> items = artworkService.findByIdsOrdered(pageIds, viewerUsername);
+        int end = Math.min(offset + safeLimit, active.rows().size());
+        List<FeedSnapshotEntry> pageSlice = active.rows().subList(offset, end);
+        List<HomeFeedItemDTO> items = hydrateSnapshotSlice(pageSlice, viewerUsername);
 
-        boolean hasMore = end < active.ids().size();
+        boolean hasMore = end < active.rows().size();
         String nextCursor = hasMore ? new FeedCursor(active.id(), end).encode() : null;
         return new HomeFeedResponse(items, nextCursor, hasMore);
     }
 
-    private record Snapshot(String id, List<Long> ids) {}
+    private List<HomeFeedItemDTO> hydrateSnapshotSlice(List<FeedSnapshotEntry> slice, String viewerUsername) {
+        if (slice.isEmpty()) {
+            return List.of();
+        }
+        List<Long> artIdsInOrder = new ArrayList<>();
+        for (FeedSnapshotEntry e : slice) {
+            if (e.kind() == FeedSnapshotRowKind.ARTWORK) {
+                artIdsInOrder.add(e.id());
+            }
+        }
+        Map<Long, ArtworkDTO> artById = new LinkedHashMap<>();
+        if (!artIdsInOrder.isEmpty()) {
+            for (ArtworkDTO dto : artworkService.findByIdsOrdered(artIdsInOrder, viewerUsername)) {
+                artById.put(dto.id(), dto);
+            }
+        }
+        Map<Long, ChallengeDTO> chById = new HashMap<>();
+        for (FeedSnapshotEntry e : slice) {
+            if (e.kind() == FeedSnapshotRowKind.CHALLENGE_PROMO) {
+                long cid = e.id();
+                if (!chById.containsKey(cid)) {
+                    challengeService.findById(cid).ifPresent(d -> chById.put(cid, d));
+                }
+            }
+        }
+        List<HomeFeedItemDTO> out = new ArrayList<>(slice.size());
+        for (FeedSnapshotEntry e : slice) {
+            if (e.kind() == FeedSnapshotRowKind.ARTWORK) {
+                ArtworkDTO dto = artById.get(e.id());
+                if (dto != null) {
+                    out.add(new HomeFeedItemDTO("ARTWORK", dto, null));
+                }
+            } else {
+                ChallengeDTO dto = chById.get(e.id());
+                if (dto != null) {
+                    out.add(new HomeFeedItemDTO("CHALLENGE_PROMO", null, dto));
+                }
+            }
+        }
+        return out;
+    }
+
+    private record Snapshot(String id, List<FeedSnapshotEntry> rows) {}
 
     private Snapshot computeAndCacheSnapshot(Long viewerId, String medium) {
-        List<Long> ranked = computeRankedIds(viewerId, medium, LocalDateTime.now());
+        List<Long> rankedArt = computeRankedIds(viewerId, medium, LocalDateTime.now());
+        List<Long> promoChallenges = buildShuffledPromoChallengeIds(viewerId);
+        List<FeedSnapshotEntry> rows = mergeArtworkIdsWithChallengePromos(
+                rankedArt,
+                promoChallenges,
+                challengeFirstAfterArtworks,
+                challengeEveryNArtworks
+        );
         String snapshotId = UUID.randomUUID().toString();
-        feedSnapshotCache.put(snapshotId, ranked);
-        return new Snapshot(snapshotId, ranked);
+        feedSnapshotCache.put(snapshotId, rows);
+        return new Snapshot(snapshotId, rows);
+    }
+
+    /**
+     * ACTIVE challenges only, excluding those the viewer already submitted to; shuffled per snapshot.
+     */
+    private List<Long> buildShuffledPromoChallengeIds(Long viewerId) {
+        List<Long> activeIds = challengeJpaRepository.findByStatus(ChallengeStatus.ACTIVE).stream()
+                .map(c -> c.getId())
+                .toList();
+        if (activeIds.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> exclude = new HashSet<>();
+        if (viewerId != null) {
+            exclude.addAll(challengeSubmissionJpaRepository.findDistinctChallengeIdsBySubmittedBy(viewerId));
+        }
+        List<Long> eligible = new ArrayList<>();
+        for (Long id : activeIds) {
+            if (!exclude.contains(id)) {
+                eligible.add(id);
+            }
+        }
+        Collections.shuffle(eligible, ThreadLocalRandom.current());
+        return eligible;
+    }
+
+    /**
+     * After {@code firstPromoAfterArtworkCount} artworks, inserts a challenge promo, then every {@code artworkIntervalBetweenPromos} artworks.
+     */
+    static List<FeedSnapshotEntry> mergeArtworkIdsWithChallengePromos(
+            List<Long> rankedArtIds,
+            List<Long> promoChallengeIds,
+            int firstPromoAfterArtworkCount,
+            int artworkIntervalBetweenPromos
+    ) {
+        if (rankedArtIds.isEmpty()) {
+            return List.of();
+        }
+        int interval = Math.max(1, artworkIntervalBetweenPromos);
+        int first = Math.max(1, firstPromoAfterArtworkCount);
+        List<FeedSnapshotEntry> out = new ArrayList<>(rankedArtIds.size() + promoChallengeIds.size());
+        int challIdx = 0;
+        int artCount = 0;
+        for (Long aid : rankedArtIds) {
+            out.add(new FeedSnapshotEntry(FeedSnapshotRowKind.ARTWORK, aid));
+            artCount++;
+            if (challIdx < promoChallengeIds.size()
+                    && artCount >= first
+                    && (artCount - first) % interval == 0) {
+                out.add(new FeedSnapshotEntry(FeedSnapshotRowKind.CHALLENGE_PROMO, promoChallengeIds.get(challIdx++)));
+            }
+        }
+        return out;
     }
 
     List<Long> computeRankedIds(Long viewerId, String medium, LocalDateTime now) {

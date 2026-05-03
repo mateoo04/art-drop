@@ -9,6 +9,12 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ChallengeSubmissionJpaRepository extends JpaRepository<ChallengeSubmission, Long> {
+
+    @Query("""
+            SELECT DISTINCT s.challenge.id FROM ChallengeSubmission s
+            WHERE s.submittedBy = :userId
+            """)
+    List<Long> findDistinctChallengeIdsBySubmittedBy(@Param("userId") Long userId);
     List<ChallengeSubmission> findByChallengeIdOrderBySubmittedAtDesc(Long challengeId, Pageable pageable);
 
     @Query("""

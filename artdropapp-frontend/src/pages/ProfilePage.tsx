@@ -1,5 +1,6 @@
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { homeFeedItemsFromArtworks } from '../api/artworksApi'
 import { MasonryFeed } from '../components/home/MasonryFeed'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
 import { Button } from '../components/ui/Button'
@@ -91,7 +92,7 @@ export function ProfilePage() {
       <section className="pt-12">
         <h2 className="font-headline text-2xl text-on-surface mb-8">{t('profile.drops')}</h2>
         {artworks && artworks.length > 0 ? (
-          <MasonryFeed artworks={artworks} />
+          <MasonryFeed items={homeFeedItemsFromArtworks(artworks)} />
         ) : (
           <p className="py-12 text-center text-on-surface-variant italic">
             {t('profile.noDrops')}

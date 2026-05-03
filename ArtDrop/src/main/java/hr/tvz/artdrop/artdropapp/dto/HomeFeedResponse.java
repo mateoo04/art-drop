@@ -3,7 +3,7 @@ package hr.tvz.artdrop.artdropapp.dto;
 import java.util.List;
 
 public record HomeFeedResponse(
-        List<ArtworkDTO> items,
+        List<HomeFeedItemDTO> items,
         String nextCursor,
         boolean hasMore
 ) {}

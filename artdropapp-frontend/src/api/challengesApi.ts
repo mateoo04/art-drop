@@ -45,7 +45,7 @@ function mapThumbnail(raw: Record<string, unknown>): SubmissionThumbnail {
   }
 }
 
-function mapChallenge(raw: Record<string, unknown>): Challenge {
+export function mapChallenge(raw: Record<string, unknown>): Challenge {
   return {
     id: Number(raw.id),
     title: String(raw.title ?? ''),

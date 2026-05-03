@@ -1,6 +1,8 @@
 package hr.tvz.artdrop.artdropapp.service;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import hr.tvz.artdrop.artdropapp.dto.FeedSnapshotEntry;
+import hr.tvz.artdrop.artdropapp.dto.FeedSnapshotRowKind;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +21,14 @@ class FeedRankingServiceTest {
     @BeforeEach
     void setUp() {
         service = new FeedRankingService(
-                null, null, null, null,
-                Caffeine.newBuilder().<String, List<Long>>build(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                Caffeine.newBuilder().<String, List<FeedSnapshotEntry>>build(),
                 1.5,  // wCircle
                 1.0,  // wEngage
                 2.0,  // wRecency
@@ -28,9 +36,49 @@ class FeedRankingServiceTest {
                 36.0, // recency half-life hours
                 96.0, // engagement half-life hours
                 24.0, // seen-recency half-life hours
-                30, 90, 300, 7
+                30, 90, 300, 7,
+                6, 12
         );
         now = LocalDateTime.of(2026, 5, 3, 12, 0);
+    }
+
+    @Test
+    void mergeInsertsFirstChallengeAfterFirstArtworkBlock() {
+        List<Long> art = List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L);
+        List<Long> chall = List.of(100L, 200L);
+        List<FeedSnapshotEntry> merged = FeedRankingService.mergeArtworkIdsWithChallengePromos(art, chall, 6, 12);
+        assertThat(merged).hasSize(8);
+        assertThat(merged.get(5).kind()).isEqualTo(FeedSnapshotRowKind.ARTWORK);
+        assertThat(merged.get(5).id()).isEqualTo(6L);
+        assertThat(merged.get(6).kind()).isEqualTo(FeedSnapshotRowKind.CHALLENGE_PROMO);
+        assertThat(merged.get(6).id()).isEqualTo(100L);
+        assertThat(merged.get(7).kind()).isEqualTo(FeedSnapshotRowKind.ARTWORK);
+        assertThat(merged.get(7).id()).isEqualTo(7L);
+    }
+
+    @Test
+    void mergeSecondChallengeRespectsInterval() {
+        List<Long> art = new java.util.ArrayList<>();
+        for (long i = 1; i <= 30; i++) {
+            art.add(i);
+        }
+        List<Long> chall = List.of(10L, 20L, 30L);
+        List<FeedSnapshotEntry> merged = FeedRankingService.mergeArtworkIdsWithChallengePromos(art, chall, 6, 12);
+        long promoCount = merged.stream().filter(e -> e.kind() == FeedSnapshotRowKind.CHALLENGE_PROMO).count();
+        assertThat(promoCount).isEqualTo(3);
+    }
+
+    @Test
+    void mergeWithNoChallengesReturnsArtworksOnly() {
+        List<Long> art = List.of(1L, 2L, 3L);
+        List<FeedSnapshotEntry> merged = FeedRankingService.mergeArtworkIdsWithChallengePromos(art, List.of(), 6, 12);
+        assertThat(merged).hasSize(3);
+        assertThat(merged).allMatch(e -> e.kind() == FeedSnapshotRowKind.ARTWORK);
+    }
+
+    @Test
+    void mergeEmptyArtworksReturnsEmpty() {
+        assertThat(FeedRankingService.mergeArtworkIdsWithChallengePromos(List.of(), List.of(1L), 6, 12)).isEmpty();
     }
 
     @Test

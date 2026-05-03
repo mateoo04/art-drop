@@ -21,7 +21,7 @@ export function HomePage() {
     staleTime: 5 * 60 * 1000,
   })
   const {
-    artworks,
+    items: feedItems,
     isLoading,
     isFetchingNextPage,
     error,
@@ -51,13 +51,13 @@ export function HomePage() {
           >
             {error}
           </p>
-        ) : artworks.length === 0 ? (
+        ) : feedItems.length === 0 ? (
           <p className="py-24 text-center text-on-surface-variant italic">
             {t('home.empty')}
           </p>
         ) : (
           <>
-            <MasonryFeed artworks={artworks} onCardSeen={reportSeen} />
+            <MasonryFeed items={feedItems} onCardSeen={reportSeen} />
             <InfiniteScrollSentinel
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}
