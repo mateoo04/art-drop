@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../ui/Button'
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 }
 
 export function DecisionModal({ open, mode, applicantUsername, onClose, onConfirm }: Props) {
+  const { t } = useTranslation()
   const [reason, setReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -28,7 +30,7 @@ export function DecisionModal({ open, mode, applicantUsername, onClose, onConfir
       setReason('')
       onClose()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed')
+      setError(e instanceof Error ? e.message : t('admin.decision.failed'))
     } finally {
       setSubmitting(false)
     }
@@ -42,7 +44,7 @@ export function DecisionModal({ open, mode, applicantUsername, onClose, onConfir
     >
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t('common.close')}
         tabIndex={-1}
         onClick={() => {
           if (!submitting) onClose()
@@ -51,14 +53,14 @@ export function DecisionModal({ open, mode, applicantUsername, onClose, onConfir
       />
       <div className="relative w-full max-w-md bg-surface-container-lowest border border-outline-variant/15 shadow-[0_20px_60px_rgba(45,52,53,0.18)] p-8">
         <h2 className="font-display text-2xl text-on-surface mb-3">
-          {mode === 'approve' ? 'Approve' : 'Reject'} seller application
+          {mode === 'approve' ? t('admin.decision.titleApprove') : t('admin.decision.titleReject')}
         </h2>
         <p className="font-body text-sm text-on-surface-variant leading-relaxed mb-6">
-          Applicant: <strong>@{applicantUsername}</strong>
+          {t('admin.decision.applicant')}: <strong>@{applicantUsername}</strong>
         </p>
         <label className="block">
           <span className="block font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-1.5">
-            Reason {reasonRequired ? '(required)' : '(optional)'}
+            {t('admin.decision.reasonLabel')} {reasonRequired ? t('admin.decision.reasonRequired') : t('admin.decision.reasonOptional')}
           </span>
           <textarea
             value={reason}
@@ -71,7 +73,7 @@ export function DecisionModal({ open, mode, applicantUsername, onClose, onConfir
         {error ? <p className="text-error mt-2 text-sm" role="alert">{error}</p> : null}
         <div className="flex justify-end gap-3 mt-6">
           <Button variant="secondary" onClick={onClose} disabled={submitting}>
-            Cancel
+            {t('admin.decision.cancel')}
           </Button>
           {mode === 'approve' ? (
             <Button
@@ -79,7 +81,7 @@ export function DecisionModal({ open, mode, applicantUsername, onClose, onConfir
               loading={submitting}
               disabled={!valid}
             >
-              Approve
+              {t('admin.decision.approve')}
             </Button>
           ) : (
             <Button
@@ -88,7 +90,7 @@ export function DecisionModal({ open, mode, applicantUsername, onClose, onConfir
               loading={submitting}
               disabled={!valid}
             >
-              Reject
+              {t('admin.decision.reject')}
             </Button>
           )}
         </div>

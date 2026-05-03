@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { isLoginError, login, type LoginError } from '../api/authApi'
 import { AuthHeader } from '../components/layout/AuthHeader'
@@ -9,34 +10,43 @@ import { Button } from '../components/ui/Button'
 import { FormField } from '../components/ui/FormField'
 import { Input } from '../components/ui/Input'
 import { storeToken } from '../lib/auth'
+import type { TFunction } from 'i18next'
 
 const HERO_IMAGE_URL =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuC7J-zoC-6ecgH_YsQEcGf7NqrVj1tZSo8dlgSiiXmfotRFTMK1xoZPM1vEa9bmhzn26gL_fgiVqOM6nkxxipdoCxbap_10tE-aIgdLD-OgGdoYXDWMwvq6C7BPqCyJ33kxVeEdnzigM3xPmRYmV9NN1rNs0QaC1jnbBllNzeWSvDcUoOQOh41IiFNgO-K2iHpXfzyiNNsuQhtvA3jmNy1bOjRMlg9E23PDZ7JX7ijJdv7jq1RpvDIQhEutYgxG2xdd8SCmrSAVAKo'
 
-const loginSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, { message: 'Email is required' })
-    .email({ message: 'Enter a valid email address' }),
-  password: z.string().min(1, { message: 'Password is required' }),
-})
+const makeLoginSchema = (t: TFunction) =>
+  z.object({
+    email: z
+      .string()
+      .trim()
+      .min(1, { message: t('auth.validation.email.required') })
+      .email({ message: t('auth.validation.email.invalid') }),
+    password: z.string().min(1, { message: t('auth.validation.password.required') }),
+  })
 
-type LoginFormValues = z.infer<typeof loginSchema>
-
-function messageFor(err: LoginError): string {
-  if (err.kind === 'bad_credentials') {
-    return 'Incorrect email or password.'
-  }
-  if (err.kind === 'invalid') {
-    return 'Please check your details and try again.'
-  }
-  return 'Something went wrong. Please try again.'
+type LoginFormValues = {
+  email: string
+  password: string
 }
 
 export function LoginPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [formError, setFormError] = useState<LoginError | null>(null)
+
+  const loginSchema = useMemo(() => makeLoginSchema(t), [t])
+
+  function messageFor(err: LoginError): string {
+    if (err.kind === 'bad_credentials') {
+      return t('auth.login.errorBadCredentials')
+    }
+    if (err.kind === 'invalid') {
+      return t('auth.login.errorInvalid')
+    }
+    return t('auth.login.errorNetwork')
+  }
+
   const {
     register,
     handleSubmit,
@@ -76,33 +86,33 @@ export function LoginPage() {
           <img
             className="w-full h-48 md:h-64 object-cover grayscale opacity-90 transition-all duration-700 hover:grayscale-0"
             src={HERO_IMAGE_URL}
-            alt="Abstract minimalist digital painting in muted charcoal tones"
+            alt={t('auth.login.heroAlt')}
           />
         </div>
 
         <section className="mb-8">
           <h2 className="font-headline text-4xl font-light mb-2 tracking-tight">
-            Welcome back.
+            {t('auth.login.heading')}
           </h2>
           <p className="font-body text-sm text-on-surface-variant leading-relaxed max-w-[280px]">
-            Continue your journey through the world of digital art.
+            {t('auth.login.subheading')}
           </p>
         </section>
 
         <form className="space-y-6" onSubmit={onSubmit} noValidate>
-          <FormField label="Email Address" htmlFor="email" error={errors.email?.message}>
+          <FormField label={t('auth.login.email')} htmlFor="email" error={errors.email?.message}>
             <Input
               id="email"
               type="email"
               autoComplete="email"
-              placeholder="name@curator.com"
+              placeholder={t('auth.login.emailPlaceholder')}
               disabled={isSubmitting}
               invalid={!!errors.email}
               {...register('email')}
             />
           </FormField>
 
-          <FormField label="Password" htmlFor="password" error={errors.password?.message}>
+          <FormField label={t('auth.login.password')} htmlFor="password" error={errors.password?.message}>
             <Input
               id="password"
               type="password"
@@ -119,7 +129,7 @@ export function LoginPage() {
               href="#"
               className="font-label text-[10px] uppercase tracking-widest text-outline hover:text-on-surface transition-colors"
             >
-              Forgot Password?
+              {t('auth.login.forgotPassword')}
             </a>
           </div>
 
@@ -134,7 +144,7 @@ export function LoginPage() {
 
           <div className="pt-2">
             <Button type="submit" variant="primary" fullWidth loading={isSubmitting}>
-              Log In to Your Profile
+              {t('auth.login.submit')}
             </Button>
           </div>
         </form>
@@ -144,7 +154,8 @@ export function LoginPage() {
             to="/signup"
             className="font-label text-[11px] uppercase tracking-[0.15em] text-on-surface hover:text-outline transition-colors duration-300"
           >
-            Don't have an account? <span className="border-b border-on-surface pb-1">Sign Up</span>
+            {t('auth.login.noAccount')}{' '}
+            <span className="border-b border-on-surface pb-1">{t('auth.login.signUpLink')}</span>
           </Link>
         </footer>
       </main>

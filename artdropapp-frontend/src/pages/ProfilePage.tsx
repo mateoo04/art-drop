@@ -1,4 +1,5 @@
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { MasonryFeed } from '../components/home/MasonryFeed'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
 import { Button } from '../components/ui/Button'
@@ -12,12 +13,13 @@ export function ProfilePage() {
   const navigate = useNavigate()
   const { profile, artworks, inCircle, loading, error, toggleCircle } = useProfile(slug)
   const { promptToAuth } = useAuthPrompt()
+  const { t } = useTranslation()
 
   if (loading) {
     return (
       <main className="max-w-[1440px] mx-auto px-8 pt-4">
         <div className="py-24 flex justify-center">
-          <Spinner label="Loading profile" />
+          <Spinner label={t('profile.loadingProfile')} />
         </div>
       </main>
     )
@@ -27,7 +29,7 @@ export function ProfilePage() {
     return (
       <main className="max-w-[1440px] mx-auto px-8 pt-4">
         <p className="py-24 text-center text-on-surface-variant italic">
-          We couldn't find that artist.
+          {t('profile.notFound')}
         </p>
       </main>
     )
@@ -40,7 +42,7 @@ export function ProfilePage() {
           className="py-24 text-center text-error border border-error-container/40 bg-error-container/10"
           role="alert"
         >
-          {error ?? 'Unable to load profile.'}
+          {error ?? t('profile.notFound')}
         </p>
       </main>
     )
@@ -51,7 +53,7 @@ export function ProfilePage() {
   }
 
   const isAuthed = Boolean(getToken())
-  const circleActionLabel = inCircle ? 'In your Circle' : 'Join Circle'
+  const circleActionLabel = inCircle ? t('profile.inCircle') : t('profile.joinCircle')
 
   return (
     <main className="max-w-[1440px] mx-auto px-8 pt-4 pb-24">
@@ -61,14 +63,14 @@ export function ProfilePage() {
           <div className="flex items-center gap-2">
             {profile.isSelf && (profile.sellerStatus === 'NONE' || profile.sellerStatus === 'REJECTED' || profile.sellerStatus === 'REVOKED') ? (
               <Button variant="secondary" onClick={() => navigate('/account')}>
-                Become a seller
+                {t('account.becomeSeller')}
               </Button>
             ) : null}
             <button
               type="button"
               onClick={() => {
                 if (!isAuthed) {
-                  promptToAuth(`follow ${profile.displayName}`)
+                  promptToAuth(t('profile.followAction', { name: profile.displayName }))
                   return
                 }
                 void toggleCircle()
@@ -80,19 +82,19 @@ export function ProfilePage() {
                   : 'bg-transparent text-on-surface border-on-surface hover:bg-on-surface hover:text-surface'
               }`}
             >
-              {isAuthed ? circleActionLabel : 'Join Circle'}
+              {isAuthed ? circleActionLabel : t('profile.joinCircle')}
             </button>
           </div>
         }
       />
 
       <section className="pt-12">
-        <h2 className="font-headline text-2xl text-on-surface mb-8">Drops</h2>
+        <h2 className="font-headline text-2xl text-on-surface mb-8">{t('profile.drops')}</h2>
         {artworks && artworks.length > 0 ? (
           <MasonryFeed artworks={artworks} />
         ) : (
           <p className="py-12 text-center text-on-surface-variant italic">
-            No drops yet.
+            {t('profile.noDrops')}
           </p>
         )}
       </section>

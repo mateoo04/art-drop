@@ -1,6 +1,7 @@
 import { ArrowRight, ChevronDown, ImagePlus, Loader, Plus, X } from 'lucide-react'
 import { type FormEvent, type KeyboardEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { createArtwork, fetchMediums } from '../api/artworksApi'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useFooterVisible } from '../hooks/useFooterVisible'
@@ -14,17 +15,18 @@ type ProgressTab = 'FINISHED' | 'WIP'
 
 type EditionStatus = 'ORIGINAL' | 'EDITION' | 'AVAILABLE'
 
-const EDITION_LABELS: Record<EditionStatus, string> = {
-  ORIGINAL: 'Original (1/1)',
-  EDITION: 'Limited Edition',
-  AVAILABLE: 'Open Edition',
-}
-
 export function ArtworkDropPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useCurrentUser()
   const { application, refetch: refetchApp } = useMySellerApplication()
   const footerVisible = useFooterVisible()
+
+  const EDITION_LABELS: Record<EditionStatus, string> = {
+    ORIGINAL: t('artwork.drop.edition.original'),
+    EDITION: t('artwork.drop.edition.limited'),
+    AVAILABLE: t('artwork.drop.edition.open'),
+  }
 
   type DropImage = { publicId: string; url: string }
   const [images, setImages] = useState<DropImage[]>([])
@@ -90,7 +92,7 @@ export function ArtworkDropPage() {
         })
       }
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Upload failed')
+      setMessage(err instanceof Error ? err.message : t('artwork.drop.upload.failed'))
     } finally {
       setUploading(false)
     }
@@ -130,7 +132,7 @@ export function ArtworkDropPage() {
   }
 
   function removeTag(tag: string) {
-    setTags(tags.filter((t) => t !== tag))
+    setTags(tags.filter((tg) => tg !== tag))
   }
 
   function parseDim(value: string): number | null {
@@ -144,15 +146,15 @@ export function ArtworkDropPage() {
     e.preventDefault()
     setMessage(null)
     if (images.length === 0) {
-      setMessage('Please upload at least one image.')
+      setMessage(t('artwork.drop.error.noImages'))
       return
     }
     if (!title.trim()) {
-      setMessage('Please give your piece a title.')
+      setMessage(t('artwork.drop.error.noTitle'))
       return
     }
     if (!medium.trim()) {
-      setMessage('Please choose a medium.')
+      setMessage(t('artwork.drop.error.noMedium'))
       return
     }
     const wantsListing = listForSale && isSeller
@@ -161,7 +163,7 @@ export function ArtworkDropPage() {
     if (wantsListing) {
       priceNumber = priceText.trim() === '' ? null : Number.parseFloat(priceText)
       if (priceNumber == null || !Number.isFinite(priceNumber) || priceNumber < 0) {
-        setMessage('Enter a valid price to list this piece for sale.')
+        setMessage(t('artwork.drop.error.invalidPrice'))
         return
       }
       saleStatus = editionStatus
@@ -197,13 +199,13 @@ export function ArtworkDropPage() {
       }
     } catch (err) {
       if (err instanceof Error && err.message === 'TITLE_TAKEN') {
-        setMessage('That title is already taken — try another.')
+        setMessage(t('artwork.drop.error.titleTaken'))
       } else if (err instanceof Error && err.message === 'FORBIDDEN_SALE_GATE') {
-        setMessage('Listing for sale requires verified seller status.')
+        setMessage(t('artwork.drop.error.forbiddenSale'))
       } else if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
-        setMessage('Please sign in to drop an artwork.')
+        setMessage(t('artwork.drop.error.unauthenticated'))
       } else {
-        setMessage(err instanceof Error ? err.message : 'Something went wrong.')
+        setMessage(err instanceof Error ? err.message : t('artwork.drop.error.fallback'))
       }
     } finally {
       setSubmitting(false)
@@ -214,12 +216,12 @@ export function ArtworkDropPage() {
     <>
       <main className="w-full max-w-[640px] mx-auto flex flex-col pt-16 pb-32 px-6">
         <header className="mb-12">
-          <BackButton to="/" label="Cancel Drop" className="mb-8" />
+          <BackButton to="/" label={t('artwork.drop.cancelLabel')} className="mb-8" />
           <h1 className="font-display text-4xl md:text-5xl text-on-surface mb-4 tracking-tight leading-tight">
-            Drop a new artwork
+            {t('artwork.drop.title')}
           </h1>
           <p className="font-body text-on-surface-variant text-lg max-w-md">
-            Share a piece with your circle. Sellers can also list it for sale.
+            {t('artwork.drop.subtitle')}
           </p>
         </header>
 
@@ -227,11 +229,11 @@ export function ArtworkDropPage() {
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="block font-label text-xs uppercase tracking-[0.15em] text-on-surface-variant">
-                Artwork Media
+                {t('artwork.drop.fields.media')}
               </span>
               {images.length > 0 ? (
                 <span className="font-label text-[10px] uppercase tracking-[0.1em] text-on-surface-variant">
-                  {images.length} image{images.length === 1 ? '' : 's'} · cover marked
+                  {t('artwork.drop.fields.imagesCount', { count: images.length })} {t('artwork.drop.fields.imagesCoverMarked')}
                 </span>
               ) : null}
             </div>
@@ -254,10 +256,10 @@ export function ArtworkDropPage() {
                   />
                 )}
                 <p className="font-body text-sm text-on-surface text-center px-4">
-                  {uploading ? 'Opening uploader…' : 'Click to upload images'}
+                  {uploading ? t('artwork.drop.upload.opening') : t('artwork.drop.upload.clickToUpload')}
                 </p>
                 <p className="font-label text-xs text-on-surface-variant mt-2">
-                  JPG, PNG, or WebP · up to 10 files
+                  {t('artwork.drop.upload.fileTypes')}
                 </p>
               </button>
             ) : (
@@ -281,21 +283,21 @@ export function ArtworkDropPage() {
                             onClick={() => handleSetCover(idx)}
                             className="font-label text-[10px] uppercase tracking-[0.1em] bg-on-surface text-surface px-2 py-1 self-start hover:bg-primary transition-colors"
                           >
-                            Set cover
+                            {t('artwork.drop.upload.setCover')}
                           </button>
                         ) : null}
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(idx)}
-                          aria-label="Remove image"
+                          aria-label={t('artwork.drop.upload.removeLabel')}
                           className="font-label text-[10px] uppercase tracking-[0.1em] bg-error text-on-error px-2 py-1 self-start hover:opacity-90 transition-opacity"
                         >
-                          Remove
+                          {t('artwork.drop.upload.remove')}
                         </button>
                       </div>
                       {isCover ? (
                         <span className="absolute top-2 left-2 px-2 py-0.5 bg-on-surface text-surface font-label text-[10px] uppercase tracking-[0.1em]">
-                          Cover
+                          {t('artwork.drop.upload.cover')}
                         </span>
                       ) : null}
                     </div>
@@ -314,7 +316,7 @@ export function ArtworkDropPage() {
                       <Plus size={30} className="text-on-surface-variant" />
                     )}
                     <span className="font-label text-[10px] uppercase tracking-[0.1em] text-on-surface-variant mt-1">
-                      {uploading ? 'Uploading…' : 'Add more'}
+                      {uploading ? t('artwork.drop.upload.uploading') : t('artwork.drop.upload.addMore')}
                     </span>
                   </button>
                 ) : null}
@@ -327,14 +329,14 @@ export function ArtworkDropPage() {
               htmlFor="title"
               className="block font-label text-xs uppercase tracking-[0.15em] text-on-surface-variant"
             >
-              Title
+              {t('artwork.drop.fields.title')}
             </label>
             <input
               id="title"
               type="text"
               value={title}
               onChange={(ev) => setTitle(ev.target.value)}
-              placeholder="Give it a name"
+              placeholder={t('artwork.drop.fields.titlePlaceholder')}
               className="w-full bg-transparent border-b border-outline-variant/30 py-4 px-0 text-xl font-display text-on-surface placeholder:text-outline-variant/50 focus:outline-none focus:border-primary"
               autoComplete="off"
               required
@@ -347,7 +349,7 @@ export function ArtworkDropPage() {
                 htmlFor="medium"
                 className="block font-label text-xs uppercase tracking-[0.15em] text-on-surface-variant"
               >
-                Medium
+                {t('artwork.drop.fields.medium')}
               </label>
               <div className="relative">
                 <select
@@ -358,7 +360,7 @@ export function ArtworkDropPage() {
                   required
                 >
                   <option value="" disabled>
-                    Select medium
+                    {t('artwork.drop.fields.mediumPlaceholder')}
                   </option>
                   {(mediums.length === 0
                     ? ['Digital', 'Sculpture', 'Painting', 'Photography', 'Mixed Media']
@@ -378,7 +380,7 @@ export function ArtworkDropPage() {
 
             <section className="space-y-4">
               <span className="block font-label text-xs uppercase tracking-[0.15em] text-on-surface-variant">
-                Status
+                {t('artwork.drop.fields.status')}
               </span>
               <div className="flex border border-outline-variant/30 p-1" role="tablist">
                 {(['FINISHED', 'WIP'] as const).map((opt) => (
@@ -394,7 +396,7 @@ export function ArtworkDropPage() {
                         : 'flex-1 py-2 text-sm font-label text-center text-on-surface-variant hover:text-on-surface transition-colors'
                     }
                   >
-                    {opt === 'FINISHED' ? 'Finished' : 'WIP'}
+                    {opt === 'FINISHED' ? t('artwork.drop.fields.statusFinished') : t('artwork.drop.fields.statusWip')}
                   </button>
                 ))}
               </div>
@@ -407,7 +409,7 @@ export function ArtworkDropPage() {
                 htmlFor="description"
                 className="block font-label text-xs uppercase tracking-[0.15em] text-on-surface-variant"
               >
-                Description
+                {t('artwork.drop.fields.description')}
               </label>
               <span className="font-label text-[10px] text-outline-variant">
                 {charCount} / {maxChars}
@@ -418,7 +420,7 @@ export function ArtworkDropPage() {
               value={description}
               onChange={(ev) => setDescription(ev.target.value.slice(0, maxChars))}
               rows={4}
-              placeholder="What's the story behind this piece?"
+              placeholder={t('artwork.drop.fields.descriptionPlaceholder')}
               className="w-full bg-transparent border border-outline-variant/30 p-4 text-sm font-body text-on-surface placeholder:text-outline-variant/50 resize-none focus:outline-none focus:border-primary"
             />
           </section>
@@ -428,19 +430,19 @@ export function ArtworkDropPage() {
               htmlFor="tags"
               className="block font-label text-xs uppercase tracking-[0.15em] text-on-surface-variant"
             >
-              Tags
+              {t('artwork.drop.fields.tags')}
             </label>
             <div className="w-full border border-outline-variant/30 p-2 flex flex-wrap gap-2 items-center bg-transparent focus-within:border-primary transition-colors">
-              {tags.map((t) => (
+              {tags.map((tag) => (
                 <span
-                  key={t}
+                  key={tag}
                   className="bg-secondary-container text-on-surface px-3 py-1 text-xs font-label flex items-center gap-1"
                 >
-                  {t}
+                  {tag}
                   <button
                     type="button"
-                    onClick={() => removeTag(t)}
-                    aria-label={`Remove ${t}`}
+                    onClick={() => removeTag(tag)}
+                    aria-label={t('artwork.drop.fields.removeTag', { tag })}
                     className="hover:text-error"
                   >
                     <X size={14} />
@@ -454,7 +456,7 @@ export function ArtworkDropPage() {
                 onChange={(ev) => setTagDraft(ev.target.value)}
                 onKeyDown={handleTagKey}
                 onBlur={() => handleAddTag(tagDraft)}
-                placeholder="Add tags (press Enter)"
+                placeholder={t('artwork.drop.fields.tagsPlaceholder')}
                 className="flex-1 min-w-[150px] border-none bg-transparent text-sm p-1 focus:outline-none placeholder:text-outline-variant/50"
               />
             </div>
@@ -464,8 +466,8 @@ export function ArtworkDropPage() {
             <details className="group">
               <summary className="flex items-center justify-between cursor-pointer list-none">
                 <span className="font-label text-sm uppercase tracking-[0.1em] text-on-surface">
-                  Add Dimensions{' '}
-                  <span className="text-on-surface-variant lowercase">(optional)</span>
+                  {t('artwork.drop.fields.dimensions')}{' '}
+                  <span className="text-on-surface-variant lowercase">{t('artwork.drop.fields.dimensionsOptional')}</span>
                 </span>
                 <ChevronDown
                   size={20}
@@ -474,13 +476,13 @@ export function ArtworkDropPage() {
               </summary>
               <div className="pt-6 grid grid-cols-3 gap-4">
                 {[
-                  { label: 'Width', value: width, set: setWidth },
-                  { label: 'Height', value: height, set: setHeight },
-                  { label: 'Depth', value: depth, set: setDepth },
+                  { labelKey: 'artwork.drop.fields.dimensionWidth', value: width, set: setWidth },
+                  { labelKey: 'artwork.drop.fields.dimensionHeight', value: height, set: setHeight },
+                  { labelKey: 'artwork.drop.fields.dimensionDepth', value: depth, set: setDepth },
                 ].map((field) => (
-                  <div key={field.label}>
+                  <div key={field.labelKey}>
                     <label className="block font-label text-[10px] uppercase text-outline-variant mb-2">
-                      {field.label}
+                      {t(field.labelKey)}
                     </label>
                     <input
                       type="number"
@@ -529,35 +531,37 @@ export function ArtworkDropPage() {
                     : 'px-2 py-1 bg-surface-container-highest text-on-surface-variant font-label text-[10px] uppercase tracking-wider'
                 }
               >
-                {isSeller ? 'Verified Seller' : 'Seller Required'}
+                {isSeller ? t('artwork.drop.seller.verified') : t('artwork.drop.seller.required')}
               </span>
             </div>
-            <h3 className="font-display text-2xl text-on-surface mb-2 mt-4">List for sale</h3>
+            <h3 className="font-display text-2xl text-on-surface mb-2 mt-4">{t('artwork.drop.fields.listing')}</h3>
             <p className="font-body text-sm text-on-surface-variant mb-8">
-              Make this piece available for purchase directly from your profile.
+              {t('artwork.drop.fields.listingSubtitle')}
             </p>
             {!isSeller ? (
               <p className="text-sm text-on-surface-variant mb-6">
                 {sellerStatus === 'PENDING' ? (
-                  'Your seller application is under review.'
+                  t('artwork.drop.seller.pending')
                 ) : (sellerStatus === 'NONE' ||
                     ((sellerStatus === 'REJECTED' || sellerStatus === 'REVOKED') &&
                       !cooldownActive)) ? (
                   <>
-                    Selling artworks requires verified seller status.{' '}
+                    {t('artwork.drop.seller.requiresStatus')}{' '}
                     <button
                       type="button"
                       onClick={() => setApplyOpen(true)}
                       className="underline"
                     >
-                      Apply now
+                      {t('artwork.drop.seller.applyNow')}
                     </button>
                     .
                   </>
                 ) : application?.canReapplyAt ? (
-                  `You can re-apply on ${new Date(application.canReapplyAt).toLocaleDateString()}.`
+                  t('artwork.drop.seller.canReapply', {
+                    date: new Date(application.canReapplyAt).toLocaleDateString(),
+                  })
                 ) : (
-                  'Selling artworks requires verified seller status.'
+                  t('artwork.drop.seller.requiresStatusFallback')
                 )}
               </p>
             ) : null}
@@ -574,7 +578,7 @@ export function ArtworkDropPage() {
                   htmlFor="list_sale"
                   className="font-label text-sm text-on-surface cursor-pointer"
                 >
-                  Enable Marketplace Listing
+                  {t('artwork.drop.fields.enableListing')}
                 </label>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-outline-variant/15">
@@ -583,7 +587,7 @@ export function ArtworkDropPage() {
                     htmlFor="price"
                     className="block font-label text-xs uppercase tracking-[0.15em] text-on-surface-variant mb-3"
                   >
-                    Price
+                    {t('artwork.drop.fields.price')}
                   </label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-body">
@@ -606,7 +610,7 @@ export function ArtworkDropPage() {
                     htmlFor="sale_status"
                     className="block font-label text-xs uppercase tracking-[0.15em] text-on-surface-variant mb-3"
                   >
-                    Edition Status
+                    {t('artwork.drop.fields.editionStatus')}
                   </label>
                   <div className="relative">
                     <select
@@ -651,7 +655,7 @@ export function ArtworkDropPage() {
             onClick={() => navigate('/')}
             className="font-label text-sm uppercase tracking-[0.1em] text-on-surface-variant hover:text-on-surface transition-colors py-3"
           >
-            Cancel
+            {t('artwork.drop.cancel')}
           </button>
           <button
             type="submit"
@@ -659,7 +663,7 @@ export function ArtworkDropPage() {
             disabled={submitting}
             className="bg-on-surface text-surface font-label text-sm uppercase tracking-[0.1em] px-8 py-4 hover:bg-primary transition-colors flex items-center disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Dropping…' : 'Drop Artwork'}
+            {submitting ? t('artwork.drop.submitting') : t('artwork.drop.submit')}
             <ArrowRight size={18} className="ml-2" />
           </button>
         </div>

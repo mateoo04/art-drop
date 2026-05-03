@@ -2,6 +2,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { FreeMode, Mousewheel, Keyboard, A11y } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/free-mode'
+import { useTranslation } from 'react-i18next'
 
 type MediumFilterBarProps = {
   mediums: string[]
@@ -10,7 +11,8 @@ type MediumFilterBarProps = {
 }
 
 export function MediumFilterBar({ mediums, active, onChange }: MediumFilterBarProps) {
-  const options = ['All', ...mediums]
+  const { t } = useTranslation()
+  const options = [{ value: 'All', label: t('home.filters.all') }, ...mediums.map((m) => ({ value: m, label: m }))]
   return (
     <div className="py-8 border-b border-outline-variant/10 mb-12 -mx-8">
       <Swiper
@@ -24,19 +26,19 @@ export function MediumFilterBar({ mediums, active, onChange }: MediumFilterBarPr
         slidesOffsetAfter={32}
         className="w-full"
       >
-        {options.map((medium) => {
-          const isActive = medium === active
+        {options.map(({ value, label }) => {
+          const isActive = value === active
           return (
-            <SwiperSlide key={medium} className="!w-auto">
+            <SwiperSlide key={value} className="!w-auto">
               <div
                 role="button"
                 tabIndex={0}
                 aria-pressed={isActive}
-                onClick={() => onChange(medium)}
+                onClick={() => onChange(value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    onChange(medium)
+                    onChange(value)
                   }
                 }}
                 className={
@@ -45,7 +47,7 @@ export function MediumFilterBar({ mediums, active, onChange }: MediumFilterBarPr
                     : 'bg-secondary-container text-on-secondary-container px-6 py-2 text-xs font-semibold tracking-widest uppercase hover:bg-outline-variant/20 transition-all whitespace-nowrap cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-on-surface'
                 }
               >
-                {medium}
+                {label}
               </div>
             </SwiperSlide>
           )

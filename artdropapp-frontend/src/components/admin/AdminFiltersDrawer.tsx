@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../ui/Button'
 import type { SellerStatus } from '../../types/seller'
 import type { AdminUserFilters } from '../../api/adminApi'
@@ -12,15 +13,16 @@ type Props = {
 
 const STATUSES: SellerStatus[] = ['NONE', 'PENDING', 'APPROVED', 'REJECTED', 'REVOKED']
 
-const SORTS: { value: NonNullable<AdminUserFilters['sort']>; label: string }[] = [
-  { value: 'newest', label: 'Newest joined' },
-  { value: 'oldest_pending', label: 'Pending oldest first' },
-  { value: 'username', label: 'Username A–Z' },
-  { value: 'most_artworks', label: 'Most artworks' },
-]
-
 export function AdminFiltersDrawer({ open, onClose, filters, onApply }: Props) {
+  const { t } = useTranslation()
   const [draft, setDraft] = useState<AdminUserFilters>(filters)
+
+  const SORTS: { value: NonNullable<AdminUserFilters['sort']>; label: string }[] = [
+    { value: 'newest', label: t('admin.filters.sorts.newest') },
+    { value: 'oldest_pending', label: t('admin.filters.sorts.oldestPending') },
+    { value: 'username', label: t('admin.filters.sorts.username') },
+    { value: 'most_artworks', label: t('admin.filters.sorts.mostArtworks') },
+  ]
 
   useEffect(() => {
     if (open) setDraft(filters)
@@ -47,21 +49,26 @@ export function AdminFiltersDrawer({ open, onClose, filters, onApply }: Props) {
     setDraft({})
   }
 
+  const roleOptions = [
+    { value: 'ROLE_USER' as const, label: t('admin.filters.roles.user') },
+    { value: 'ROLE_ADMIN' as const, label: t('admin.filters.roles.admin') },
+  ]
+
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex">
       <button
         type="button"
-        aria-label="Close filters"
+        aria-label={t('admin.filters.closeLabel')}
         tabIndex={-1}
         onClick={onClose}
         className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm cursor-default"
       />
       <aside className="relative w-full max-w-sm h-full bg-surface-container-lowest border-r border-outline-variant/15 shadow-[0_20px_60px_rgba(45,52,53,0.18)] p-8 overflow-y-auto">
-        <h2 className="font-display text-2xl text-on-surface mb-8">Filters</h2>
+        <h2 className="font-display text-2xl text-on-surface mb-8">{t('admin.filters.title')}</h2>
 
         <section className="mb-8">
           <h3 className="font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-3">
-            Seller status
+            {t('admin.filters.sellerStatus')}
           </h3>
           <div className="flex flex-wrap gap-2">
             {STATUSES.map((s) => {
@@ -86,10 +93,10 @@ export function AdminFiltersDrawer({ open, onClose, filters, onApply }: Props) {
 
         <section className="mb-8">
           <h3 className="font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-3">
-            Role
+            {t('admin.filters.role')}
           </h3>
           <div className="flex flex-wrap gap-2">
-            {(['ROLE_USER', 'ROLE_ADMIN'] as const).map((r) => {
+            {roleOptions.map(({ value: r, label }) => {
               const active = draft.role === r
               return (
                 <button
@@ -102,7 +109,7 @@ export function AdminFiltersDrawer({ open, onClose, filters, onApply }: Props) {
                       : 'px-3 py-1.5 rounded-full border border-outline-variant/30 text-on-surface-variant text-xs hover:bg-surface-container-low'
                   }
                 >
-                  {r === 'ROLE_USER' ? 'User' : 'Admin'}
+                  {label}
                 </button>
               )
             })}
@@ -111,7 +118,7 @@ export function AdminFiltersDrawer({ open, onClose, filters, onApply }: Props) {
 
         <section className="mb-8">
           <h3 className="font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-3">
-            Sort
+            {t('admin.filters.sort')}
           </h3>
           <div className="flex flex-col gap-2">
             {SORTS.map((opt) => {
@@ -133,10 +140,10 @@ export function AdminFiltersDrawer({ open, onClose, filters, onApply }: Props) {
         </section>
 
         <div className="flex justify-between gap-3 mt-10">
-          <Button variant="ghost" onClick={reset}>Reset</Button>
+          <Button variant="ghost" onClick={reset}>{t('admin.filters.reset')}</Button>
           <div className="flex gap-3">
-            <Button variant="secondary" onClick={onClose}>Cancel</Button>
-            <Button onClick={() => { onApply(draft); onClose() }}>Apply</Button>
+            <Button variant="secondary" onClick={onClose}>{t('admin.filters.cancel')}</Button>
+            <Button onClick={() => { onApply(draft); onClose() }}>{t('admin.filters.apply')}</Button>
           </div>
         </div>
       </aside>

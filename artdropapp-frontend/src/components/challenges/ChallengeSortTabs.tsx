@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { SubmissionSort } from '../../api/challengesApi'
 
 type ChallengeSortTabsProps = {
@@ -5,20 +6,22 @@ type ChallengeSortTabsProps = {
   onChange: (sort: SubmissionSort) => void
 }
 
-const TABS: { key: SubmissionSort; label: string }[] = [
-  { key: 'top', label: 'Top' },
-  { key: 'recent', label: 'Recent' },
-]
-
 export function ChallengeSortTabs({ active, onChange }: ChallengeSortTabsProps) {
+  const { t } = useTranslation()
+
+  const tabs: { key: SubmissionSort; label: string }[] = [
+    { key: 'top', label: t('challenges.sort.top') },
+    { key: 'recent', label: t('challenges.sort.recent') },
+  ]
+
   return (
     <div
       role="tablist"
-      aria-label="Sort submissions"
+      aria-label={t('challenges.sort.label')}
       className="border-b border-outline-variant/30 mb-12"
     >
       <div className="flex gap-10 max-w-[1600px] mx-auto px-8">
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const isActive = tab.key === active
           return (
             <button

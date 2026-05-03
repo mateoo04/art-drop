@@ -1,5 +1,6 @@
 import { Bookmark, Heart, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useAuthPrompt } from '../../contexts/AuthPromptContext'
 import { useLikeArtwork } from '../../hooks/useLikeArtwork'
@@ -39,22 +40,22 @@ function aspectClass(ratio: number): string {
   return 'aspect-[2/3]'
 }
 
-function progressLabel(status: ProgressStatus | null): string | null {
-  if (status === 'WIP') return 'WIP'
-  if (status === 'FINISHED') return 'Finished'
+function progressKey(status: ProgressStatus | null): string | null {
+  if (status === 'WIP') return 'home.card.progress.wip'
+  if (status === 'FINISHED') return 'home.card.progress.finished'
   return null
 }
 
-function saleLabel(status: SaleStatus | null): string | null {
+function saleKey(status: SaleStatus | null): string | null {
   switch (status) {
     case 'AVAILABLE':
-      return 'Available'
+      return 'home.card.sale.available'
     case 'ORIGINAL':
-      return 'Original'
+      return 'home.card.sale.original'
     case 'EDITION':
-      return 'Edition'
+      return 'home.card.sale.edition'
     case 'SOLD':
-      return 'Sold'
+      return 'home.card.sale.sold'
     default:
       return null
   }
@@ -76,8 +77,11 @@ function saleBadgeClasses(status: SaleStatus | null): string {
 }
 
 export function ArtworkCard({ artwork }: ArtworkCardProps) {
-  const progress = progressLabel(artwork.progressStatus)
-  const sale = saleLabel(artwork.saleStatus)
+  const { t } = useTranslation()
+  const progressKey_ = progressKey(artwork.progressStatus)
+  const saleKey_ = saleKey(artwork.saleStatus)
+  const progress = progressKey_ ? t(progressKey_) : null
+  const sale = saleKey_ ? t(saleKey_) : null
   const { promptToAuth } = useAuthPrompt()
   const likeMutation = useLikeArtwork()
   const [animating, setAnimating] = useState(false)
@@ -154,7 +158,7 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
             </Link>
             {artwork.artist ? (
               <p className="font-body text-sm text-on-surface-variant italic">
-                by{' '}
+                {t('home.card.by')}{' '}
                 <Link
                   to={`/u/${artwork.artist.slug}`}
                   className="hover:text-on-surface transition-colors underline-offset-4 hover:underline"
@@ -184,7 +188,7 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
               type="button"
               onClick={handleLike}
               aria-pressed={liked}
-              aria-label={liked ? 'Unlike artwork' : 'Like artwork'}
+              aria-label={liked ? t('home.card.unlikeArtwork') : t('home.card.likeArtwork')}
               className={`flex items-center gap-1.5 text-xs transition-colors ${
                 liked ? 'text-error' : 'hover:text-on-surface'
               }`}
@@ -200,7 +204,7 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
             </button>
             <Link
               to={`/details/${artwork.id}#comments`}
-              aria-label="Open comments"
+              aria-label={t('home.card.openComments')}
               className="flex items-center gap-1.5 text-xs hover:text-on-surface transition-colors"
             >
               <MessageCircle size={14} />
@@ -209,7 +213,7 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
           </div>
           <button
             type="button"
-            aria-label="Bookmark"
+            aria-label={t('home.card.bookmark')}
             className="text-on-surface-variant hover:text-on-surface transition-colors"
           >
             <Bookmark size={20} />

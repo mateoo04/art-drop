@@ -9,7 +9,6 @@ import { ArtworkDropPage } from './pages/ArtworkDropPage'
 import { ArtworkEditPage } from './pages/ArtworkEditPage'
 import { ChallengeDetailPage } from './pages/ChallengeDetailPage'
 import { ChallengesPage } from './pages/ChallengesPage'
-import { CirclePage } from './pages/CirclePage'
 import { CollectionsPage } from './pages/CollectionsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
@@ -26,14 +25,6 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
-        <Route
-          path="/circle"
-          element={
-            <ProtectedRoute>
-              <CirclePage />
-            </ProtectedRoute>
-          }
-        />
         <Route path="/challenges" element={<ChallengesPage />} />
         <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
         <Route path="/collections" element={<CollectionsPage />} />

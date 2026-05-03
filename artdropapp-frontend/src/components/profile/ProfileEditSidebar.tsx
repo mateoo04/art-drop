@@ -1,7 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { z } from 'zod'
 import { updateMe, type UpdateProfilePayload } from '../../api/usersApi'
 import type { UserProfile } from '../../types/user'
@@ -16,29 +18,32 @@ type ProfileEditSidebarProps = {
   onSaved: (updated: UserProfile) => void
 }
 
-const schema = z.object({
-  displayName: z
-    .string()
-    .trim()
-    .min(2, { message: 'Display name must be at least 2 characters' })
-    .max(100, { message: 'Display name must be 100 characters or fewer' }),
-  bio: z
-    .string()
-    .max(1000, { message: 'Bio must be 1000 characters or fewer' })
-    .optional()
-    .or(z.literal('')),
-  avatarUrl: z
-    .string()
-    .trim()
-    .max(1000)
-    .url({ message: 'Must be a valid URL' })
-    .optional()
-    .or(z.literal('')),
-})
+const makeSchema = (t: TFunction) =>
+  z.object({
+    displayName: z
+      .string()
+      .trim()
+      .min(2, { message: t('profile.validation.displayName.tooShort') })
+      .max(100, { message: t('profile.validation.displayName.tooLong') }),
+    bio: z
+      .string()
+      .max(1000, { message: t('profile.validation.bio.tooLong') })
+      .optional()
+      .or(z.literal('')),
+    avatarUrl: z
+      .string()
+      .trim()
+      .max(1000)
+      .url({ message: t('profile.validation.avatarUrl.invalid') })
+      .optional()
+      .or(z.literal('')),
+  })
 
-type FormValues = z.infer<typeof schema>
+type FormValues = z.infer<ReturnType<typeof makeSchema>>
 
 export function ProfileEditSidebar({ open, user, onClose, onSaved }: ProfileEditSidebarProps) {
+  const { t } = useTranslation()
+  const schema = useMemo(() => makeSchema(t), [t])
   const [submitError, setSubmitError] = useState<string | null>(null)
   const {
     register,
@@ -108,16 +113,16 @@ export function ProfileEditSidebar({ open, user, onClose, onSaved }: ProfileEdit
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label="Edit profile"
+        aria-label={t('profile.editProfile.ariaLabel')}
         className={`absolute top-0 right-0 h-full w-full max-w-md bg-surface shadow-2xl transition-transform duration-300 ease-out overflow-y-auto ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="flex items-center justify-between px-8 py-6 border-b border-outline-variant/15">
-          <h2 className="font-headline text-2xl text-on-surface">Edit profile</h2>
+          <h2 className="font-headline text-2xl text-on-surface">{t('profile.editProfile.title')}</h2>
           <button
             type="button"
-            aria-label="Close edit profile"
+            aria-label={t('profile.editProfile.closeLabel')}
             onClick={onClose}
             className="text-on-surface-variant hover:text-on-surface"
           >
@@ -126,7 +131,7 @@ export function ProfileEditSidebar({ open, user, onClose, onSaved }: ProfileEdit
         </div>
 
         <form className="px-8 py-8 space-y-6" onSubmit={onSubmit} noValidate>
-          <FormField label="Display Name" htmlFor="displayName" error={errors.displayName?.message}>
+          <FormField label={t('profile.editProfile.displayName')} htmlFor="displayName" error={errors.displayName?.message}>
             <Input
               id="displayName"
               type="text"
@@ -136,7 +141,7 @@ export function ProfileEditSidebar({ open, user, onClose, onSaved }: ProfileEdit
             />
           </FormField>
 
-          <FormField label="Avatar URL" htmlFor="avatarUrl" error={errors.avatarUrl?.message}>
+          <FormField label={t('profile.editProfile.avatarUrl')} htmlFor="avatarUrl" error={errors.avatarUrl?.message}>
             <Input
               id="avatarUrl"
               type="url"
@@ -152,7 +157,7 @@ export function ProfileEditSidebar({ open, user, onClose, onSaved }: ProfileEdit
               htmlFor="bio"
               className="block font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant"
             >
-              Bio
+              {t('profile.editProfile.bio')}
             </label>
             <textarea
               id="bio"
@@ -191,10 +196,10 @@ export function ProfileEditSidebar({ open, user, onClose, onSaved }: ProfileEdit
 
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="primary" fullWidth loading={isSubmitting}>
-              Save
+              {t('common.save')}
             </Button>
           </div>
         </form>

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from './Button'
 
 type ConfirmModalProps = {
@@ -17,13 +18,17 @@ export function ConfirmModal({
   open,
   title,
   message,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   destructive = false,
   busy = false,
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  const { t } = useTranslation()
+  const finalConfirm = confirmLabel ?? t('common.confirm')
+  const finalCancel = cancelLabel ?? t('common.cancel')
+
   useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
@@ -49,7 +54,7 @@ export function ConfirmModal({
     >
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t('common.close')}
         tabIndex={-1}
         onClick={() => {
           if (!busy) onCancel()
@@ -70,14 +75,14 @@ export function ConfirmModal({
         ) : null}
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={onCancel} disabled={busy}>
-            {cancelLabel}
+            {finalCancel}
           </Button>
           <Button
             variant={destructive ? 'destructive' : 'primary'}
             onClick={onConfirm}
             loading={busy}
           >
-            {confirmLabel}
+            {finalConfirm}
           </Button>
         </div>
       </div>

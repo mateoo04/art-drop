@@ -1,4 +1,5 @@
 import Masonry from 'react-masonry-css'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { cloudinarySrcSet, cloudinaryUrl } from '../../lib/cloudinary'
 import type { SubmissionThumbnail } from '../../types/challenge'
@@ -20,13 +21,17 @@ type ChallengeSubmissionsMasonryProps = {
 export function ChallengeSubmissionsMasonry({
   submissions,
 }: ChallengeSubmissionsMasonryProps) {
+  const { t } = useTranslation()
+
   if (submissions.length === 0) {
     return (
       <div className="py-24 text-center text-on-surface-variant italic font-headline">
-        No submissions yet.
+        {t('challenges.detail.noSubmissions')}
       </div>
     )
   }
+
+  const byLabel = t('home.card.by')
 
   return (
     <div className="max-w-[1600px] mx-auto px-8">
@@ -55,7 +60,7 @@ export function ChallengeSubmissionsMasonry({
                 <p className="font-headline text-xl">{submission.title}</p>
                 {submission.artistDisplayName ? (
                   <p className="text-xs font-light text-white/80">
-                    by {submission.artistDisplayName}
+                    {byLabel} {submission.artistDisplayName}
                   </p>
                 ) : null}
               </div>

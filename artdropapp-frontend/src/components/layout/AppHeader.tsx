@@ -1,17 +1,13 @@
+import { useTranslation } from 'react-i18next'
 import { Search, ShieldUser, ShoppingBag, User } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { getToken } from '../../lib/auth'
 import { useCurrentUser } from '../../hooks/useCurrentUser'
 
-const navItems = [
-  { to: '/', label: 'Discover', end: true },
-  { to: '/circle', label: 'Circle', end: false },
-  { to: '/challenges', label: 'Challenges', end: true },
-]
-
 export function AppHeader() {
   const navigate = useNavigate()
   const { user } = useCurrentUser()
+  const { t } = useTranslation()
   const isAdmin = (user?.roles ?? []).includes('ROLE_ADMIN')
 
   const handleAccountClick = () => {
@@ -27,34 +23,17 @@ export function AppHeader() {
         ArtDrop
       </NavLink>
 
-      <nav className="hidden md:flex gap-12 items-center" aria-label="Main navigation">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) =>
-              isActive
-                ? 'font-headline text-lg tracking-tight text-on-surface border-b-2 border-on-surface pb-1 transition-colors duration-300'
-                : 'font-body text-sm tracking-wide uppercase text-primary hover:text-on-surface transition-colors duration-300'
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
-
       <div className="flex items-center gap-6">
         <button
           type="button"
-          aria-label="Search"
+          aria-label={t('nav.search')}
           className="text-on-surface transition-transform active:scale-95"
         >
           <Search size={20} />
         </button>
         <button
           type="button"
-          aria-label="Bag"
+          aria-label={t('nav.bag')}
           className="text-on-surface transition-transform active:scale-95"
         >
           <ShoppingBag size={20} />
@@ -62,7 +41,7 @@ export function AppHeader() {
         {isAdmin ? (
           <button
             type="button"
-            aria-label="Admin"
+            aria-label={t('nav.admin')}
             onClick={() => navigate('/admin')}
             className="text-on-surface transition-transform active:scale-95"
           >
@@ -71,7 +50,7 @@ export function AppHeader() {
         ) : null}
         <button
           type="button"
-          aria-label="Account"
+          aria-label={t('nav.account')}
           onClick={handleAccountClick}
           className="text-on-surface transition-transform active:scale-95"
         >

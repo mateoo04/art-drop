@@ -63,6 +63,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+  Tailwind Preflight only resets `a` (color, text-decoration) — it does not set `cursor`.
+  `cursor` inherits, so parents (e.g. full-width headings) or mixed UA defaults can show the
+  default arrow. Match the existing `button` rule: explicit pointer for real links and buttons.
+*/
+@layer base {
+  a[href],
+  button:not(:disabled),
+  [role='button']:not([disabled]) {
+    cursor: pointer;
+  }
+}
+
 .masonry-grid {
   column-count: 1;
   column-gap: 2rem;
@@ -151,10 +164,6 @@ body {
   width: 25%;
   background-color: var(--color-on-surface);
   animation: editorial-shimmer 1100ms ease-in-out infinite;
-}
-
-button:not(:disabled) {
-  cursor: pointer;
 }
 
 .swiper-pagination-fraction, .swiper-pagination-custom, .swiper-horizontal > .swiper-pagination-bullets, div.swiper-pagination-bullets.swiper-pagination-horizontal{

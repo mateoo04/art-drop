@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { fetchListedArtworkCount, revokeSeller } from '../../api/adminApi'
 import { Button } from '../ui/Button'
 import { Spinner } from '../ui/Spinner'
@@ -12,6 +13,7 @@ type Props = {
 }
 
 export function RevokeSellerModal({ open, userId, username, onClose, onRevoked }: Props) {
+  const { t } = useTranslation()
   const [reason, setReason] = useState('')
   const [count, setCount] = useState<number | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -39,7 +41,7 @@ export function RevokeSellerModal({ open, userId, username, onClose, onRevoked }
       setReason('')
       onClose()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Revoke failed')
+      setError(e instanceof Error ? e.message : t('admin.revokeSeller.failed'))
     } finally {
       setSubmitting(false)
     }
@@ -53,7 +55,7 @@ export function RevokeSellerModal({ open, userId, username, onClose, onRevoked }
     >
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t('common.close')}
         tabIndex={-1}
         onClick={() => {
           if (!submitting) onClose()
@@ -61,18 +63,18 @@ export function RevokeSellerModal({ open, userId, username, onClose, onRevoked }
         className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm cursor-default"
       />
       <div className="relative w-full max-w-md bg-surface-container-lowest border border-outline-variant/15 shadow-[0_20px_60px_rgba(45,52,53,0.18)] p-8">
-        <h2 className="font-display text-2xl text-on-surface mb-3">Revoke seller status</h2>
+        <h2 className="font-display text-2xl text-on-surface mb-3">{t('admin.revokeSeller.title')}</h2>
         <p className="font-body text-sm text-on-surface-variant leading-relaxed mb-6">
-          You're about to revoke <strong>@{username}</strong>'s seller status.{' '}
+          {t('admin.revokeSeller.bodyPrefix')} <strong>@{username}</strong>{t('admin.revokeSeller.bodySellerStatusSuffix')}{' '}
           {count == null
-            ? <Spinner label="Loading listed artwork count" />
+            ? <Spinner label={t('admin.revokeSeller.loadingCount')} />
             : count === 0
-            ? 'No artworks are currently listed.'
-            : `This will unlist ${count} artwork${count === 1 ? '' : 's'}.`}
+            ? t('admin.revokeSeller.noArtworks')
+            : t('admin.revokeSeller.willUnlist', { count })}
         </p>
         <label className="block">
           <span className="block font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-1.5">
-            Reason (required)
+            {t('admin.revokeSeller.reasonLabel')}
           </span>
           <textarea
             value={reason}
@@ -85,7 +87,7 @@ export function RevokeSellerModal({ open, userId, username, onClose, onRevoked }
         {error ? <p className="text-error mt-2 text-sm" role="alert">{error}</p> : null}
         <div className="flex justify-end gap-3 mt-6">
           <Button variant="secondary" onClick={onClose} disabled={submitting}>
-            Cancel
+            {t('admin.revokeSeller.cancel')}
           </Button>
           <Button
             variant="destructive"
@@ -93,7 +95,7 @@ export function RevokeSellerModal({ open, userId, username, onClose, onRevoked }
             loading={submitting}
             disabled={reason.trim().length === 0}
           >
-            Revoke seller status
+            {t('admin.revokeSeller.confirm')}
           </Button>
         </div>
       </div>

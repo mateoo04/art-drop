@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useAdminUsers } from '../../hooks/useAdminUsers'
 import { SellerStatusBadge } from '../../components/SellerStatusBadge'
@@ -24,6 +25,7 @@ function activeFilterCount(f: AdminUserFilters): number {
 }
 
 export function AdminUsersPage() {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(0)
   const size = 20
@@ -46,11 +48,11 @@ export function AdminUsersPage() {
           type="search"
           value={query}
           onChange={(e) => { setQuery(e.target.value); setPage(0) }}
-          placeholder="Search by username, name, or email…"
+          placeholder={t('admin.users.search')}
           className="flex-1"
         />
         <Button variant="secondary" onClick={() => setDrawerOpen(true)}>
-          Filters{filterCount > 0 ? ` (${filterCount})` : ''}
+          {filterCount > 0 ? t('admin.users.filtersWithCount', { count: filterCount }) : t('admin.users.filters')}
         </Button>
       </div>
 
@@ -61,7 +63,7 @@ export function AdminUsersPage() {
       ) : error ? (
         <p className="text-error" role="alert">{error}</p>
       ) : !data || data.content.length === 0 ? (
-        <p className="text-on-surface-variant italic">No users found.</p>
+        <p className="text-on-surface-variant italic">{t('admin.users.noUsers')}</p>
       ) : (
         <ul className="divide-y divide-outline-variant/15">
           {data.content.map((u) => {
@@ -83,18 +85,18 @@ export function AdminUsersPage() {
                     {pending.message}
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-on-surface-variant">Submitted {formatDate(pending.submittedAt)}</span>
+                    <span className="text-xs text-on-surface-variant">{t('admin.users.submitted', { date: formatDate(pending.submittedAt) })}</span>
                     <div className="flex gap-2">
                       <Button
                         variant="destructive"
                         onClick={() => setDecision({ mode: 'reject', appId: pending.id, applicantUsername: u.username })}
                       >
-                        Reject
+                        {t('admin.users.reject')}
                       </Button>
                       <Button
                         onClick={() => setDecision({ mode: 'approve', appId: pending.id, applicantUsername: u.username })}
                       >
-                        Approve
+                        {t('admin.users.approve')}
                       </Button>
                     </div>
                   </div>
@@ -119,9 +121,9 @@ export function AdminUsersPage() {
 
       {data && data.totalPages > 1 ? (
         <div className="flex items-center justify-between mt-6">
-          <Button variant="secondary" disabled={data.number === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>Previous</Button>
-          <span className="text-sm text-on-surface-variant">Page {data.number + 1} of {data.totalPages}</span>
-          <Button variant="secondary" disabled={data.number + 1 >= data.totalPages} onClick={() => setPage((p) => p + 1)}>Next</Button>
+          <Button variant="secondary" disabled={data.number === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>{t('admin.users.previous')}</Button>
+          <span className="text-sm text-on-surface-variant">{t('admin.users.page', { current: data.number + 1, total: data.totalPages })}</span>
+          <Button variant="secondary" disabled={data.number + 1 >= data.totalPages} onClick={() => setPage((p) => p + 1)}>{t('admin.users.next')}</Button>
         </div>
       ) : null}
 
@@ -141,10 +143,10 @@ export function AdminUsersPage() {
           if (!decision) return
           if (decision.mode === 'approve') {
             await approveApplication(decision.appId, reason || undefined)
-            setToast('Application approved.')
+            setToast(t('admin.users.toastApproved'))
           } else {
             await rejectApplication(decision.appId, reason)
-            setToast('Application rejected.')
+            setToast(t('admin.users.toastRejected'))
           }
           await refetch()
         }}

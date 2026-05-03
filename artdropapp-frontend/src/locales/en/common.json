@@ -1,0 +1,521 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "confirm": "Confirm",
+    "pleaseWait": "Please wait…",
+    "replies": "Replies",
+    "artworkDetails": "Selected artwork details",
+    "details": "Details"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageOptions": {
+      "en": "English",
+      "hr": "hrvatski"
+    },
+    "open": "Open settings",
+    "close": "Close settings"
+  },
+  "account": {
+    "editProfile": "Edit profile",
+    "yourDrops": "Your drops",
+    "noDrops": "You haven't dropped anything yet.",
+    "loadingDrops": "Loading your drops",
+    "loadingProfile": "Loading your profile",
+    "becomeSeller": "Become a seller",
+    "seller": {
+      "title": "Seller status",
+      "applyCta": "Apply to become a seller",
+      "applyAgain": "Apply again",
+      "pending": "Your application is under review. Submitted {{date}}.",
+      "approved": "You're a verified seller (approved {{date}}).",
+      "revoked": "Your seller status was revoked on {{date}}.",
+      "rejected": "Your application was not approved on {{date}}.",
+      "cooldown": "You can re-apply on {{date}}.",
+      "becomeSeller": "Become a verified seller to list your artworks for sale.",
+      "modal": {
+        "title": "Apply to become a seller",
+        "body": "Tell us why you'd like to sell on ArtDrop. ({{min}}–{{max}} characters)",
+        "placeholder": "Why do you want to sell on ArtDrop?",
+        "submit": "Submit application",
+        "closeLabel": "Close",
+        "errorCooldown": "You cannot re-apply yet.",
+        "errorAlreadyPending": "You already have a pending application.",
+        "errorAlreadySeller": "You are already a verified seller.",
+        "errorFallback": "Submission failed.",
+        "cooldownSuffix": "You can re-apply on {{date}}."
+      },
+      "status": {
+        "none": "Not a seller",
+        "pending": "Pending",
+        "approved": "Verified seller",
+        "rejected": "Rejected",
+        "revoked": "Revoked"
+      }
+    }
+  },
+  "profile": {
+    "drops": "Drops",
+    "drop": "drop",
+    "noDrops": "No drops yet.",
+    "notFound": "We couldn't find that artist.",
+    "loadingProfile": "Loading profile",
+    "followAction": "follow {{name}}",
+    "joinCircle": "Join Circle",
+    "inCircle": "In your Circle",
+    "addBio": "Add a bio to introduce your practice.",
+    "circleSize": "in your Circle",
+    "circleSizeLabel": "In your Circle",
+    "followingCount": "Circles you're in",
+    "followingCountLabel": "Circles you're in",
+    "dropSingular": "drop",
+    "dropPlural": "drops",
+    "joinedPrefix": "Joined",
+    "validation": {
+      "displayName": {
+        "tooShort": "Display name must be at least 2 characters",
+        "tooLong": "Display name must be 100 characters or fewer"
+      },
+      "bio": {
+        "tooLong": "Bio must be 1000 characters or fewer"
+      },
+      "avatarUrl": {
+        "invalid": "Must be a valid URL"
+      }
+    },
+    "editProfile": {
+      "title": "Edit profile",
+      "closeLabel": "Close edit profile",
+      "displayName": "Display Name",
+      "avatarUrl": "Avatar URL",
+      "bio": "Bio",
+      "ariaLabel": "Edit profile"
+    }
+  },
+  "nav": {
+    "discover": "Discover",
+    "circle": "Circle",
+    "challenges": "Challenges",
+    "mainNavLabel": "Main navigation",
+    "search": "Search",
+    "bag": "Bag",
+    "admin": "Admin",
+    "account": "Account",
+    "newDrop": "New Drop",
+    "newDropLabel": "New drop"
+  },
+  "footer": {
+    "copyright": "© {{year}} ArtDrop Digital Gallery. All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "contact": "Contact"
+  },
+  "home": {
+    "loading": "Loading artworks",
+    "loadingMore": "Loading more artworks",
+    "empty": "No artworks in this medium yet.",
+    "activeChallenges": {
+      "allChallenges": "Challenges",
+      "timeLeft": {
+        "ended": "Ended",
+        "openEnded": "Open",
+        "hours_one": "{{count}} hour left",
+        "hours_other": "{{count}} hours left",
+        "days_one": "{{count}} day left",
+        "days_other": "{{count}} days left",
+        "weeks_one": "{{count}} week left",
+        "weeks_other": "{{count}} weeks left"
+      }
+    },
+    "filters": {
+      "all": "All"
+    },
+    "card": {
+      "by": "by",
+      "likeArtwork": "Like artwork",
+      "unlikeArtwork": "Unlike artwork",
+      "openComments": "Open comments",
+      "bookmark": "Bookmark",
+      "progress": {
+        "wip": "WIP",
+        "finished": "Finished"
+      },
+      "sale": {
+        "available": "Available",
+        "original": "Original",
+        "edition": "Edition",
+        "sold": "Sold"
+      }
+    }
+  },
+  "artwork": {
+    "detail": {
+      "notFound": "Artwork not found.",
+      "invalidId": "Invalid ID",
+      "studioNote": "Studio Note",
+      "discussion": "Discussion",
+      "price": "Price",
+      "priceWithQuantity": "Price × {{quantity}}",
+      "quantity": "Quantity",
+      "medium": "Medium",
+      "dimensions": "Dimensions",
+      "status": "Status",
+      "progressWip": "Work in progress",
+      "progressFinished": "Finished",
+      "like": "Like",
+      "liked": "Liked",
+      "loadMore": "Load more comments",
+      "gallery": {
+        "prevImage": "Previous image",
+        "nextImage": "Next image",
+        "imageNav": "Image navigation"
+      },
+      "sale": {
+        "originalAvailable": "Original Available",
+        "editionAvailable": "Edition Available",
+        "available": "Available",
+        "sold": "Sold",
+        "purchaseOriginal": "Purchase Original",
+        "purchaseEdition": "Purchase Edition",
+        "purchase": "Purchase"
+      },
+      "quantity_selector": {
+        "label": "Quantity selector",
+        "decrease": "Decrease quantity",
+        "increase": "Increase quantity"
+      }
+    },
+    "drop": {
+      "title": "Drop a new artwork",
+      "subtitle": "Share a piece with your circle. Sellers can also list it for sale.",
+      "cancelLabel": "Cancel Drop",
+      "cancel": "Cancel",
+      "submit": "Drop Artwork",
+      "submitting": "Dropping…",
+      "fields": {
+        "media": "Artwork Media",
+        "imagesCount": "{{count}} image",
+        "imagesCount_other": "{{count}} images",
+        "imagesCoverMarked": "· cover marked",
+        "title": "Title",
+        "titlePlaceholder": "Give it a name",
+        "medium": "Medium",
+        "mediumPlaceholder": "Select medium",
+        "status": "Status",
+        "statusFinished": "Finished",
+        "statusWip": "WIP",
+        "description": "Description",
+        "descriptionPlaceholder": "What's the story behind this piece?",
+        "tags": "Tags",
+        "tagsPlaceholder": "Add tags (press Enter)",
+        "dimensions": "Add Dimensions",
+        "dimensionsOptional": "(optional)",
+        "dimensionWidth": "Width",
+        "dimensionHeight": "Height",
+        "dimensionDepth": "Depth",
+        "listing": "List for sale",
+        "listingSubtitle": "Make this piece available for purchase directly from your profile.",
+        "enableListing": "Enable Marketplace Listing",
+        "price": "Price",
+        "editionStatus": "Edition Status",
+        "removeTag": "Remove {{tag}}"
+      },
+      "upload": {
+        "clickToUpload": "Click to upload images",
+        "opening": "Opening uploader…",
+        "fileTypes": "JPG, PNG, or WebP · up to 10 files",
+        "uploading": "Uploading…",
+        "addMore": "Add more",
+        "setCover": "Set cover",
+        "remove": "Remove",
+        "removeLabel": "Remove image",
+        "cover": "Cover",
+        "failed": "Upload failed"
+      },
+      "edition": {
+        "original": "Original (1/1)",
+        "limited": "Limited Edition",
+        "open": "Open Edition"
+      },
+      "seller": {
+        "verified": "Verified Seller",
+        "required": "Seller Required",
+        "pending": "Your seller application is under review.",
+        "requiresStatus": "Selling artworks requires verified seller status.",
+        "applyNow": "Apply now",
+        "canReapply": "You can re-apply on {{date}}.",
+        "requiresStatusFallback": "Selling artworks requires verified seller status."
+      },
+      "error": {
+        "noImages": "Please upload at least one image.",
+        "noTitle": "Please give your piece a title.",
+        "noMedium": "Please choose a medium.",
+        "invalidPrice": "Enter a valid price to list this piece for sale.",
+        "titleTaken": "That title is already taken — try another.",
+        "forbiddenSale": "Listing for sale requires verified seller status.",
+        "unauthenticated": "Please sign in to drop an artwork.",
+        "fallback": "Something went wrong."
+      }
+    },
+    "edit": {
+      "title": "Edit artwork",
+      "loadingLabel": "Loading artwork",
+      "save": "Save",
+      "saving": "Saving…",
+      "fields": {
+        "title": "Title",
+        "medium": "Medium",
+        "description": "Description",
+        "imageUrl": "Image URL (https://…)",
+        "imageUrlPlaceholder": "https://example.com/image.jpg",
+        "listing": "Listing",
+        "price": "Price",
+        "pricePlaceholder": "e.g. 250.00",
+        "saleStatus": "Sale status",
+        "saleStatusOptions": {
+          "notListed": "Not listed",
+          "available": "Available",
+          "original": "Original",
+          "edition": "Edition",
+          "sold": "Sold"
+        }
+      },
+      "seller": {
+        "pending": "Your seller application is under review.",
+        "requiresStatus": "Selling artworks requires verified seller status.",
+        "applyNow": "Apply now",
+        "canReapply": "You can re-apply on {{date}}.",
+        "requiresStatusFallback": "Selling artworks requires verified seller status."
+      },
+      "error": {
+        "invalidId": "Invalid ID",
+        "notFound": "Artwork not found.",
+        "loadFailed": "Failed to load artwork",
+        "forbiddenSale": "Selling artworks requires verified seller status.",
+        "saveFailed": "Save failed"
+      }
+    }
+  },
+  "comments": {
+    "empty": "No comments yet.",
+    "loadingComments": "Loading comments",
+    "loadingMoreComments": "Loading more comments",
+    "loadingReplies": "Loading replies",
+    "delete": "Delete",
+    "reply": "Reply",
+    "deleteModal": {
+      "title": "Delete comment?",
+      "message": "This will remove your comment from the discussion. You can't undo this.",
+      "confirm": "Delete"
+    },
+    "composer": {
+      "post": "Post",
+      "cancel": "Cancel",
+      "failedToPost": "Failed to post",
+      "defaultAuthReason": "leave a comment",
+      "placeholder": "Share something thoughtful…",
+      "placeholderSignedOut": "Sign in to {{reason}}…",
+      "replyPlaceholder": "Reply to {{name}}…"
+    },
+    "viewMoreReplies": "View {{count}} more reply",
+    "viewMoreReplies_other": "View {{count}} more replies"
+  },
+  "challenges": {
+    "loading": "Loading challenges",
+    "empty": "No challenges yet — check back soon.",
+    "learnMore": "Learn More",
+    "active": {
+      "viewAll": "View all",
+      "awaitingSubmissions": "Awaiting submissions"
+    },
+    "detail": {
+      "loading": "Loading challenge",
+      "notFound": "Challenge not found.",
+      "loadingSubmissions": "Loading submissions",
+      "loadingMoreSubmissions": "Loading more submissions",
+      "noSubmissions": "No submissions yet."
+    },
+    "hero": {
+      "status": {
+        "past": "Past Challenge",
+        "featured": "Featured Challenge",
+        "upcoming": "Upcoming Challenge",
+        "active": "Active Challenge"
+      },
+      "backLabel": "All Challenges",
+      "joinChallenge": "Join Challenge",
+      "timeClosed": "Challenge Closed",
+      "timeRemaining": "Time Remaining",
+      "timeFormat": "{{days}} Days : {{hours}} Hrs : {{minutes}} Mins"
+    },
+    "sort": {
+      "label": "Sort submissions",
+      "top": "Top",
+      "recent": "Recent"
+    }
+  },
+  "circle": {
+    "title": "Your Circle",
+    "subtitle": "The latest drops from artists whose practice you're following.",
+    "loading": "Loading your Circle",
+    "empty": "Your Circle is quiet. Follow artists whose practice you want to see more of — their drops will show up here, newest first.",
+    "discoverArtists": "Discover artists"
+  },
+  "collections": {
+    "title": "Collections",
+    "loading": "Loading collections…",
+    "artworkId": "Artwork ID",
+    "created": "Created",
+    "visibility": "Visibility",
+    "public": "Public",
+    "private": "Private"
+  },
+  "admin": {
+    "layout": {
+      "title": "Admin",
+      "userDirectory": "User directory"
+    },
+    "users": {
+      "noUsers": "No users found.",
+      "search": "Search by username, name, or email…",
+      "filters": "Filters",
+      "filtersWithCount": "Filters ({{count}})",
+      "submitted": "Submitted {{date}}",
+      "reject": "Reject",
+      "approve": "Approve",
+      "page": "Page {{current}} of {{total}}",
+      "previous": "Previous",
+      "next": "Next",
+      "toastApproved": "Application approved.",
+      "toastRejected": "Application rejected."
+    },
+    "userDetail": {
+      "backToUsers": "← Back to users",
+      "revokeSellerStatus": "Revoke seller status",
+      "sellerHistory": "Seller history",
+      "noApplications": "No applications yet.",
+      "submitted": "Submitted {{date}}",
+      "decided": "Decided {{date}}",
+      "revoked": "Revoked {{date}}",
+      "revokedSuffix": "· revoked",
+      "toastRevoked": "Seller status revoked. {{count}} artwork unlisted.",
+      "toastRevoked_other": "Seller status revoked. {{count}} artworks unlisted."
+    },
+    "filters": {
+      "title": "Filters",
+      "sellerStatus": "Seller status",
+      "role": "Role",
+      "sort": "Sort",
+      "reset": "Reset",
+      "cancel": "Cancel",
+      "apply": "Apply",
+      "closeLabel": "Close filters",
+      "roles": {
+        "user": "User",
+        "admin": "Admin"
+      },
+      "sorts": {
+        "newest": "Newest joined",
+        "oldestPending": "Pending oldest first",
+        "username": "Username A–Z",
+        "mostArtworks": "Most artworks"
+      }
+    },
+    "decision": {
+      "titleApprove": "Approve seller application",
+      "titleReject": "Reject seller application",
+      "applicant": "Applicant",
+      "reasonLabel": "Reason",
+      "reasonRequired": "(required)",
+      "reasonOptional": "(optional)",
+      "cancel": "Cancel",
+      "approve": "Approve",
+      "reject": "Reject",
+      "failed": "Failed"
+    },
+    "revokeSeller": {
+      "title": "Revoke seller status",
+      "bodyPrefix": "You're about to revoke",
+      "bodySellerStatusSuffix": "'s seller status.",
+      "loadingCount": "Loading listed artwork count",
+      "noArtworks": "No artworks are currently listed.",
+      "willUnlist": "This will unlist {{count}} artwork.",
+      "willUnlist_other": "This will unlist {{count}} artworks.",
+      "reasonLabel": "Reason (required)",
+      "cancel": "Cancel",
+      "confirm": "Revoke seller status",
+      "failed": "Revoke failed"
+    },
+    "accessDenied": "Access denied."
+  },
+  "auth": {
+    "login": {
+      "heroAlt": "Abstract minimalist digital painting in muted charcoal tones",
+      "heading": "Welcome back.",
+      "subheading": "Continue your journey through the world of digital art.",
+      "email": "Email Address",
+      "emailPlaceholder": "name@curator.com",
+      "password": "Password",
+      "forgotPassword": "Forgot Password?",
+      "submit": "Log In to Your Profile",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign Up",
+      "errorBadCredentials": "Incorrect email or password.",
+      "errorInvalid": "Please check your details and try again.",
+      "errorNetwork": "Something went wrong. Please try again."
+    },
+    "signup": {
+      "heroAlt": "Abstract minimalist painting in muted earth tones",
+      "heading": "Begin your collection.",
+      "subheading": "Join our community of digital curators and discover exceptional artworks.",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "E.g. Elena",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "E.g. Rossi",
+      "email": "Email Address",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Create Your Profile",
+      "hasAccount": "Already have an account?",
+      "signInLink": "Sign In",
+      "signInInstead": "Sign in instead?",
+      "errorEmailTaken": "An account with this email already exists.",
+      "errorInvalid": "Please check your details and try again.",
+      "errorNetwork": "Something went wrong. Please try again."
+    },
+    "validation": {
+      "email": {
+        "required": "Email is required",
+        "invalid": "Enter a valid email address"
+      },
+      "password": {
+        "required": "Password is required",
+        "tooShort": "Password must be at least 8 characters"
+      },
+      "firstName": {
+        "required": "First name is required",
+        "tooLong": "First name must be 50 characters or fewer"
+      },
+      "lastName": {
+        "required": "Last name is required",
+        "tooLong": "Last name must be 50 characters or fewer"
+      },
+      "confirmPassword": {
+        "required": "Please confirm your password",
+        "mismatch": "Passwords don't match"
+      }
+    },
+    "prompt": {
+      "closeModal": "Close modal",
+      "title": "Join the community",
+      "body": "Sign up or log in to like artworks, follow artists, and participate in challenges.",
+      "signup": "Sign up",
+      "login": "Log in"
+    }
+  }
+}

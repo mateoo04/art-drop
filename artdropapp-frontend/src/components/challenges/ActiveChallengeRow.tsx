@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { FreeMode, Mousewheel, Keyboard, A11y } from 'swiper/modules'
@@ -20,9 +21,11 @@ const PLACEHOLDER_HEIGHT_PX = 500
 function SubmissionSlide({
   submission,
   ratio,
+  byLabel,
 }: {
   submission: SubmissionThumbnail
   ratio: number
+  byLabel: string
 }) {
   const widthPx = Math.round(PLACEHOLDER_HEIGHT_PX * ratio)
   return (
@@ -43,7 +46,7 @@ function SubmissionSlide({
           <p className="font-headline text-xl">{submission.title}</p>
           {submission.artistDisplayName ? (
             <p className="text-xs font-light text-white/80">
-              by {submission.artistDisplayName}
+              {byLabel} {submission.artistDisplayName}
             </p>
           ) : null}
         </div>
@@ -52,26 +55,29 @@ function SubmissionSlide({
   )
 }
 
-function PlaceholderSlide({ ratio }: { ratio: number }) {
+function PlaceholderSlide({ ratio, label }: { ratio: number; label: string }) {
   return (
     <div
       style={{ aspectRatio: ratio }}
       className={`relative overflow-hidden bg-surface-container-high ${SLIDE_HEIGHT}`}
     >
       <div className="absolute inset-0 flex items-center justify-center text-on-surface-variant/50 italic font-headline">
-        Awaiting submissions
+        {label}
       </div>
     </div>
   )
 }
 
 export function ActiveChallengeRow({ challenge, bordered }: ActiveChallengeRowProps) {
+  const { t } = useTranslation()
   const submissions = challenge.submissions
   const showPlaceholders = submissions.length === 0
+  const awaitingLabel = t('challenges.active.awaitingSubmissions')
+  const byLabel = t('home.card.by')
   const slides = showPlaceholders
     ? PLACEHOLDER_RATIOS.map((ratio, i) => (
         <SwiperSlide key={`placeholder-${i}`} className="!w-auto">
-          <PlaceholderSlide ratio={ratio} />
+          <PlaceholderSlide ratio={ratio} label={awaitingLabel} />
         </SwiperSlide>
       ))
     : submissions.map((submission, i) => (
@@ -79,6 +85,7 @@ export function ActiveChallengeRow({ challenge, bordered }: ActiveChallengeRowPr
           <SubmissionSlide
             submission={submission}
             ratio={ASPECT_RATIOS[i % ASPECT_RATIOS.length]}
+            byLabel={byLabel}
           />
         </SwiperSlide>
       ))
@@ -100,7 +107,7 @@ export function ActiveChallengeRow({ challenge, bordered }: ActiveChallengeRowPr
           to={`/challenges/${challenge.id}`}
           className="shrink-0 flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-on-surface hover:text-tertiary transition-colors"
         >
-          View all
+          {t('challenges.active.viewAll')}
           <ArrowRight size={14} />
         </Link>
       </div>

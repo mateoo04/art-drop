@@ -1,12 +1,14 @@
+import { useTranslation } from 'react-i18next'
 import { useCollections } from '../hooks/useCollections'
 
 export function CollectionsPage() {
+  const { t } = useTranslation()
   const { data, loading, error } = useCollections()
 
   return (
     <main className="app-main">
-      <h1>ArtDrop - Collections</h1>
-      {loading ? <p className="artwork-list--status">Loading collections...</p> : null}
+      <h1>{t('collections.title')}</h1>
+      {loading ? <p className="artwork-list--status">{t('collections.loading')}</p> : null}
       {error ? (
         <p className="artwork-list--status artwork-list--error" role="alert">
           {error}
@@ -19,12 +21,12 @@ export function CollectionsPage() {
               <article className="artwork-list__item">
                 <strong className="artwork-list__title">{collection.name}</strong>
                 <span>{collection.description}</span>
-                <span className="artwork-list__medium">Artwork ID: {collection.artworkId}</span>
+                <span className="artwork-list__medium">{t('collections.artworkId')}: {collection.artworkId}</span>
                 <span className="artwork-list__tags">
-                  Created: {new Date(collection.createdAt).toLocaleString()}
+                  {t('collections.created')}: {new Date(collection.createdAt).toLocaleString()}
                 </span>
                 <span className="artwork-list__tags">
-                  Visibility: {collection.isPublic ? 'Public' : 'Private'}
+                  {t('collections.visibility')}: {collection.isPublic ? t('collections.public') : t('collections.private')}
                 </span>
               </article>
             </li>

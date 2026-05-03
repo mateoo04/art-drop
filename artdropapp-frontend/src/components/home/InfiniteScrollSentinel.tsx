@@ -13,7 +13,7 @@ export function InfiniteScrollSentinel({
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
-  label = 'Loading more artworks',
+  label,
 }: InfiniteScrollSentinelProps) {
   const { ref, inView } = useInView({ rootMargin: '600px 0px' })
 

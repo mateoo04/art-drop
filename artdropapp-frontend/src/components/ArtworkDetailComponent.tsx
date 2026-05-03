@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight, Heart, Minus, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Keyboard, A11y, Pagination } from 'swiper/modules'
 import type { Swiper as SwiperType } from 'swiper'
@@ -30,32 +31,6 @@ function formatPrice(value: number): string {
   }).format(value)
 }
 
-function saleRibbon(status: SaleStatus): string {
-  switch (status) {
-    case 'ORIGINAL':
-      return 'Original Available'
-    case 'EDITION':
-      return 'Edition Available'
-    case 'AVAILABLE':
-      return 'Available'
-    case 'SOLD':
-      return 'Sold'
-  }
-}
-
-function purchaseLabel(status: SaleStatus): string {
-  switch (status) {
-    case 'ORIGINAL':
-      return 'Purchase Original'
-    case 'EDITION':
-      return 'Purchase Edition'
-    case 'AVAILABLE':
-      return 'Purchase'
-    case 'SOLD':
-      return 'Sold'
-  }
-}
-
 function formatDimensions(
   w: number | null,
   h: number | null,
@@ -74,6 +49,7 @@ export function ArtworkDetailComponent({
   loading,
   error,
 }: ArtworkDetailComponentProps) {
+  const { t } = useTranslation()
   const comments = useComments(artwork?.id ?? null)
   const { promptToAuth } = useAuthPrompt()
   const likeMutation = useLikeArtwork()
@@ -99,10 +75,36 @@ export function ArtworkDetailComponent({
     likeMutation.mutate({ artworkId: artwork.id, like: next })
   }
 
+  function saleRibbon(status: SaleStatus): string {
+    switch (status) {
+      case 'ORIGINAL':
+        return t('artwork.detail.sale.originalAvailable')
+      case 'EDITION':
+        return t('artwork.detail.sale.editionAvailable')
+      case 'AVAILABLE':
+        return t('artwork.detail.sale.available')
+      case 'SOLD':
+        return t('artwork.detail.sale.sold')
+    }
+  }
+
+  function purchaseLabel(status: SaleStatus): string {
+    switch (status) {
+      case 'ORIGINAL':
+        return t('artwork.detail.sale.purchaseOriginal')
+      case 'EDITION':
+        return t('artwork.detail.sale.purchaseEdition')
+      case 'AVAILABLE':
+        return t('artwork.detail.sale.purchase')
+      case 'SOLD':
+        return t('artwork.detail.sale.sold')
+    }
+  }
+
   if (loading) {
     return (
       <div className="px-4 md:px-12 py-16 flex justify-center">
-        <Spinner label="Loading artwork" />
+        <Spinner label={t('artwork.edit.loadingLabel')} />
       </div>
     )
   }
@@ -120,9 +122,9 @@ export function ArtworkDetailComponent({
       <div
         className="px-4 md:px-12 py-16 text-center text-on-surface-variant"
         role="region"
-        aria-label="Details"
+        aria-label={t('common.details')}
       >
-        Artwork not found.
+        {t('artwork.detail.notFound')}
       </div>
     )
   }
@@ -149,7 +151,7 @@ export function ArtworkDetailComponent({
   const effectiveQuantity = showQuantitySelector ? quantity : 1
 
   return (
-    <article aria-label="Selected artwork details">
+    <article aria-label={t('common.artworkDetails')}>
       <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 xl:px-12 py-8 lg:py-16 xl:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 xl:gap-24">
         {/* Gallery */}
         <section className="lg:col-span-7 min-w-0 flex flex-col">
@@ -167,8 +169,8 @@ export function ArtworkDetailComponent({
                   bulletActiveClass: 'gallery-progress__segment--active',
                 }}
                 a11y={{
-                  prevSlideMessage: 'Previous image',
-                  nextSlideMessage: 'Next image',
+                  prevSlideMessage: t('artwork.detail.gallery.prevImage'),
+                  nextSlideMessage: t('artwork.detail.gallery.nextImage'),
                 }}
                 spaceBetween={0}
                 slidesPerView={1}
@@ -194,7 +196,7 @@ export function ArtworkDetailComponent({
                 <button
                   type="button"
                   onClick={() => swiper?.slidePrev()}
-                  aria-label="Previous image"
+                  aria-label={t('artwork.detail.gallery.prevImage')}
                   className="w-10 h-10 flex items-center justify-center bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors shadow-sm"
                 >
                   <ChevronLeft size={20} aria-hidden="true" />
@@ -202,7 +204,7 @@ export function ArtworkDetailComponent({
                 <button
                   type="button"
                   onClick={() => swiper?.slideNext()}
-                  aria-label="Next image"
+                  aria-label={t('artwork.detail.gallery.nextImage')}
                   className="w-10 h-10 flex items-center justify-center bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors shadow-sm"
                 >
                   <ChevronRight size={20} aria-hidden="true" />
@@ -211,7 +213,7 @@ export function ArtworkDetailComponent({
             ) : null}
           </div>
           {galleryImages.length > 1 ? (
-            <div className="gallery-pagination" role="tablist" aria-label="Image navigation" />
+            <div className="gallery-pagination" role="tablist" aria-label={t('artwork.detail.gallery.imageNav')} />
           ) : null}
         </section>
 
@@ -248,7 +250,7 @@ export function ArtworkDetailComponent({
 
           {artwork.description ? (
             <div className="mb-12 lg:mb-16">
-              <h3 className="font-display text-2xl mb-4 text-on-surface">Studio Note</h3>
+              <h3 className="font-display text-2xl mb-4 text-on-surface">{t('artwork.detail.studioNote')}</h3>
               <p className="font-body text-sm text-on-surface-variant leading-relaxed whitespace-pre-line">
                 {artwork.description}
               </p>
@@ -269,7 +271,9 @@ export function ArtworkDetailComponent({
             {showCommercePanel && artwork.price != null ? (
               <div className="flex justify-between items-baseline mb-6 lg:mb-8">
                 <span className="font-body text-sm text-on-surface-variant">
-                  {effectiveQuantity > 1 ? `Price × ${effectiveQuantity}` : 'Price'}
+                  {effectiveQuantity > 1
+                    ? t('artwork.detail.priceWithQuantity', { quantity: effectiveQuantity })
+                    : t('artwork.detail.price')}
                 </span>
                 <span className="font-display text-2xl md:text-3xl text-on-surface">
                   {formatPrice(artwork.price * effectiveQuantity)}
@@ -278,17 +282,17 @@ export function ArtworkDetailComponent({
             ) : null}
             {showQuantitySelector ? (
               <div className="flex items-center justify-between mb-6">
-                <span className="font-body text-sm text-on-surface-variant">Quantity</span>
+                <span className="font-body text-sm text-on-surface-variant">{t('artwork.detail.quantity')}</span>
                 <div
                   className="inline-flex items-stretch border border-outline-variant/40"
                   role="group"
-                  aria-label="Quantity selector"
+                  aria-label={t('artwork.detail.quantity_selector.label')}
                 >
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     disabled={quantity <= 1}
-                    aria-label="Decrease quantity"
+                    aria-label={t('artwork.detail.quantity_selector.decrease')}
                     className="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-container-low disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
                     <Minus size={18} aria-hidden="true" />
@@ -303,7 +307,7 @@ export function ArtworkDetailComponent({
                     type="button"
                     onClick={() => setQuantity((q) => Math.min(MAX_QUANTITY, q + 1))}
                     disabled={quantity >= MAX_QUANTITY}
-                    aria-label="Increase quantity"
+                    aria-label={t('artwork.detail.quantity_selector.increase')}
                     className="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-container-low disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
                     <Plus size={18} aria-hidden="true" />
@@ -341,7 +345,7 @@ export function ArtworkDetailComponent({
                   }`}
                 />
                 <span className="font-label text-xs uppercase tracking-wide">
-                  {liked ? 'Liked' : 'Like'}
+                  {liked ? t('artwork.detail.liked') : t('artwork.detail.like')}
                 </span>
                 <span className="font-label text-xs text-on-surface-variant ml-1">
                   {artwork.likeCount}
@@ -352,20 +356,22 @@ export function ArtworkDetailComponent({
 
           <dl className="flex flex-col gap-4 border-t border-outline-variant/15 py-8">
             <div className="flex justify-between items-center">
-              <dt className="font-label text-sm text-on-surface-variant">Medium</dt>
+              <dt className="font-label text-sm text-on-surface-variant">{t('artwork.detail.medium')}</dt>
               <dd className="font-label text-sm text-on-surface">{artwork.medium}</dd>
             </div>
             {dimensions ? (
               <div className="flex justify-between items-center">
-                <dt className="font-label text-sm text-on-surface-variant">Dimensions</dt>
+                <dt className="font-label text-sm text-on-surface-variant">{t('artwork.detail.dimensions')}</dt>
                 <dd className="font-label text-sm text-on-surface">{dimensions}</dd>
               </div>
             ) : null}
             {artwork.progressStatus ? (
               <div className="flex justify-between items-center">
-                <dt className="font-label text-sm text-on-surface-variant">Status</dt>
+                <dt className="font-label text-sm text-on-surface-variant">{t('artwork.detail.status')}</dt>
                 <dd className="font-label text-sm text-on-surface">
-                  {artwork.progressStatus === 'WIP' ? 'Work in progress' : 'Finished'}
+                  {artwork.progressStatus === 'WIP'
+                    ? t('artwork.detail.progressWip')
+                    : t('artwork.detail.progressFinished')}
                 </dd>
               </div>
             ) : null}
@@ -378,7 +384,7 @@ export function ArtworkDetailComponent({
         id="comments"
         className="w-full max-w-[1000px] mx-auto px-4 md:px-12 py-12 lg:py-16 bg-surface-container-low mb-16 lg:mb-24 scroll-mt-24"
       >
-        <h3 className="font-display text-2xl mb-8 lg:mb-12 text-on-surface">Discussion</h3>
+        <h3 className="font-display text-2xl mb-8 lg:mb-12 text-on-surface">{t('artwork.detail.discussion')}</h3>
         <div className="mb-10 lg:mb-16">
           <CommentComposer
             onSubmit={async (text) => {
@@ -388,7 +394,7 @@ export function ArtworkDetailComponent({
         </div>
         {comments.loading ? (
           <div className="py-6 flex justify-center">
-            <Spinner label="Loading comments" />
+            <Spinner label={t('comments.loadingComments')} />
           </div>
         ) : comments.error ? (
           <p
@@ -415,9 +421,9 @@ export function ArtworkDetailComponent({
                   className="inline-flex items-center justify-center px-6 py-3 border border-on-surface font-label text-[11px] uppercase tracking-[0.2em] font-semibold text-on-surface hover:bg-on-surface hover:text-surface transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {comments.loadingMore ? (
-                    <Spinner label="Loading more comments" />
+                    <Spinner label={t('comments.loadingMoreComments')} />
                   ) : (
-                    'Load more comments'
+                    t('artwork.detail.loadMore')
                   )}
                 </button>
               </div>

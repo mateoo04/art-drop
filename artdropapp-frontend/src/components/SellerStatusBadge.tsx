@@ -1,12 +1,5 @@
+import { useTranslation } from 'react-i18next'
 import type { SellerStatus } from '../types/seller'
-
-const LABELS: Record<SellerStatus, string> = {
-  NONE: 'Not a seller',
-  PENDING: 'Pending',
-  APPROVED: 'Verified seller',
-  REJECTED: 'Rejected',
-  REVOKED: 'Revoked',
-}
 
 const TONES: Record<SellerStatus, string> = {
   NONE: 'bg-surface-variant text-on-surface-variant',
@@ -17,11 +10,21 @@ const TONES: Record<SellerStatus, string> = {
 }
 
 export function SellerStatusBadge({ status }: { status: SellerStatus }) {
+  const { t } = useTranslation()
+
+  const labels: Record<SellerStatus, string> = {
+    NONE: t('account.seller.status.none'),
+    PENDING: t('account.seller.status.pending'),
+    APPROVED: t('account.seller.status.approved'),
+    REJECTED: t('account.seller.status.rejected'),
+    REVOKED: t('account.seller.status.revoked'),
+  }
+
   return (
     <span
       className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ${TONES[status]}`}
     >
-      {LABELS[status]}
+      {labels[status]}
     </span>
   )
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getToken } from '../../lib/auth'
 import { useAuthPrompt } from '../../contexts/AuthPromptContext'
 import { Button } from '../ui/Button'
@@ -18,21 +19,25 @@ export function CommentComposer({
   onCancel,
   compact = false,
   placeholder,
-  submitLabel = 'Post',
-  authPromptReason = 'leave a comment',
+  submitLabel,
+  authPromptReason,
   autoFocus = false,
 }: CommentComposerProps) {
+  const { t } = useTranslation()
   const [text, setText] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const { promptToAuth } = useAuthPrompt()
+
+  const resolvedSubmitLabel = submitLabel ?? t('comments.composer.post')
+  const resolvedAuthPromptReason = authPromptReason ?? t('comments.composer.defaultAuthReason')
 
   const isAuthed = Boolean(getToken())
 
   const handle = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isAuthed) {
-      promptToAuth(authPromptReason)
+      promptToAuth(resolvedAuthPromptReason)
       return
     }
     const trimmed = text.trim()
@@ -43,18 +48,21 @@ export function CommentComposer({
       await onSubmit(trimmed)
       setText('')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to post')
+      setError(err instanceof Error ? err.message : t('comments.composer.failedToPost'))
     } finally {
       setSubmitting(false)
     }
   }
 
   const handleFocusGuard = () => {
-    if (!isAuthed) promptToAuth(authPromptReason)
+    if (!isAuthed) promptToAuth(resolvedAuthPromptReason)
   }
 
   const placeholderText =
-    placeholder ?? (isAuthed ? 'Share something thoughtful…' : `Sign in to ${authPromptReason}…`)
+    placeholder ??
+    (isAuthed
+      ? t('comments.composer.placeholder')
+      : t('comments.composer.placeholderSignedOut', { reason: resolvedAuthPromptReason }))
 
   return (
     <form onSubmit={handle} className={compact ? 'space-y-2' : 'space-y-3'}>
@@ -80,7 +88,7 @@ export function CommentComposer({
       <div className="flex justify-end gap-2">
         {onCancel ? (
           <Button type="button" variant="ghost" onClick={onCancel} disabled={submitting}>
-            Cancel
+            {t('comments.composer.cancel')}
           </Button>
         ) : null}
         <Button
@@ -89,7 +97,7 @@ export function CommentComposer({
           loading={submitting}
           disabled={isAuthed && !text.trim()}
         >
-          {submitLabel}
+          {resolvedSubmitLabel}
         </Button>
       </div>
     </form>

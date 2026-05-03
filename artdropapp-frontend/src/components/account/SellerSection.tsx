@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SellerApplicationModal } from '../SellerApplicationModal'
 import { SellerStatusBadge } from '../SellerStatusBadge'
 import { Button } from '../ui/Button'
@@ -14,6 +15,7 @@ function formatDate(value: string | null) {
 export function SellerSection() {
   const { application, loading, error, refetch } = useMySellerApplication()
   const [modalOpen, setModalOpen] = useState(false)
+  const { t } = useTranslation()
 
   const status = application?.derivedSellerStatus ?? 'NONE'
   const cooldownActive =
@@ -28,7 +30,7 @@ export function SellerSection() {
   return (
     <section className="pt-12 pb-8">
       <div className="flex items-center gap-3 mb-4">
-        <h2 className="font-headline text-2xl text-on-surface">Seller status</h2>
+        <h2 className="font-headline text-2xl text-on-surface">{t('account.seller.title')}</h2>
         <SellerStatusBadge status={status} />
       </div>
 
@@ -39,16 +41,16 @@ export function SellerSection() {
       ) : status === 'NONE' ? (
         <div>
           <p className="text-on-surface-variant mb-3">
-            Become a verified seller to list your artworks for sale.
+            {t('account.seller.becomeSeller')}
           </p>
           <Button onClick={() => setModalOpen(true)}>
-            Apply to become a seller
+            {t('account.seller.applyCta')}
           </Button>
         </div>
       ) : status === 'PENDING' ? (
         <div>
           <p className="text-on-surface-variant">
-            Your application is under review. Submitted {formatDate(application!.submittedAt)}.
+            {t('account.seller.pending', { date: formatDate(application!.submittedAt) })}
           </p>
           <p className="mt-3 text-sm text-on-surface bg-surface-variant rounded-md p-3 whitespace-pre-wrap">
             {application!.message}
@@ -56,14 +58,14 @@ export function SellerSection() {
         </div>
       ) : status === 'APPROVED' ? (
         <p className="text-on-surface-variant">
-          You're a verified seller (approved {formatDate(application!.decidedAt)}).
+          {t('account.seller.approved', { date: formatDate(application!.decidedAt) })}
         </p>
       ) : (
         <div>
           <p className="text-on-surface-variant">
             {status === 'REVOKED'
-              ? `Your seller status was revoked on ${formatDate(application!.revokedAt)}.`
-              : `Your application was not approved on ${formatDate(application!.decidedAt)}.`}
+              ? t('account.seller.revoked', { date: formatDate(application!.revokedAt) })
+              : t('account.seller.rejected', { date: formatDate(application!.decidedAt) })}
           </p>
           {(status === 'REVOKED' ? application!.revokeReason : application!.decisionReason) ? (
             <p className="mt-2 text-sm text-on-surface bg-surface-variant rounded-md p-3 whitespace-pre-wrap">
@@ -72,12 +74,12 @@ export function SellerSection() {
           ) : null}
           {cooldownActive ? (
             <p className="mt-3 text-sm text-on-surface-variant">
-              You can re-apply on {formatDate(application!.canReapplyAt)}.
+              {t('account.seller.cooldown', { date: formatDate(application!.canReapplyAt) })}
             </p>
           ) : (
             <div className="mt-3">
               <Button onClick={() => setModalOpen(true)}>
-                Apply again
+                {t('account.seller.applyAgain')}
               </Button>
             </div>
           )}

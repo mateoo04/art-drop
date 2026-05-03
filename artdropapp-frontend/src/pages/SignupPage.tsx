@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { signup, isSignupError, type SignupError } from '../api/authApi'
 import { AuthHeader } from '../components/layout/AuthHeader'
@@ -9,52 +10,64 @@ import { Button } from '../components/ui/Button'
 import { FormField } from '../components/ui/FormField'
 import { Input } from '../components/ui/Input'
 import { deriveUsernameFromEmail, storeToken } from '../lib/auth'
+import type { TFunction } from 'i18next'
 
 const HERO_IMAGE_URL =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuCu_FZrOTTzX5XK4WeCT-aVlozipqUREoyXBxA5nWws63YY8rNsVbPz1NCAOtwKduW0_QEzLi8p9XX7znw-1V0XyRhwF4PpxCMY0mVyilcV-4DmBEUYQVd9c3a_IrAMxQ83RzHyA1036Y8NMzU4av-LYfBL_pi5xovfyk1x6TpPvrL0foUy1iHaaHlFU-QSAvd4v1sU6FInP0ZrSWzPhs8QDeSeanyr-Rox6N1SktzKjx5mUexaemlyoJC8OuSHOsbNs1NIRnhHPFU'
 
-const signupSchema = z
-  .object({
-    firstName: z
-      .string()
-      .trim()
-      .min(1, { message: 'First name is required' })
-      .max(50, { message: 'First name must be 50 characters or fewer' }),
-    lastName: z
-      .string()
-      .trim()
-      .min(1, { message: 'Last name is required' })
-      .max(50, { message: 'Last name must be 50 characters or fewer' }),
-    email: z
-      .string()
-      .trim()
-      .min(1, { message: 'Email is required' })
-      .email({ message: 'Enter a valid email address' }),
-    password: z
-      .string()
-      .min(8, { message: 'Password must be at least 8 characters' }),
-    confirmPassword: z.string().min(1, { message: 'Please confirm your password' }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ['confirmPassword'],
-    message: "Passwords don't match",
-  })
+const makeSignupSchema = (t: TFunction) =>
+  z
+    .object({
+      firstName: z
+        .string()
+        .trim()
+        .min(1, { message: t('auth.validation.firstName.required') })
+        .max(50, { message: t('auth.validation.firstName.tooLong') }),
+      lastName: z
+        .string()
+        .trim()
+        .min(1, { message: t('auth.validation.lastName.required') })
+        .max(50, { message: t('auth.validation.lastName.tooLong') }),
+      email: z
+        .string()
+        .trim()
+        .min(1, { message: t('auth.validation.email.required') })
+        .email({ message: t('auth.validation.email.invalid') }),
+      password: z
+        .string()
+        .min(8, { message: t('auth.validation.password.tooShort') }),
+      confirmPassword: z.string().min(1, { message: t('auth.validation.confirmPassword.required') }),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      path: ['confirmPassword'],
+      message: t('auth.validation.confirmPassword.mismatch'),
+    })
 
-type SignupFormValues = z.infer<typeof signupSchema>
-
-function messageFor(err: SignupError): string {
-  if (err.kind === 'email_taken') {
-    return 'An account with this email already exists.'
-  }
-  if (err.kind === 'invalid') {
-    return 'Please check your details and try again.'
-  }
-  return 'Something went wrong. Please try again.'
+type SignupFormValues = {
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  confirmPassword: string
 }
 
 export function SignupPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [formError, setFormError] = useState<SignupError | null>(null)
+
+  const signupSchema = useMemo(() => makeSignupSchema(t), [t])
+
+  function messageFor(err: SignupError): string {
+    if (err.kind === 'email_taken') {
+      return t('auth.signup.errorEmailTaken')
+    }
+    if (err.kind === 'invalid') {
+      return t('auth.signup.errorInvalid')
+    }
+    return t('auth.signup.errorNetwork')
+  }
+
   const {
     register,
     handleSubmit,
@@ -99,57 +112,57 @@ export function SignupPage() {
           <img
             className="w-full h-48 md:h-64 object-cover grayscale opacity-90 transition-all duration-700 hover:grayscale-0"
             src={HERO_IMAGE_URL}
-            alt="Abstract minimalist painting in muted earth tones"
+            alt={t('auth.signup.heroAlt')}
           />
         </div>
 
         <section className="mb-8">
           <h2 className="font-headline text-4xl font-light mb-2 tracking-tight">
-            Begin your collection.
+            {t('auth.signup.heading')}
           </h2>
           <p className="font-body text-sm text-on-surface-variant leading-relaxed max-w-[280px]">
-            Join our community of digital curators and discover exceptional artworks.
+            {t('auth.signup.subheading')}
           </p>
         </section>
 
         <form className="space-y-6" onSubmit={onSubmit} noValidate>
-          <FormField label="First Name" htmlFor="firstName" error={errors.firstName?.message}>
+          <FormField label={t('auth.signup.firstName')} htmlFor="firstName" error={errors.firstName?.message}>
             <Input
               id="firstName"
               type="text"
               autoComplete="given-name"
-              placeholder="E.g. Elena"
+              placeholder={t('auth.signup.firstNamePlaceholder')}
               disabled={isSubmitting}
               invalid={!!errors.firstName}
               {...register('firstName')}
             />
           </FormField>
 
-          <FormField label="Last Name" htmlFor="lastName" error={errors.lastName?.message}>
+          <FormField label={t('auth.signup.lastName')} htmlFor="lastName" error={errors.lastName?.message}>
             <Input
               id="lastName"
               type="text"
               autoComplete="family-name"
-              placeholder="E.g. Rossi"
+              placeholder={t('auth.signup.lastNamePlaceholder')}
               disabled={isSubmitting}
               invalid={!!errors.lastName}
               {...register('lastName')}
             />
           </FormField>
 
-          <FormField label="Email Address" htmlFor="email" error={errors.email?.message}>
+          <FormField label={t('auth.signup.email')} htmlFor="email" error={errors.email?.message}>
             <Input
               id="email"
               type="email"
               autoComplete="email"
-              placeholder="name@curator.com"
+              placeholder={t('auth.login.emailPlaceholder')}
               disabled={isSubmitting}
               invalid={!!errors.email}
               {...register('email')}
             />
           </FormField>
 
-          <FormField label="Password" htmlFor="password" error={errors.password?.message}>
+          <FormField label={t('auth.signup.password')} htmlFor="password" error={errors.password?.message}>
             <Input
               id="password"
               type="password"
@@ -162,7 +175,7 @@ export function SignupPage() {
           </FormField>
 
           <FormField
-            label="Confirm Password"
+            label={t('auth.signup.confirmPassword')}
             htmlFor="confirmPassword"
             error={errors.confirmPassword?.message}
           >
@@ -185,7 +198,7 @@ export function SignupPage() {
               {messageFor(formError)}{' '}
               {formError.kind === 'email_taken' ? (
                 <Link to="/login" className="underline underline-offset-4 hover:text-on-surface">
-                  Sign in instead?
+                  {t('auth.signup.signInInstead')}
                 </Link>
               ) : null}
             </div>
@@ -193,7 +206,7 @@ export function SignupPage() {
 
           <div className="pt-2">
             <Button type="submit" variant="primary" fullWidth loading={isSubmitting}>
-              Create Your Profile
+              {t('auth.signup.submit')}
             </Button>
           </div>
         </form>
@@ -203,7 +216,8 @@ export function SignupPage() {
             to="/login"
             className="font-label text-[11px] uppercase tracking-[0.15em] text-on-surface hover:text-outline transition-colors duration-300"
           >
-            Already have an account? <span className="border-b border-on-surface pb-1">Sign In</span>
+            {t('auth.signup.hasAccount')}{' '}
+            <span className="border-b border-on-surface pb-1">{t('auth.signup.signInLink')}</span>
           </Link>
         </footer>
       </main>

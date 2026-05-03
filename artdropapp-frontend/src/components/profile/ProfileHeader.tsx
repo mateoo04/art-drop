@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { UserProfile } from '../../types/user'
 
 type ProfileHeaderProps = {
@@ -31,6 +32,7 @@ function Avatar({ user }: { user: UserProfile }) {
 }
 
 export function ProfileHeader({ user, action }: ProfileHeaderProps) {
+  const { t } = useTranslation()
   const showCounts = user.circleSize != null
   return (
     <section className="flex items-start gap-8 pt-8 pb-12 border-b border-outline-variant/15">
@@ -48,44 +50,44 @@ export function ProfileHeader({ user, action }: ProfileHeaderProps) {
           </p>
         ) : user.isSelf ? (
           <p className="font-body text-sm text-on-surface-variant italic mt-4">
-            Add a bio to introduce your practice.
+            {t('profile.addBio')}
           </p>
         ) : null}
         <dl className="flex gap-8 mt-6 font-label text-[11px] uppercase tracking-[0.15em] text-on-surface-variant items-center">
           {showCounts ? (
             <>
               <div>
-                <dt className="sr-only">In your Circle</dt>
+                <dt className="sr-only">{t('profile.circleSizeLabel')}</dt>
                 <dd>
                   <span className="font-headline text-lg text-on-surface not-italic normal-case tracking-normal mr-1.5">
                     {user.circleSize ?? 0}
                   </span>
-                  in your Circle
+                  {t('profile.circleSize')}
                 </dd>
               </div>
               <div>
-                <dt className="sr-only">Circles you're in</dt>
+                <dt className="sr-only">{t('profile.followingCountLabel')}</dt>
                 <dd>
                   <span className="font-headline text-lg text-on-surface not-italic normal-case tracking-normal mr-1.5">
                     {user.followingCount ?? 0}
                   </span>
-                  Circles you're in
+                  {t('profile.followingCount')}
                 </dd>
               </div>
             </>
           ) : null}
           <div>
-            <dt className="sr-only">Drops</dt>
+            <dt className="sr-only">{t('profile.drops')}</dt>
             <dd>
               <span className="font-headline text-lg text-on-surface not-italic normal-case tracking-normal mr-1.5">
                 {user.artworkCount}
               </span>
-              {user.artworkCount === 1 ? 'drop' : 'drops'}
+              {user.artworkCount === 1 ? t('profile.dropSingular') : t('profile.dropPlural')}
             </dd>
           </div>
           <div>
-            <dt className="sr-only">Joined</dt>
-            <dd>Joined {formatJoinDate(user.createdAt)}</dd>
+            <dt className="sr-only">{t('profile.joinedPrefix')}</dt>
+            <dd>{t('profile.joinedPrefix')} {formatJoinDate(user.createdAt)}</dd>
           </div>
         </dl>
       </div>

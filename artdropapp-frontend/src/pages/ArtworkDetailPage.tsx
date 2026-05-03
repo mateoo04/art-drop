@@ -1,11 +1,13 @@
 import { useEffect } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { fetchArtworkById } from '../api/artworksApi'
 import { ArtworkDetailComponent } from '../components/ArtworkDetailComponent'
 import type { Artwork } from '../types/artwork'
 
 export function ArtworkDetailPage() {
+  const { t } = useTranslation()
   const { id: idParam } = useParams<{ id: string }>()
   const { hash } = useLocation()
   const id = idParam ? Number.parseInt(idParam, 10) : Number.NaN
@@ -26,10 +28,10 @@ export function ArtworkDetailPage() {
   }, [isLoading, hash, data?.id])
 
   const errorMessage = !enabled
-    ? 'Invalid ID'
+    ? t('artwork.detail.invalidId')
     : error
       ? error.message === 'NOT_FOUND'
-        ? 'Artwork not found.'
+        ? t('artwork.detail.notFound')
         : error.message
       : null
 

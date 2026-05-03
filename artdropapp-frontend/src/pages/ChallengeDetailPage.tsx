@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import type { SubmissionSort } from '../api/challengesApi'
 import { ChallengeHeroBanner } from '../components/challenges/ChallengeHeroBanner'
@@ -10,6 +11,7 @@ import { useChallenge } from '../hooks/useChallenge'
 import { useChallengeSubmissions } from '../hooks/useChallengeSubmissions'
 
 export function ChallengeDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const challengeId = id ? Number(id) : null
   const validId = challengeId != null && Number.isFinite(challengeId) ? challengeId : null
@@ -28,7 +30,7 @@ export function ChallengeDetailPage() {
   if (loading) {
     return (
       <main className="max-w-[1920px] mx-auto py-32 flex justify-center">
-        <Spinner label="Loading challenge" />
+        <Spinner label={t('challenges.detail.loading')} />
       </main>
     )
   }
@@ -40,7 +42,7 @@ export function ChallengeDetailPage() {
           className="py-12 text-center text-error border border-error-container/40 bg-error-container/10"
           role="alert"
         >
-          {error ?? 'Challenge not found.'}
+          {error ?? t('challenges.detail.notFound')}
         </p>
       </main>
     )
@@ -53,7 +55,7 @@ export function ChallengeDetailPage() {
         <ChallengeSortTabs active={sort} onChange={setSort} />
         {submissionsLoading ? (
           <div className="py-12 flex justify-center">
-            <Spinner label="Loading submissions" />
+            <Spinner label={t('challenges.detail.loadingSubmissions')} />
           </div>
         ) : submissionsError ? (
           <p
@@ -69,7 +71,7 @@ export function ChallengeDetailPage() {
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}
               onLoadMore={fetchNextPage}
-              label="Loading more submissions"
+              label={t('challenges.detail.loadingMoreSubmissions')}
             />
           </>
         )}

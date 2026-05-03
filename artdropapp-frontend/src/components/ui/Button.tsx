@@ -1,4 +1,5 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'destructive'
 
@@ -24,6 +25,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   { variant = 'primary', loading = false, fullWidth = false, disabled, className, children, type = 'button', ...rest },
   ref,
 ) {
+  const { t } = useTranslation()
   const widthClass = fullWidth ? 'w-full' : ''
   const base =
     'inline-flex items-center justify-center py-5 px-6 font-label text-[11px] uppercase tracking-[0.2em] font-semibold transition-all duration-200 rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-on-surface focus-visible:ring-offset-2 focus-visible:ring-offset-surface'
@@ -37,7 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       className={[base, VARIANT_CLASSES[variant], widthClass, className ?? ''].filter(Boolean).join(' ')}
       {...rest}
     >
-      {loading ? 'Please wait…' : children}
+      {loading ? t('common.pleaseWait') : children}
     </button>
   )
 })

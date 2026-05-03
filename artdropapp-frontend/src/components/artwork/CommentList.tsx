@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { Comment } from '../../types/comment'
 import { getToken } from '../../lib/auth'
 import { useAuthPrompt } from '../../contexts/AuthPromptContext'
@@ -76,6 +77,7 @@ type CommentRowProps = {
 }
 
 function CommentRow({ comment, isReply = false, onReplyClick, onDeleteClick }: CommentRowProps) {
+  const { t } = useTranslation()
   return (
     <div className="flex gap-4">
       <AuthorAvatar comment={comment} size={isReply ? 'sm' : 'md'} />
@@ -91,7 +93,7 @@ function CommentRow({ comment, isReply = false, onReplyClick, onDeleteClick }: C
               onClick={onDeleteClick}
               className="ml-auto font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant hover:text-error transition-colors"
             >
-              Delete
+              {t('comments.delete')}
             </button>
           ) : null}
         </div>
@@ -104,7 +106,7 @@ function CommentRow({ comment, isReply = false, onReplyClick, onDeleteClick }: C
             onClick={onReplyClick}
             className="mt-2 text-left font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant hover:text-on-surface transition-colors"
           >
-            Reply
+            {t('comments.reply')}
           </button>
         ) : null}
       </div>
@@ -119,6 +121,7 @@ export function CommentList({
   onLoadMoreReplies,
   loadingRepliesFor,
 }: CommentListProps) {
+  const { t } = useTranslation()
   const [replyingTo, setReplyingTo] = useState<number | null>(null)
   const [pendingDelete, setPendingDelete] = useState<number | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -126,7 +129,7 @@ export function CommentList({
 
   const handleReplyClick = (commentId: number) => {
     if (!getToken()) {
-      promptToAuth('reply to a comment')
+      promptToAuth(t('comments.composer.defaultAuthReason'))
       return
     }
     setReplyingTo((current) => (current === commentId ? null : commentId))
@@ -146,14 +149,14 @@ export function CommentList({
   if (comments.length === 0) {
     return (
       <p className="py-6 text-center text-on-surface-variant italic font-body text-sm">
-        No comments yet.
+        {t('comments.empty')}
       </p>
     )
   }
 
   return (
     <>
-      <ul className="space-y-8" aria-label="Comments">
+      <ul className="space-y-8" aria-label={t('comments.loadingComments')}>
         {comments.map((c) => {
           const remainingReplies = Math.max(0, c.replyCount - c.replies.length)
           const isLoadingMore = loadingRepliesFor === c.id
@@ -170,9 +173,11 @@ export function CommentList({
                   <CommentComposer
                     compact
                     autoFocus
-                    authPromptReason="reply to a comment"
-                    placeholder={`Reply to ${c.author.displayName ?? 'this comment'}…`}
-                    submitLabel="Reply"
+                    authPromptReason={t('comments.composer.defaultAuthReason')}
+                    placeholder={t('comments.composer.replyPlaceholder', {
+                      name: c.author.displayName ?? 'this comment',
+                    })}
+                    submitLabel={t('comments.reply')}
                     onCancel={() => setReplyingTo(null)}
                     onSubmit={async (text) => {
                       await onReply(text, c.id)
@@ -185,7 +190,7 @@ export function CommentList({
               {c.replies.length > 0 ? (
                 <ul
                   className="mt-6 ml-14 space-y-6 border-l border-outline-variant/15 pl-6"
-                  aria-label="Replies"
+                  aria-label={t('common.replies')}
                 >
                   {c.replies.map((r) => (
                     <li key={r.id}>
@@ -207,9 +212,9 @@ export function CommentList({
                   className="mt-4 ml-14 font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-50"
                 >
                   {isLoadingMore ? (
-                    <Spinner label="Loading replies" />
+                    <Spinner label={t('comments.loadingReplies')} />
                   ) : (
-                    `View ${remainingReplies} more ${remainingReplies === 1 ? 'reply' : 'replies'}`
+                    t('comments.viewMoreReplies', { count: remainingReplies })
                   )}
                 </button>
               ) : null}
@@ -219,9 +224,9 @@ export function CommentList({
       </ul>
       <ConfirmModal
         open={pendingDelete != null}
-        title="Delete comment?"
-        message="This will remove your comment from the discussion. You can't undo this."
-        confirmLabel="Delete"
+        title={t('comments.deleteModal.title')}
+        message={t('comments.deleteModal.message')}
+        confirmLabel={t('comments.deleteModal.confirm')}
         destructive
         busy={deleting}
         onConfirm={() => void handleDeleteConfirm()}

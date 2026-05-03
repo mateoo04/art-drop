@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ActiveChallengeRow } from '../components/challenges/ActiveChallengeRow'
 import { ChallengeHeroBanner } from '../components/challenges/ChallengeHeroBanner'
 import { PastChallengesList } from '../components/challenges/PastChallengesList'
@@ -24,12 +25,13 @@ function partition(challenges: Challenge[]) {
 }
 
 export function ChallengesPage() {
+  const { t } = useTranslation()
   const { data, loading, error } = useChallenges()
 
   if (loading) {
     return (
       <main className="max-w-[1920px] mx-auto py-32 flex justify-center">
-        <Spinner label="Loading challenges" />
+        <Spinner label={t('challenges.loading')} />
       </main>
     )
   }
@@ -50,7 +52,7 @@ export function ChallengesPage() {
   if (!data || data.length === 0) {
     return (
       <main className="max-w-[1920px] mx-auto px-8 py-32 text-center text-on-surface-variant">
-        No challenges yet — check back soon.
+        {t('challenges.empty')}
       </main>
     )
   }
@@ -62,7 +64,7 @@ export function ChallengesPage() {
       {featured ? (
         <ChallengeHeroBanner
           challenge={featured}
-          secondaryAction={{ label: 'Learn More', to: `/challenges/${featured.id}` }}
+          secondaryAction={{ label: t('challenges.learnMore'), to: `/challenges/${featured.id}` }}
         />
       ) : null}
       {activeOthers.map((challenge, i) => (

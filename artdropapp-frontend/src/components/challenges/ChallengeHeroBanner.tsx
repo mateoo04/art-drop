@@ -1,7 +1,9 @@
 import { Timer } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { cloudinaryUrl } from '../../lib/cloudinary'
+import { getChallengeRemaining } from '../../lib/challengeTime'
 import type { Challenge, SubmissionThumbnail } from '../../types/challenge'
 import { BackButton } from '../ui/BackButton'
 
@@ -25,45 +27,30 @@ function pickHeroSubmission(
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
-function getRemaining(endsAt: string | null): {
-  days: number
-  hours: number
-  minutes: number
-  ended: boolean
-} | null {
-  if (!endsAt) return null
-  const end = new Date(endsAt).getTime()
-  if (Number.isNaN(end)) return null
-  const diff = end - Date.now()
-  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, ended: true }
-  const minutes = Math.floor(diff / 60_000) % 60
-  const hours = Math.floor(diff / 3_600_000) % 24
-  const days = Math.floor(diff / 86_400_000)
-  return { days, hours, minutes, ended: false }
-}
-
-function statusLabel(challenge: Challenge): string {
-  if (challenge.status === 'ENDED') return 'Past Challenge'
-  if (challenge.kind === 'FEATURED') return 'Featured Challenge'
-  if (challenge.status === 'UPCOMING') return 'Upcoming Challenge'
-  return 'Active Challenge'
-}
-
 export function ChallengeHeroBanner({
   challenge,
   secondaryAction,
   backTo,
 }: ChallengeHeroBannerProps) {
+  const { t } = useTranslation()
+
+  function statusLabel(c: Challenge): string {
+    if (c.status === 'ENDED') return t('challenges.hero.status.past')
+    if (c.kind === 'FEATURED') return t('challenges.hero.status.featured')
+    if (c.status === 'UPCOMING') return t('challenges.hero.status.upcoming')
+    return t('challenges.hero.status.active')
+  }
+
   const heroSubmission = useMemo(
     () => pickHeroSubmission(challenge.submissions),
     [challenge.id, challenge.submissions],
   )
 
-  const [remaining, setRemaining] = useState(() => getRemaining(challenge.endsAt))
+  const [remaining, setRemaining] = useState(() => getChallengeRemaining(challenge.endsAt))
   useEffect(() => {
-    setRemaining(getRemaining(challenge.endsAt))
+    setRemaining(getChallengeRemaining(challenge.endsAt))
     const id = window.setInterval(() => {
-      setRemaining(getRemaining(challenge.endsAt))
+      setRemaining(getChallengeRemaining(challenge.endsAt))
     }, 60_000)
     return () => window.clearInterval(id)
   }, [challenge.endsAt])
@@ -73,7 +60,7 @@ export function ChallengeHeroBanner({
       {backTo ? (
         <BackButton
           to={backTo}
-          label="All Challenges"
+          label={t('challenges.hero.backLabel')}
           tone="on-image"
           className="absolute top-8 left-8 z-20"
         />
@@ -114,11 +101,15 @@ export function ChallengeHeroBanner({
               <Timer size={20} className="text-tertiary-container" />
               <div className="flex flex-col">
                 <span className="text-xs font-bold uppercase tracking-widest text-white/70">
-                  {remaining.ended ? 'Challenge Closed' : 'Time Remaining'}
+                  {remaining.ended ? t('challenges.hero.timeClosed') : t('challenges.hero.timeRemaining')}
                 </span>
                 {!remaining.ended ? (
                   <span className="text-lg font-headline text-white">
-                    {remaining.days} Days : {remaining.hours} Hrs : {remaining.minutes} Mins
+                    {t('challenges.hero.timeFormat', {
+                      days: remaining.days,
+                      hours: remaining.hours,
+                      minutes: remaining.minutes,
+                    })}
                   </span>
                 ) : null}
               </div>
@@ -134,7 +125,7 @@ export function ChallengeHeroBanner({
                   }
                   className="bg-white text-black px-8 py-4 font-label uppercase tracking-widest text-xs font-bold hover:bg-surface-variant transition-colors"
                 >
-                  Join Challenge
+                  {t('challenges.hero.joinChallenge')}
                 </button>
               ) : null}
               {secondaryAction ? (
