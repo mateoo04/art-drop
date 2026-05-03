@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { MainLayout } from './components/layout/MainLayout'
@@ -13,9 +13,10 @@ import { CollectionsPage } from './pages/CollectionsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
+import { AdminChallengeFormPage } from './pages/admin/AdminChallengeFormPage'
+import { AdminChallengesPage } from './pages/admin/AdminChallengesPage'
 import { AdminLayoutPage } from './pages/admin/AdminLayoutPage'
 import { AdminUsersPage } from './pages/admin/AdminUsersPage'
-import { AdminUserDetailPage } from './pages/admin/AdminUserDetailPage'
 import './App.css'
 
 function App() {
@@ -55,9 +56,12 @@ function App() {
             </AdminRoute>
           }
         >
-          <Route index element={<AdminUsersPage />} />
+          <Route index element={<Navigate to="users" replace />} />
           <Route path="users" element={<AdminUsersPage />} />
-          <Route path="users/:id" element={<AdminUserDetailPage />} />
+          <Route path="users/:id" element={<Navigate to="/admin/users" replace />} />
+          <Route path="challenges" element={<AdminChallengesPage />} />
+          <Route path="challenges/new" element={<AdminChallengeFormPage />} />
+          <Route path="challenges/:id/edit" element={<AdminChallengeFormPage />} />
         </Route>
       </Route>
     </Routes>

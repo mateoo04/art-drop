@@ -390,7 +390,8 @@
   "admin": {
     "layout": {
       "title": "Admin",
-      "userDirectory": "User directory"
+      "userDirectory": "User directory",
+      "challenges": "Challenges"
     },
     "users": {
       "noUsers": "No users found.",
@@ -404,7 +405,32 @@
       "previous": "Previous",
       "next": "Next",
       "toastApproved": "Application approved.",
-      "toastRejected": "Application rejected."
+      "toastRejected": "Application rejected.",
+      "manage": "Manage",
+      "promoteAdmin": "Promote to admin",
+      "grantSeller": "Make seller",
+      "grantSellerConfirmTitle": "Grant seller access?",
+      "grantSellerConfirmBody": "{{name}} will be able to list artworks for sale on the marketplace.",
+      "promoteAdminConfirmTitle": "Promote to administrator?",
+      "promoteAdminConfirmBody": "{{name}} will have full admin access to this dashboard, including user and challenge management.",
+      "deactivate": "Deactivate user",
+      "reactivate": "Reactivate user",
+      "actionFailed": "Action failed.",
+      "selfDeactivate": "You cannot deactivate your own account.",
+      "toastPromoted": "User promoted to admin.",
+      "toastGrantSeller": "Seller access granted.",
+      "toastDeactivated": "User deactivated.",
+      "toastReactivated": "User reactivated.",
+      "deactivateConfirmTitle": "Deactivate user?",
+      "deactivateConfirmBody": "This will prevent {{name}} from signing in.",
+      "expand": {
+        "actions": "Actions",
+        "pendingSellerTitle": "Pending seller application",
+        "pendingBadge": "Seller request",
+        "close": "Close",
+        "toggleExpand": "Show details",
+        "toggleCollapse": "Hide details"
+      }
     },
     "userDetail": {
       "backToUsers": "← Back to users",
@@ -463,7 +489,57 @@
       "confirm": "Revoke seller status",
       "failed": "Revoke failed"
     },
-    "accessDenied": "Access denied."
+    "accessDenied": "Access denied.",
+    "challenges": {
+      "search": "Search challenges…",
+      "create": "Create challenge",
+      "none": "No challenges match.",
+      "submissionCount": "{{count}} submissions",
+      "manage": "Manage",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "actionFailed": "Something went wrong.",
+      "toastActivated": "Challenge activated.",
+      "toastDeactivated": "Challenge deactivated.",
+      "toastDeleted": "Challenge deleted.",
+      "deleteConfirmTitle": "Delete challenge?",
+      "deleteConfirmBody": "Permanently delete “{{title}}” and its submissions? This cannot be undone.",
+      "backToList": "← Back to challenges",
+      "newTitle": "New challenge",
+      "editTitle": "Edit challenge",
+      "fieldTitle": "Title",
+      "fieldDescription": "Description",
+      "fieldQuote": "Quote",
+      "fieldKind": "Kind",
+      "fieldStatus": "Status",
+      "fieldTheme": "Theme",
+      "fieldCoverUrl": "Cover image URL",
+      "fieldStarts": "Starts",
+      "fieldEnds": "Ends",
+      "save": "Save",
+      "filters": {
+        "title": "Challenge filters",
+        "status": "Status",
+        "all": "All",
+        "sortStarts": "Start date (newest)",
+        "sortTitle": "Title A–Z"
+      },
+      "statusLabel": {
+        "UPCOMING": "Upcoming",
+        "ACTIVE": "Active",
+        "ENDED": "Ended"
+      },
+      "expand": {
+        "details": "Details",
+        "schedule": "Schedule",
+        "actions": "Actions",
+        "close": "Close",
+        "toggleExpand": "Show details",
+        "toggleCollapse": "Hide details"
+      }
+    }
   },
   "auth": {
     "login": {

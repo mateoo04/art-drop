@@ -1,5 +1,5 @@
 import { authFetch } from '../lib/authFetch'
-import type { SellerApplication } from '../types/seller'
+import type { AdminPrimaryRole, SellerApplication } from '../types/seller'
 
 function normalizeTimestamp(value: unknown): string {
   if (typeof value === 'string') return value
@@ -15,16 +15,21 @@ function mapApplication(raw: Record<string, unknown>): SellerApplication {
   const applicantRaw = raw.applicant as Record<string, unknown> | null | undefined
   const applicant = applicantRaw == null
     ? null
-    : {
-        id: Number(applicantRaw.id),
-        username: String(applicantRaw.username ?? ''),
-        slug: String(applicantRaw.slug ?? ''),
-        displayName: String(applicantRaw.displayName ?? ''),
-        email: String(applicantRaw.email ?? ''),
-        avatarUrl: applicantRaw.avatarUrl == null ? null : String(applicantRaw.avatarUrl),
-        sellerStatus: String(applicantRaw.sellerStatus ?? 'NONE') as SellerApplication['derivedSellerStatus'],
-        pendingApplication: null,
-      }
+    : (() => {
+        const pr = String(applicantRaw.primaryRole ?? 'USER').toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER'
+        return {
+          id: Number(applicantRaw.id),
+          username: String(applicantRaw.username ?? ''),
+          slug: String(applicantRaw.slug ?? ''),
+          displayName: String(applicantRaw.displayName ?? ''),
+          email: String(applicantRaw.email ?? ''),
+          avatarUrl: applicantRaw.avatarUrl == null ? null : String(applicantRaw.avatarUrl),
+          sellerStatus: String(applicantRaw.sellerStatus ?? 'NONE') as SellerApplication['derivedSellerStatus'],
+          pendingApplication: null,
+          primaryRole: pr as AdminPrimaryRole,
+          enabled: applicantRaw.enabled !== false,
+        }
+      })()
   return {
     id: Number(raw.id),
     userId: Number(raw.userId),

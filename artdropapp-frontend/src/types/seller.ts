@@ -17,6 +17,8 @@ export interface SellerApplication {
   canReapplyAt: string | null
 }
 
+export type AdminPrimaryRole = 'USER' | 'ADMIN'
+
 export interface AdminUserSummary {
   id: number
   username: string
@@ -26,6 +28,8 @@ export interface AdminUserSummary {
   avatarUrl: string | null
   sellerStatus: SellerStatus
   pendingApplication: SellerApplication | null
+  primaryRole: AdminPrimaryRole
+  enabled: boolean
 }
 
 export interface AdminUserDetail {

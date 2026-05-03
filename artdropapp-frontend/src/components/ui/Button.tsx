@@ -1,7 +1,7 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'inverse'
+type Variant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'inverse' | 'outline' | 'outline-destructive'
 
 type ButtonProps = ComponentPropsWithoutRef<'button'> & {
   variant?: Variant
@@ -21,6 +21,10 @@ const VARIANT_CLASSES: Record<Variant, string> = {
     'bg-error text-on-error hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed',
   inverse:
     'bg-white text-[#1A1A1A] hover:bg-white/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]',
+  outline:
+    'bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:bg-surface-container-high active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed',
+  'outline-destructive':
+    'bg-error/5 text-error border border-error/40 hover:bg-error/10 hover:border-error/60 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed',
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(

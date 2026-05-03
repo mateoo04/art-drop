@@ -37,6 +37,7 @@ import java.util.Set;
 public class SellerApplicationServiceImpl implements SellerApplicationService {
 
     private static final String ROLE_SELLER = "ROLE_SELLER";
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     private final SellerApplicationJpaRepository applicationRepository;
     private final UserJpaRepository userRepository;
@@ -344,7 +345,7 @@ public class SellerApplicationServiceImpl implements SellerApplicationService {
         return new ListedArtworkCountDTO(artworkRepository.countListedByAuthorId(userId));
     }
 
-    private boolean hasRole(User user, String role) {
+    private static boolean hasRole(User user, String role) {
         return user.getAuthorities() != null
                 && user.getAuthorities().stream().anyMatch(a -> role.equals(a.getName()));
     }
@@ -390,16 +391,19 @@ public class SellerApplicationServiceImpl implements SellerApplicationService {
     }
 
     private String deriveSellerStatus(SellerApplication latest, User user) {
-        if (latest == null) return "NONE";
-        return switch (latest.getStatus()) {
-            case PENDING -> "PENDING";
-            case REJECTED -> "REJECTED";
-            case APPROVED -> {
-                if (latest.getRevokedAt() != null) yield "REVOKED";
-                if (user != null && hasRole(user, ROLE_SELLER)) yield "APPROVED";
-                yield "REVOKED";
-            }
-        };
+        if (latest != null && latest.getStatus() == SellerApplicationStatus.PENDING) {
+            return "PENDING";
+        }
+        if (user != null && hasRole(user, ROLE_SELLER)) {
+            return "APPROVED";
+        }
+        if (latest == null) {
+            return "NONE";
+        }
+        if (latest.getStatus() == SellerApplicationStatus.REJECTED) {
+            return "REJECTED";
+        }
+        return "REVOKED";
     }
 
     String deriveSellerStatusForUser(User user) {
@@ -415,7 +419,10 @@ public class SellerApplicationServiceImpl implements SellerApplicationService {
                 user.getDisplayName(),
                 user.getEmail(),
                 user.getAvatarUrl(),
-                deriveSellerStatusForUser(user)
+                deriveSellerStatusForUser(user),
+                null,
+                primaryRoleFor(user),
+                user.isEnabled()
         );
     }
 
@@ -433,7 +440,92 @@ public class SellerApplicationServiceImpl implements SellerApplicationService {
                 user.getEmail(),
                 user.getAvatarUrl(),
                 derived,
-                pending
+                pending,
+                primaryRoleFor(user),
+                user.isEnabled()
         );
+    }
+
+    private static String primaryRoleFor(User user) {
+        return hasRole(user, ROLE_ADMIN) ? "ADMIN" : "USER";
+    }
+
+    @Override
+    @Transactional
+    public String promoteToAdmin(Long userId, String actingUsername) {
+        Optional<User> maybe = userRepository.findByIdWithAuthorities(userId);
+        if (maybe.isEmpty()) {
+            return "NOT_FOUND";
+        }
+        User user = maybe.get();
+        if (hasRole(user, ROLE_ADMIN)) {
+            return "OK";
+        }
+        Authority adminAuthority = authorityRepository.findByName(ROLE_ADMIN)
+                .orElseGet(() -> authorityRepository.save(new Authority(null, ROLE_ADMIN)));
+        Set<Authority> roles = new HashSet<>();
+        if (user.getAuthorities() != null) {
+            roles.addAll(user.getAuthorities());
+        }
+        roles.add(adminAuthority);
+        user.setAuthorities(roles);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        return "OK";
+    }
+
+    @Override
+    @Transactional
+    public String grantSellerRole(Long userId, String actingUsername) {
+        Optional<User> maybe = userRepository.findByIdWithAuthorities(userId);
+        if (maybe.isEmpty()) {
+            return "NOT_FOUND";
+        }
+        User user = maybe.get();
+        if (hasRole(user, ROLE_SELLER)) {
+            return "OK";
+        }
+        Authority sellerAuthority = authorityRepository.findByName(ROLE_SELLER)
+                .orElseGet(() -> authorityRepository.save(new Authority(null, ROLE_SELLER)));
+        Set<Authority> roles = new HashSet<>();
+        if (user.getAuthorities() != null) {
+            roles.addAll(user.getAuthorities());
+        }
+        roles.add(sellerAuthority);
+        user.setAuthorities(roles);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        return "OK";
+    }
+
+    @Override
+    @Transactional
+    public String deactivateUser(Long userId, String actingUsername) {
+        Optional<User> maybe = userRepository.findById(userId);
+        if (maybe.isEmpty()) {
+            return "NOT_FOUND";
+        }
+        User user = maybe.get();
+        if (actingUsername != null && actingUsername.equals(user.getUsername())) {
+            return "SELF_DEACTIVATE";
+        }
+        user.setEnabled(false);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        return "OK";
+    }
+
+    @Override
+    @Transactional
+    public String reactivateUser(Long userId, String actingUsername) {
+        Optional<User> maybe = userRepository.findById(userId);
+        if (maybe.isEmpty()) {
+            return "NOT_FOUND";
+        }
+        User user = maybe.get();
+        user.setEnabled(true);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        return "OK";
     }
 }

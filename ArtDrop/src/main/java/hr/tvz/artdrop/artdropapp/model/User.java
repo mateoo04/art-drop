@@ -60,4 +60,7 @@ public class User {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = true;
 }

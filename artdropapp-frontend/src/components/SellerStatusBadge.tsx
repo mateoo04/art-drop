@@ -2,11 +2,11 @@ import { useTranslation } from 'react-i18next'
 import type { SellerStatus } from '../types/seller'
 
 const TONES: Record<SellerStatus, string> = {
-  NONE: 'bg-surface-variant text-on-surface-variant',
-  PENDING: 'bg-tertiary-container text-on-tertiary-container',
-  APPROVED: 'bg-primary-container text-on-primary-container',
-  REJECTED: 'bg-error-container text-on-error-container',
-  REVOKED: 'bg-error-container text-on-error-container',
+  NONE: 'border-outline-variant/30 text-on-surface-variant',
+  PENDING: 'border-tertiary/40 text-tertiary',
+  APPROVED: 'border-emerald-700/30 text-emerald-800',
+  REJECTED: 'border-error/30 text-error',
+  REVOKED: 'border-error/30 text-error',
 }
 
 export function SellerStatusBadge({ status }: { status: SellerStatus }) {
@@ -22,7 +22,7 @@ export function SellerStatusBadge({ status }: { status: SellerStatus }) {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ${TONES[status]}`}
+      className={`inline-flex items-center rounded-none border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] bg-transparent ${TONES[status]}`}
     >
       {labels[status]}
     </span>

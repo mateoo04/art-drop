@@ -55,4 +55,16 @@ public interface SellerApplicationService {
     RevokeResult revoke(Long userId, String adminUsername, RevokeSellerCommand command);
 
     ListedArtworkCountDTO countListedArtworks(Long userId);
+
+    /** @return "OK", "NOT_FOUND", or "SELF_DEACTIVATE" */
+    String promoteToAdmin(Long userId, String actingUsername);
+
+    /** @return "OK" or "NOT_FOUND" */
+    String grantSellerRole(Long userId, String actingUsername);
+
+    /** @return "OK", "NOT_FOUND", or "SELF_DEACTIVATE" */
+    String deactivateUser(Long userId, String actingUsername);
+
+    /** @return "OK" or "NOT_FOUND" */
+    String reactivateUser(Long userId, String actingUsername);
 }

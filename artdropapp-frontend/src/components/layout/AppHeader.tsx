@@ -42,7 +42,7 @@ export function AppHeader() {
           <button
             type="button"
             aria-label={t('nav.admin')}
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/users')}
             className="text-on-surface transition-transform active:scale-95"
           >
             <ShieldUser size={20} />

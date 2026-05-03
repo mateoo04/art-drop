@@ -109,6 +109,40 @@ public class AdminController {
         };
     }
 
+    @PostMapping("/users/{id}/promote-admin")
+    public ResponseEntity<?> promoteToAdmin(@PathVariable Long id, Authentication authentication) {
+        return switch (service.promoteToAdmin(id, authentication.getName())) {
+            case "NOT_FOUND" -> ResponseEntity.notFound().build();
+            default -> ResponseEntity.ok().build();
+        };
+    }
+
+    @PostMapping("/users/{id}/grant-seller")
+    public ResponseEntity<?> grantSeller(@PathVariable Long id, Authentication authentication) {
+        return switch (service.grantSellerRole(id, authentication.getName())) {
+            case "NOT_FOUND" -> ResponseEntity.notFound().build();
+            default -> ResponseEntity.ok().build();
+        };
+    }
+
+    @PostMapping("/users/{id}/deactivate")
+    public ResponseEntity<?> deactivateUser(@PathVariable Long id, Authentication authentication) {
+        return switch (service.deactivateUser(id, authentication.getName())) {
+            case "NOT_FOUND" -> ResponseEntity.notFound().build();
+            case "SELF_DEACTIVATE" ->
+                    ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "SELF_DEACTIVATE"));
+            default -> ResponseEntity.ok().build();
+        };
+    }
+
+    @PostMapping("/users/{id}/reactivate")
+    public ResponseEntity<?> reactivateUser(@PathVariable Long id, Authentication authentication) {
+        return switch (service.reactivateUser(id, authentication.getName())) {
+            case "NOT_FOUND" -> ResponseEntity.notFound().build();
+            default -> ResponseEntity.ok().build();
+        };
+    }
+
     private ResponseEntity<?> mapDecide(SellerApplicationService.DecideResult result) {
         return switch (result) {
             case SellerApplicationService.DecideOk(SellerApplicationDTO app) -> ResponseEntity.ok(app);

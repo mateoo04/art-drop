@@ -3,10 +3,16 @@ package hr.tvz.artdrop.artdropapp.repository;
 import hr.tvz.artdrop.artdropapp.model.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
 public interface UserJpaRepository extends JpaRepository<User, Long> {
+    @EntityGraph(attributePaths = "authorities")
+    @Query("SELECT u FROM User u WHERE u.id = :id")
+    Optional<User> findByIdWithAuthorities(@Param("id") Long id);
+
     Optional<User> findBySlug(String slug);
 
     @EntityGraph(attributePaths = "authorities")

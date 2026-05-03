@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS app_user (
     bio VARCHAR(1000),
     avatar_url VARCHAR(1000),
     created_at TIMESTAMP,
-    updated_at TIMESTAMP
+    updated_at TIMESTAMP,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE IF NOT EXISTS authority (
