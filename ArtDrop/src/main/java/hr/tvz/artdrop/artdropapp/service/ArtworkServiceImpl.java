@@ -92,6 +92,18 @@ public class ArtworkServiceImpl implements ArtworkService {
         return mapMany(rows, viewerUsername);
     }
 
+    @Override
+    public List<ArtworkDTO> searchArtworks(String query, String viewerUsername, int limit, int offset) {
+        String trimmed = query == null ? "" : query.trim();
+        if (trimmed.isEmpty()) {
+            return List.of();
+        }
+        int cappedLimit = Math.max(1, Math.min(limit, 50));
+        Pageable page = paged(cappedLimit, offset, Sort.by(Sort.Direction.DESC, "publishedAt"));
+        List<Artwork> rows = artworkRepository.searchArtworks(trimmed, page);
+        return mapMany(rows, viewerUsername);
+    }
+
     private static Pageable paged(int limit, int offset) {
         return paged(limit, offset, Sort.unsorted());
     }

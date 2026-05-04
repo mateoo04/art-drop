@@ -38,6 +38,17 @@ public class ArtworkController {
         return ResponseEntity.ok(artworkService.findAll(viewer, limit, offset));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<ArtworkDTO>> searchArtworks(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset,
+            Authentication authentication
+    ) {
+        String viewer = authentication == null ? null : authentication.getName();
+        return ResponseEntity.ok(artworkService.searchArtworks(q, viewer, limit, offset));
+    }
+
     @GetMapping("/mediums")
     public ResponseEntity<List<String>> getMediums() {
         return ResponseEntity.ok(artworkService.findDistinctMediums());

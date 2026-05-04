@@ -197,6 +197,22 @@ export async function fetchMediums(): Promise<string[]> {
   return json.map(String)
 }
 
+export async function fetchSearchArtworks(q: string, limit = 40): Promise<Artwork[]> {
+  const params = new URLSearchParams()
+  params.set('q', q)
+  params.set('limit', String(limit))
+  params.set('offset', '0')
+  const res = await authFetch(`/api/artworks/search?${params.toString()}`)
+  if (!res.ok) {
+    throw new Error(`Failed to search artworks (${res.status})`)
+  }
+  const json: unknown = await res.json()
+  if (!Array.isArray(json)) {
+    throw new Error('Unexpected server response')
+  }
+  return json.map((el) => mapApiArtwork(el as Record<string, unknown>))
+}
+
 export async function fetchArtworkById(id: number): Promise<Artwork> {
   const res = await authFetch(`/api/artworks/id/${id}`)
   if (res.status === 404) {

@@ -21,6 +21,8 @@ public interface ArtworkService {
 
     List<ArtworkDTO> findByMedium(String val, String viewerUsername, int limit, int offset);
 
+    List<ArtworkDTO> searchArtworks(String query, String viewerUsername, int limit, int offset);
+
     List<ArtworkDTO> findByAuthorId(Long authorId, String viewerUsername);
 
     List<ArtworkDTO> findCircleFeed(Long viewerId, int limit, int offset);

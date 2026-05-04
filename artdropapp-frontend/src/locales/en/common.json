@@ -109,6 +109,26 @@
     "newDrop": "New Drop",
     "newDropLabel": "New drop"
   },
+  "search": {
+    "overlayTitle": "Search artworks",
+    "placeholder": "Search artworks, artists, mediums…",
+    "placeholderShort": "Search artworks, artists, challenges",
+    "closeAria": "Close search",
+    "clearAria": "Clear search",
+    "minChars": "Type at least 2 characters to search.",
+    "empty": "No artworks match your search.",
+    "error": "Search could not load. Try again.",
+    "viewDetails": "View artwork",
+    "sectionArtworks": "ARTWORKS",
+    "sectionArtists": "ARTISTS",
+    "sectionChallenges": "CHALLENGES",
+    "byArtist": "by {{name}}",
+    "viewAllResults": "VIEW ALL RESULTS",
+    "allResults": "ALL RESULTS",
+    "challengeEnded": "Ended",
+    "oneDayLeft": "1 day left",
+    "daysLeft": "{{count}} days left"
+  },
   "footer": {
     "copyright": "© {{year}} ArtDrop Digital Gallery. All rights reserved.",
     "privacyPolicy": "Privacy Policy",

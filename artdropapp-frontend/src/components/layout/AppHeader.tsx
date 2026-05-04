@@ -3,11 +3,13 @@ import { Search, ShieldUser, ShoppingBag, User } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { getToken } from '../../lib/auth'
 import { useCurrentUser } from '../../hooks/useCurrentUser'
+import { useSearchOverlay } from '../../hooks/useSearchOverlay'
 
 export function AppHeader() {
   const navigate = useNavigate()
   const { user } = useCurrentUser()
   const { t } = useTranslation()
+  const { openSearch } = useSearchOverlay()
   const isAdmin = (user?.roles ?? []).includes('ROLE_ADMIN')
 
   const handleAccountClick = () => {
@@ -27,6 +29,7 @@ export function AppHeader() {
         <button
           type="button"
           aria-label={t('nav.search')}
+          onClick={() => openSearch()}
           className="text-on-surface transition-transform active:scale-95"
         >
           <Search size={20} />

@@ -63,6 +63,15 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
     @Query("SELECT COUNT(a) FROM Artwork a WHERE a.author.id = :authorId AND (a.saleStatus IS NOT NULL OR a.price IS NOT NULL)")
     long countListedByAuthorId(Long authorId);
 
+    @Query("SELECT DISTINCT a FROM Artwork a LEFT JOIN a.tags t WHERE " +
+            "(LOWER(a.title) LIKE LOWER(CONCAT('%', :q, '%'))) OR " +
+            "(a.description IS NOT NULL AND LOWER(a.description) LIKE LOWER(CONCAT('%', :q, '%'))) OR " +
+            "(LOWER(a.medium) LIKE LOWER(CONCAT('%', :q, '%'))) OR " +
+            "(LOWER(a.author.displayName) LIKE LOWER(CONCAT('%', :q, '%'))) OR " +
+            "(t IS NOT NULL AND LOWER(t) LIKE LOWER(CONCAT('%', :q, '%'))) " +
+            "ORDER BY a.publishedAt DESC")
+    List<Artwork> searchArtworks(@Param("q") String q, Pageable pageable);
+
     @Modifying
     @Transactional
     @Query("UPDATE Artwork a SET a.saleStatus = NULL, a.price = NULL, a.updatedAt = CURRENT_TIMESTAMP WHERE a.author.id = :authorId AND (a.saleStatus IS NOT NULL OR a.price IS NOT NULL)")
