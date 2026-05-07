@@ -1,4 +1,4 @@
-import { ArrowRight, CircleX, Search, User } from 'lucide-react'
+import { ChevronRight, CircleX, Search, User } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
@@ -16,7 +16,7 @@ import type { Challenge } from '../../types/challenge'
 import { Spinner } from '../ui/Spinner'
 
 const SEARCH_DEBOUNCE_MS = 320
-const MIN_QUERY_LEN = 2
+const MIN_QUERY_LEN = 1
 const SEARCH_LIMIT = 8
 
 type SearchOverlayProps = {
@@ -50,7 +50,7 @@ function uniqueArtists(artworks: Artwork[]): Artist[] {
 function pickChallenges(challenges: Challenge[] | null, query: string): Challenge[] {
   if (!challenges?.length) return []
   const q = query.trim().toLowerCase()
-  if (q.length < 2) {
+  if (!q) {
     return challenges.filter((c) => c.status === 'ACTIVE' || c.status === 'UPCOMING').slice(0, 3)
   }
   const scored = challenges.filter(
@@ -168,9 +168,7 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
             ) : null}
           </div>
 
-          {!searchEnabled ? (
-            <p className="px-8 py-12 text-center text-on-surface-variant">{t('search.minChars')}</p>
-          ) : busy ? (
+          {!searchEnabled ? null : busy ? (
             <div className="flex justify-center px-8 py-16">
               <Spinner />
             </div>
@@ -184,9 +182,24 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
             <>
               <div className="grid max-h-[70vh] grid-cols-1 overflow-y-auto lg:grid-cols-12">
                 <section className="border-b border-surface-container-high py-8 lg:col-span-8 lg:border-b-0 lg:border-r">
-                  <p className="mb-6 px-8 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
-                    {t('search.sectionArtworks')}
-                  </p>
+                  <div className="mb-6 flex items-center justify-between gap-2 px-8">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+                      {t('search.sectionArtworks')}
+                    </p>
+                    <Link
+                      to={`/search?q=${encodeURIComponent(effectiveQuery)}&tab=artworks`}
+                      onClick={onClose}
+                      className="group inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-widest text-on-surface-variant outline-none transition-colors hover:text-on-surface focus-visible:text-primary"
+                    >
+                      {t('search.seeAll')}
+                      <ChevronRight
+                        size={14}
+                        strokeWidth={2}
+                        className="shrink-0 transition-transform group-hover:translate-x-0.5"
+                        aria-hidden
+                      />
+                    </Link>
+                  </div>
                   <Swiper
                     modules={[FreeMode, Mousewheel, Keyboard, A11y]}
                     slidesPerView={1.12}
@@ -242,9 +255,24 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
 
                 <aside className="flex flex-col lg:col-span-4">
                   <section className="flex-1 border-b border-surface-container-high p-8">
-                    <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
-                      {t('search.sectionArtists')}
-                    </p>
+                    <div className="mb-4 flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+                        {t('search.sectionArtists')}
+                      </p>
+                      <Link
+                        to={`/search?q=${encodeURIComponent(effectiveQuery)}&tab=artists`}
+                        onClick={onClose}
+                        className="group inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-widest text-on-surface-variant outline-none transition-colors hover:text-on-surface focus-visible:text-primary"
+                      >
+                        {t('search.seeAll')}
+                        <ChevronRight
+                          size={14}
+                          strokeWidth={2}
+                          className="shrink-0 transition-transform group-hover:translate-x-0.5"
+                          aria-hidden
+                        />
+                      </Link>
+                    </div>
                     <ul className="space-y-2">
                       {artists.slice(0, 3).map((artist) => (
                         <li key={artist.id}>
@@ -272,9 +300,24 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
                   </section>
 
                   <section className="flex-1 p-8">
-                    <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
-                      {t('search.sectionChallenges')}
-                    </p>
+                    <div className="mb-4 flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+                        {t('search.sectionChallenges')}
+                      </p>
+                      <Link
+                        to={`/search?q=${encodeURIComponent(effectiveQuery)}&tab=challenges`}
+                        onClick={onClose}
+                        className="group inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-widest text-on-surface-variant outline-none transition-colors hover:text-on-surface focus-visible:text-primary"
+                      >
+                        {t('search.seeAll')}
+                        <ChevronRight
+                          size={14}
+                          strokeWidth={2}
+                          className="shrink-0 transition-transform group-hover:translate-x-0.5"
+                          aria-hidden
+                        />
+                      </Link>
+                    </div>
                     <ul className="space-y-2">
                       {challengeRows.slice(0, 3).map((c) => (
                         <li key={c.id}>
@@ -297,15 +340,6 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
                 </aside>
               </div>
 
-              <div className="border-t border-surface-container-high bg-surface-container-lowest p-6">
-                <button
-                  type="button"
-                  className="mx-auto flex items-center gap-2 text-center text-sm font-semibold uppercase tracking-widest text-on-surface transition-colors hover:text-primary"
-                >
-                  {t('search.viewAllResults')}
-                  <ArrowRight size={16} aria-hidden />
-                </button>
-              </div>
             </>
           )}
         </div>

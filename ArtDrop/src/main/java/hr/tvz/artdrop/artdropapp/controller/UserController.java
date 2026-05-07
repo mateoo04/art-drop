@@ -1,5 +1,6 @@
 package hr.tvz.artdrop.artdropapp.controller;
 
+import hr.tvz.artdrop.artdropapp.dto.ArtistSummaryDTO;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
 import hr.tvz.artdrop.artdropapp.dto.CircleStatusDTO;
 import hr.tvz.artdrop.artdropapp.dto.UpdateProfileCommand;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -33,6 +35,15 @@ public class UserController {
         this.userService = userService;
         this.userRepository = userRepository;
         this.artworkService = artworkService;
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ArtistSummaryDTO>> searchUsers(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset
+    ) {
+        return ResponseEntity.ok(userService.searchUsers(q, limit, offset));
     }
 
     @GetMapping("/me")

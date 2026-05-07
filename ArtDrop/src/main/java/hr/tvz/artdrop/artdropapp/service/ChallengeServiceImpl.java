@@ -62,6 +62,20 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
+    public List<ChallengeDTO> searchChallenges(String query, int limit, int offset) {
+        String trimmed = query == null ? "" : query.trim();
+        if (trimmed.isEmpty()) {
+            return List.of();
+        }
+        int safeLimit = Math.max(1, Math.min(limit, 50));
+        int safeOffset = Math.max(0, offset);
+        PageRequest pageRequest = PageRequest.of(safeOffset / safeLimit, safeLimit);
+        return challengeRepository.searchChallenges(trimmed, pageRequest).stream()
+                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS))
+                .toList();
+    }
+
+    @Override
     public List<SubmissionThumbnailDTO> findSubmissions(Long challengeId, int limit, int offset, String sort) {
         int safeLimit = Math.max(1, Math.min(limit, 50));
         int page = Math.max(0, offset) / safeLimit;

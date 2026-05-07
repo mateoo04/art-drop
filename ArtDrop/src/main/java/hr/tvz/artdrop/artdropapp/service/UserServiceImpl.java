@@ -1,5 +1,6 @@
 package hr.tvz.artdrop.artdropapp.service;
 
+import hr.tvz.artdrop.artdropapp.dto.ArtistSummaryDTO;
 import hr.tvz.artdrop.artdropapp.dto.UpdateProfileCommand;
 import hr.tvz.artdrop.artdropapp.dto.UserProfileDTO;
 import hr.tvz.artdrop.artdropapp.model.User;
@@ -8,10 +9,13 @@ import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserFollowJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -69,6 +73,21 @@ public class UserServiceImpl implements UserService {
             boolean isSelf = viewerUsername != null && viewerUsername.equals(user.getUsername());
             return toProfile(user, isSelf);
         });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ArtistSummaryDTO> searchUsers(String query, int limit, int offset) {
+        String trimmed = query == null ? "" : query.trim();
+        if (trimmed.isEmpty()) {
+            return List.of();
+        }
+        int safeLimit = Math.max(1, Math.min(limit, 50));
+        int safeOffset = Math.max(0, offset);
+        Pageable pageable = PageRequest.of(safeOffset / safeLimit, safeLimit);
+        return userRepository.searchPublic(trimmed, pageable).stream()
+                .map(u -> new ArtistSummaryDTO(u.getId(), u.getDisplayName(), u.getSlug(), u.getAvatarUrl()))
+                .toList();
     }
 
     @Override

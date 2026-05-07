@@ -50,7 +50,7 @@ export function ChallengeDetailPage() {
 
   return (
     <main className="max-w-[1920px] mx-auto pb-20">
-      <ChallengeHeroBanner challenge={challenge} backTo="/challenges" />
+      <ChallengeHeroBanner challenge={challenge} />
       <section className="py-16">
         <ChallengeSortTabs active={sort} onChange={setSort} />
         {submissionsLoading ? (

@@ -1,6 +1,10 @@
 import { ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { A11y, FreeMode, Keyboard, Mousewheel } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/free-mode'
 import { cloudinaryUrl } from '../../lib/cloudinary'
 import { formatChallengeDeadlineShort } from '../../lib/challengeTime'
 import type { Challenge } from '../../types/challenge'
@@ -122,7 +126,21 @@ export function HomeActiveChallengesSection({
       {showSkeleton ? <ChallengeRowSkeleton /> : null}
 
       {showCards ? (
-        <div className="-mx-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-8 pb-1 md:mx-0 md:px-0">
+        <Swiper
+          modules={[FreeMode, Mousewheel, Keyboard, A11y]}
+          slidesPerView="auto"
+          spaceBetween={16}
+          slidesOffsetBefore={32}
+          slidesOffsetAfter={32}
+          breakpoints={{
+            768: { slidesOffsetBefore: 0, slidesOffsetAfter: 0 },
+          }}
+          freeMode
+          mousewheel={{ forceToAxis: true }}
+          keyboard={{ enabled: true }}
+          a11y={{ enabled: true }}
+          className="-mx-8 pb-1 md:mx-0"
+        >
           {active.map((challenge) => {
             const visual = cardVisual(challenge)
             const subtitle =
@@ -130,38 +148,32 @@ export function HomeActiveChallengesSection({
               t('home.activeChallenges.timeLeft.openEnded')
 
             return (
-              <Link
-                key={challenge.id}
-                to={`/challenges/${challenge.id}`}
-                className="group flex min-h-[7rem] w-[min(85vw,20rem)] shrink-0 snap-start overflow-hidden bg-[#1c1c1c] outline-none ring-1 ring-white/10 transition-[color,box-shadow] hover:ring-white/20 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-              >
-                <div className="relative h-[7rem] w-[7rem] shrink-0 overflow-hidden bg-zinc-800">
-                  {visual ? (
-                    <img
-                      src={visual.src}
-                      alt={visual.alt}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div
-                      className="flex h-full w-full items-center justify-center text-center font-headline text-xs text-white/40"
-                      aria-hidden
-                    >
-                      {challenge.theme ?? '—'}
-                    </div>
-                  )}
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 px-4 py-3">
-                  <p className="font-headline text-base font-bold leading-tight text-white line-clamp-2">
-                    {challenge.title}
-                  </p>
-                  <p className="text-sm font-light text-white/65">{subtitle}</p>
-                </div>
-              </Link>
+              <SwiperSlide key={challenge.id} className="!w-[min(85vw,20rem)]">
+                <Link
+                  to={`/challenges/${challenge.id}`}
+                  className="group flex min-h-[7rem] overflow-hidden bg-[#1c1c1c] outline-none ring-1 ring-white/10 transition-[color,box-shadow] hover:ring-white/20 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                >
+                  <div className="relative h-[7rem] w-[7rem] shrink-0 overflow-hidden bg-zinc-800">
+                    {visual ? (
+                      <img
+                        src={visual.src}
+                        alt={visual.alt}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : null}
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 px-4 py-3">
+                    <p className="font-headline text-base font-bold leading-tight text-white line-clamp-2">
+                      {challenge.title}
+                    </p>
+                    <p className="text-sm font-light text-white/65">{subtitle}</p>
+                  </div>
+                </Link>
+              </SwiperSlide>
             )
           })}
-        </div>
+        </Swiper>
       ) : null}
 
       {showEmpty ? (

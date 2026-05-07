@@ -36,4 +36,11 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
     org.springframework.data.domain.Page<User> searchByUsernameDisplayNameOrEmail(
             @org.springframework.data.repository.query.Param("q") String q,
             org.springframework.data.domain.Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE u.enabled = true AND (" +
+            "LOWER(u.displayName) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
+            "LOWER(u.slug) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
+            "LOWER(u.username) LIKE LOWER(CONCAT('%', :q, '%'))) " +
+            "ORDER BY u.displayName ASC")
+    java.util.List<User> searchPublic(@Param("q") String q, org.springframework.data.domain.Pageable pageable);
 }

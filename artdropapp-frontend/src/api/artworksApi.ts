@@ -197,11 +197,11 @@ export async function fetchMediums(): Promise<string[]> {
   return json.map(String)
 }
 
-export async function fetchSearchArtworks(q: string, limit = 40): Promise<Artwork[]> {
+export async function fetchSearchArtworks(q: string, limit = 40, offset = 0): Promise<Artwork[]> {
   const params = new URLSearchParams()
   params.set('q', q)
   params.set('limit', String(limit))
-  params.set('offset', '0')
+  params.set('offset', String(offset))
   const res = await authFetch(`/api/artworks/search?${params.toString()}`)
   if (!res.ok) {
     throw new Error(`Failed to search artworks (${res.status})`)

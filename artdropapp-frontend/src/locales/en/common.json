@@ -115,7 +115,6 @@
     "placeholderShort": "Search artworks, artists, challenges",
     "closeAria": "Close search",
     "clearAria": "Clear search",
-    "minChars": "Type at least 2 characters to search.",
     "empty": "No artworks match your search.",
     "error": "Search could not load. Try again.",
     "viewDetails": "View artwork",
@@ -123,11 +122,22 @@
     "sectionArtists": "ARTISTS",
     "sectionChallenges": "CHALLENGES",
     "byArtist": "by {{name}}",
-    "viewAllResults": "VIEW ALL RESULTS",
+    "seeAll": "See all",
     "allResults": "ALL RESULTS",
     "challengeEnded": "Ended",
     "oneDayLeft": "1 day left",
-    "daysLeft": "{{count}} days left"
+    "daysLeft": "{{count}} days left",
+    "page": {
+      "title": "Search results",
+      "titleEmpty": "Search",
+      "noQuery": "Type a search term in the box above.",
+      "empty": "No results for '{{query}}'.",
+      "tab": {
+        "artworks": "Artworks",
+        "artists": "Artists",
+        "challenges": "Challenges"
+      }
+    }
   },
   "footer": {
     "copyright": "© {{year}} ArtDrop Digital Gallery. All rights reserved.",
@@ -379,7 +389,7 @@
         "upcoming": "Upcoming Challenge",
         "active": "Active Challenge"
       },
-      "backLabel": "All Challenges",
+      "backLabel": "Back",
       "joinChallenge": "Join Challenge",
       "timeClosed": "Challenge Closed",
       "timeRemaining": "Time Remaining",

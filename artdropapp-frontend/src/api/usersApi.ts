@@ -1,6 +1,6 @@
 import { authFetch } from '../lib/authFetch'
 import type { UserProfile } from '../types/user'
-import type { Artwork } from '../types/artwork'
+import type { Artist, Artwork } from '../types/artwork'
 import { mapApiArtwork } from './artworksApi'
 
 export type UpdateProfilePayload = {
@@ -115,6 +115,30 @@ export async function joinCircle(slug: string): Promise<boolean> {
   }
   const json = (await res.json()) as { inCircle?: unknown }
   return Boolean(json.inCircle)
+}
+
+export async function fetchSearchUsers(q: string, limit = 20, offset = 0): Promise<Artist[]> {
+  const params = new URLSearchParams()
+  params.set('q', q)
+  params.set('limit', String(limit))
+  params.set('offset', String(offset))
+  const res = await authFetch(`/api/users/search?${params.toString()}`)
+  if (!res.ok) {
+    throw new Error(`Failed to search users (${res.status})`)
+  }
+  const json: unknown = await res.json()
+  if (!Array.isArray(json)) {
+    throw new Error('Unexpected server response')
+  }
+  return json.map((raw) => {
+    const r = raw as Record<string, unknown>
+    return {
+      id: Number(r.id),
+      displayName: String(r.displayName ?? ''),
+      slug: String(r.slug ?? ''),
+      avatarUrl: r.avatarUrl == null ? null : String(r.avatarUrl),
+    }
+  })
 }
 
 export async function leaveCircle(slug: string): Promise<boolean> {

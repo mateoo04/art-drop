@@ -27,6 +27,15 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeService.findAll());
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<ChallengeDTO>> searchChallenges(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset
+    ) {
+        return ResponseEntity.ok(challengeService.searchChallenges(q, limit, offset));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ChallengeDTO> getById(@PathVariable Long id) {
         return challengeService.findById(id)

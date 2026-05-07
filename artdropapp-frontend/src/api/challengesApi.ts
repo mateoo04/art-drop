@@ -76,6 +76,27 @@ export async function fetchChallenges(): Promise<Challenge[]> {
   return json.map((item) => mapChallenge(item as Record<string, unknown>))
 }
 
+export async function fetchSearchChallenges(
+  q: string,
+  limit = 20,
+  offset = 0,
+): Promise<Challenge[]> {
+  const params = new URLSearchParams({
+    q,
+    limit: String(limit),
+    offset: String(offset),
+  })
+  const res = await fetch(`/api/challenges/search?${params.toString()}`)
+  if (!res.ok) {
+    throw new Error(`Failed to search challenges (${res.status})`)
+  }
+  const json: unknown = await res.json()
+  if (!Array.isArray(json)) {
+    throw new Error('Unexpected server response')
+  }
+  return json.map((item) => mapChallenge(item as Record<string, unknown>))
+}
+
 export async function fetchChallenge(challengeId: number): Promise<Challenge> {
   const res = await fetch(`/api/challenges/${challengeId}`)
   if (!res.ok) {

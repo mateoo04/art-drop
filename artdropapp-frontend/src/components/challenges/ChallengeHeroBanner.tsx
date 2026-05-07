@@ -1,7 +1,7 @@
 import { Timer } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { cloudinaryUrl } from '../../lib/cloudinary'
 import { getChallengeRemaining } from '../../lib/challengeTime'
 import type { Challenge, SubmissionThumbnail } from '../../types/challenge'
@@ -16,7 +16,7 @@ type SecondaryAction = {
 type ChallengeHeroBannerProps = {
   challenge: Challenge
   secondaryAction?: SecondaryAction
-  backTo?: string
+  showBack?: boolean
 }
 
 function pickHeroSubmission(
@@ -30,9 +30,18 @@ function pickHeroSubmission(
 export function ChallengeHeroBanner({
   challenge,
   secondaryAction,
-  backTo,
+  showBack = true,
 }: ChallengeHeroBannerProps) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const handleBack = () => {
+    if (location.key === 'default') {
+      navigate('/challenges')
+    } else {
+      navigate(-1)
+    }
+  }
 
   function statusLabel(c: Challenge): string {
     if (c.status === 'ENDED') return t('challenges.hero.status.past')
@@ -57,9 +66,9 @@ export function ChallengeHeroBanner({
 
   return (
     <section className="w-full relative h-[600px] md:h-[800px] flex items-end overflow-hidden">
-      {backTo ? (
+      {showBack ? (
         <BackButton
-          to={backTo}
+          onClick={handleBack}
           label={t('challenges.hero.backLabel')}
           tone="on-image"
           className="absolute top-8 left-8 z-20"

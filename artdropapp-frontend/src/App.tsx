@@ -12,6 +12,7 @@ import { ChallengesPage } from './pages/ChallengesPage'
 import { CollectionsPage } from './pages/CollectionsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
+import { SearchPage } from './pages/SearchPage'
 import { SignupPage } from './pages/SignupPage'
 import { AdminChallengeFormPage } from './pages/admin/AdminChallengeFormPage'
 import { AdminChallengesPage } from './pages/admin/AdminChallengesPage'
@@ -29,6 +30,7 @@ function App() {
         <Route path="/challenges" element={<ChallengesPage />} />
         <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
         <Route path="/collections" element={<CollectionsPage />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/details/:id" element={<ArtworkDetailPage />} />
         <Route path="/edit/:id" element={<ArtworkEditPage />} />
         <Route
