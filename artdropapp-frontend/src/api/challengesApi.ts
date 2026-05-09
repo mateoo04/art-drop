@@ -1,3 +1,4 @@
+import { authFetch } from '../lib/authFetch'
 import type {
   Challenge,
   ChallengeKind,
@@ -127,4 +128,70 @@ export async function fetchChallengeSubmissions(
     throw new Error('Unexpected server response')
   }
   return json.map((item) => mapThumbnail(item as Record<string, unknown>))
+}
+
+export type ChallengeSubmitErrorCode =
+  | 'ALREADY_SUBMITTED'
+  | 'IN_OTHER_CHALLENGE'
+  | 'CHALLENGE_NOT_ACTIVE'
+  | 'ARTWORK_TOO_OLD'
+  | 'NOT_OWNER'
+  | 'UNAUTHENTICATED'
+  | 'NOT_FOUND'
+  | 'UNKNOWN'
+
+export type ChallengeWithdrawErrorCode =
+  | 'CHALLENGE_ENDED'
+  | 'NOT_OWNER'
+  | 'UNAUTHENTICATED'
+  | 'NOT_FOUND'
+  | 'UNKNOWN'
+
+async function readErrorCode(res: Response): Promise<string | null> {
+  try {
+    const body = (await res.json()) as Record<string, unknown> | null
+    if (body && typeof body === 'object' && typeof body.error === 'string') {
+      return body.error
+    }
+  } catch {
+    // ignore
+  }
+  return null
+}
+
+export async function submitArtworkToChallenge(
+  challengeId: number,
+  artworkId: number,
+): Promise<void> {
+  const res = await authFetch(`/api/challenges/${challengeId}/submissions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ artworkId }),
+  })
+  if (res.status === 201) return
+  if (res.status === 401) throw new Error('UNAUTHENTICATED')
+  if (res.status === 404) throw new Error('NOT_FOUND')
+  if (res.status === 403 || res.status === 409) {
+    const code = await readErrorCode(res)
+    throw new Error(code ?? 'UNKNOWN')
+  }
+  throw new Error(`Submit failed (${res.status})`)
+}
+
+export async function withdrawArtworkFromChallenge(
+  challengeId: number,
+  artworkId: number,
+): Promise<void> {
+  const res = await authFetch(
+    `/api/challenges/${challengeId}/submissions/${artworkId}`,
+    { method: 'DELETE' },
+  )
+  if (res.status === 204) return
+  if (res.status === 401) throw new Error('UNAUTHENTICATED')
+  if (res.status === 404) throw new Error('NOT_FOUND')
+  if (res.status === 403) {
+    const code = await readErrorCode(res)
+    throw new Error(code ?? 'UNKNOWN')
+  }
+  throw new Error(`Withdraw failed (${res.status})`)
 }

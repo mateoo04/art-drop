@@ -39,6 +39,7 @@ public record ArtworkCommand(
         @Digits(integer = 10, fraction = 2)
         BigDecimal price,
         @Pattern(regexp = "ORIGINAL|EDITION|AVAILABLE|SOLD", message = "saleStatus must be ORIGINAL, EDITION, AVAILABLE or SOLD")
-        String saleStatus
+        String saleStatus,
+        Long challengeId
 ) {
 }

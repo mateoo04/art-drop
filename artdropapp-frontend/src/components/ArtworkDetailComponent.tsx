@@ -10,12 +10,17 @@ import 'swiper/css/pagination'
 
 import type { Artwork, DimensionUnit, SaleStatus } from '../types/artwork'
 import { useComments } from '../hooks/useComments'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useLikeArtwork } from '../hooks/useLikeArtwork'
+import { useWithdrawFromChallenge } from '../hooks/useWithdrawFromChallenge'
 import { useAuthPrompt } from '../contexts/AuthPromptContext'
+import { translateChallengeWithdrawError } from '../lib/challengeErrors'
 import { getToken } from '../lib/auth'
 import { CommentComposer } from './artwork/CommentComposer'
 import { CommentList } from './artwork/CommentList'
+import { ConfirmModal } from './ui/ConfirmModal'
 import { Spinner } from './ui/Spinner'
+import { SubmitToChallengeModal } from './SubmitToChallengeModal'
 
 export type ArtworkDetailComponentProps = {
   artwork: Artwork | null
@@ -53,9 +58,33 @@ export function ArtworkDetailComponent({
   const comments = useComments(artwork?.id ?? null)
   const { promptToAuth } = useAuthPrompt()
   const likeMutation = useLikeArtwork()
+  const withdrawMutation = useWithdrawFromChallenge()
+  const { user } = useCurrentUser()
   const [animating, setAnimating] = useState(false)
   const [swiper, setSwiper] = useState<SwiperType | null>(null)
   const [quantity, setQuantity] = useState(1)
+  const [submitModalOpen, setSubmitModalOpen] = useState(false)
+  const [withdrawConfirmOpen, setWithdrawConfirmOpen] = useState(false)
+  const [withdrawError, setWithdrawError] = useState<string | null>(null)
+
+  const isOwner =
+    artwork != null && user != null && artwork.artist != null && artwork.artist.id === user.id
+  const withdrawing = withdrawMutation.isPending
+
+  function handleWithdrawConfirmed() {
+    if (!artwork || artwork.currentSubmission == null) return
+    setWithdrawError(null)
+    withdrawMutation.mutate(
+      { challengeId: artwork.currentSubmission.challengeId, artworkId: artwork.id },
+      {
+        onSuccess: () => setWithdrawConfirmOpen(false),
+        onError: (e) => {
+          setWithdrawError(translateChallengeWithdrawError(e.message, t))
+          setWithdrawConfirmOpen(false)
+        },
+      },
+    )
+  }
 
   const MAX_QUANTITY = 99
 
@@ -354,6 +383,49 @@ export function ArtworkDetailComponent({
             </div>
           </div>
 
+          {isOwner ? (
+            <div className="border-t border-outline-variant/15 pt-6 mb-6">
+              {artwork.currentSubmission != null ? (
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div>
+                    <p className="font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-1">
+                      {t('artwork.detail.challenge.inChallengeLabel')}
+                    </p>
+                    <Link
+                      to={`/challenges/${artwork.currentSubmission.challengeId}`}
+                      className="font-display text-lg text-on-surface hover:underline"
+                    >
+                      {artwork.currentSubmission.challengeTitle}
+                    </Link>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setWithdrawConfirmOpen(true)}
+                    disabled={withdrawing}
+                    className="font-label text-[11px] uppercase tracking-[0.2em] text-error hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {withdrawing
+                      ? t('artwork.detail.challenge.withdrawing')
+                      : t('artwork.detail.challenge.withdraw')}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setSubmitModalOpen(true)}
+                  className="font-label text-[11px] uppercase tracking-[0.2em] text-on-surface border border-on-surface px-4 py-3 hover:bg-on-surface hover:text-surface transition-colors"
+                >
+                  {t('artwork.detail.challenge.submitCta')}
+                </button>
+              )}
+              {withdrawError ? (
+                <p className="mt-3 text-sm text-error" role="alert">
+                  {withdrawError}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           <dl className="flex flex-col gap-4 border-t border-outline-variant/15 py-8">
             <div className="flex justify-between items-center">
               <dt className="font-label text-sm text-on-surface-variant">{t('artwork.detail.medium')}</dt>
@@ -431,6 +503,31 @@ export function ArtworkDetailComponent({
           </>
         )}
       </section>
+
+      {isOwner && artwork.currentSubmission == null ? (
+        <SubmitToChallengeModal
+          open={submitModalOpen}
+          onClose={() => setSubmitModalOpen(false)}
+          artwork={artwork}
+        />
+      ) : null}
+
+      {isOwner && artwork.currentSubmission != null ? (
+        <ConfirmModal
+          open={withdrawConfirmOpen}
+          title={t('artwork.detail.challenge.confirmWithdrawTitle')}
+          message={t('artwork.detail.challenge.confirmWithdrawMessage', {
+            title: artwork.currentSubmission.challengeTitle,
+          })}
+          confirmLabel={t('artwork.detail.challenge.withdraw')}
+          destructive
+          busy={withdrawing}
+          onCancel={() => {
+            if (!withdrawing) setWithdrawConfirmOpen(false)
+          }}
+          onConfirm={() => void handleWithdrawConfirmed()}
+        />
+      ) : null}
     </article>
   )
 }

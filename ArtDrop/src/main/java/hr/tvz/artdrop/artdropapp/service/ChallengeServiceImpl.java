@@ -1,5 +1,6 @@
 package hr.tvz.artdrop.artdropapp.service;
 
+import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
 import hr.tvz.artdrop.artdropapp.dto.ChallengeDTO;
 import hr.tvz.artdrop.artdropapp.dto.SubmissionThumbnailDTO;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
@@ -8,10 +9,14 @@ import hr.tvz.artdrop.artdropapp.model.ChallengeKind;
 import hr.tvz.artdrop.artdropapp.model.ChallengeStatus;
 import hr.tvz.artdrop.artdropapp.model.ChallengeSubmission;
 import hr.tvz.artdrop.artdropapp.model.User;
+import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeSubmissionJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -25,13 +30,22 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     private final ChallengeJpaRepository challengeRepository;
     private final ChallengeSubmissionJpaRepository submissionRepository;
+    private final ArtworkJpaRepository artworkRepository;
+    private final UserJpaRepository userRepository;
+    private final ArtworkService artworkService;
 
     public ChallengeServiceImpl(
             ChallengeJpaRepository challengeRepository,
-            ChallengeSubmissionJpaRepository submissionRepository
+            ChallengeSubmissionJpaRepository submissionRepository,
+            ArtworkJpaRepository artworkRepository,
+            UserJpaRepository userRepository,
+            @Lazy ArtworkService artworkService
     ) {
         this.challengeRepository = challengeRepository;
         this.submissionRepository = submissionRepository;
+        this.artworkRepository = artworkRepository;
+        this.userRepository = userRepository;
+        this.artworkService = artworkService;
     }
 
     @Override
@@ -107,6 +121,116 @@ public class ChallengeServiceImpl implements ChallengeService {
                 total,
                 preview
         );
+    }
+
+    @Override
+    @Transactional
+    public SubmitResult submitArtwork(Long challengeId, Long artworkId, String username) {
+        if (username == null) {
+            return new SubmitResult(SubmitOutcome.UNAUTHENTICATED, null);
+        }
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            return new SubmitResult(SubmitOutcome.UNAUTHENTICATED, null);
+        }
+        Optional<Challenge> challengeOpt = challengeRepository.findById(challengeId);
+        if (challengeOpt.isEmpty()) {
+            return new SubmitResult(SubmitOutcome.NOT_FOUND, null);
+        }
+        Optional<Artwork> artworkOpt = artworkRepository.findById(artworkId);
+        if (artworkOpt.isEmpty()) {
+            return new SubmitResult(SubmitOutcome.NOT_FOUND, null);
+        }
+        Challenge challenge = challengeOpt.get();
+        Artwork artwork = artworkOpt.get();
+        if (artwork.getAuthor() == null || !user.get().getId().equals(artwork.getAuthor().getId())) {
+            return new SubmitResult(SubmitOutcome.FORBIDDEN_NOT_OWNER, null);
+        }
+        if (challenge.getStatus() != ChallengeStatus.ACTIVE) {
+            return new SubmitResult(SubmitOutcome.FORBIDDEN_CHALLENGE_NOT_ACTIVE, null);
+        }
+        if (artwork.getPublishedAt() == null
+                || (challenge.getStartsAt() != null && artwork.getPublishedAt().isBefore(challenge.getStartsAt()))) {
+            return new SubmitResult(SubmitOutcome.FORBIDDEN_ARTWORK_TOO_OLD, null);
+        }
+        if (submissionRepository.findByChallengeIdAndArtworkId(challengeId, artworkId).isPresent()) {
+            return new SubmitResult(SubmitOutcome.CONFLICT_ALREADY_SUBMITTED, null);
+        }
+        Optional<ChallengeSubmission> existing = submissionRepository
+                .findFirstByArtworkIdAndChallenge_StatusNot(artworkId, ChallengeStatus.ENDED);
+        if (existing.isPresent()) {
+            return new SubmitResult(SubmitOutcome.CONFLICT_IN_OTHER_CHALLENGE, null);
+        }
+        ChallengeSubmission submission = new ChallengeSubmission(
+                null, challenge, artwork, user.get().getId(), LocalDateTime.now()
+        );
+        ChallengeSubmission saved = submissionRepository.save(submission);
+        return new SubmitResult(SubmitOutcome.CREATED, saved.getId());
+    }
+
+    @Override
+    @Transactional
+    public WithdrawResult withdrawSubmission(Long challengeId, Long artworkId, String username) {
+        if (username == null) {
+            return new WithdrawResult(WithdrawOutcome.UNAUTHENTICATED);
+        }
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            return new WithdrawResult(WithdrawOutcome.UNAUTHENTICATED);
+        }
+        Optional<ChallengeSubmission> existing = submissionRepository
+                .findByChallengeIdAndArtworkId(challengeId, artworkId);
+        if (existing.isEmpty()) {
+            return new WithdrawResult(WithdrawOutcome.NOT_FOUND);
+        }
+        ChallengeSubmission submission = existing.get();
+        Artwork artwork = submission.getArtwork();
+        if (artwork == null
+                || artwork.getAuthor() == null
+                || !user.get().getId().equals(artwork.getAuthor().getId())) {
+            return new WithdrawResult(WithdrawOutcome.FORBIDDEN_NOT_OWNER);
+        }
+        Challenge challenge = submission.getChallenge();
+        if (challenge != null && challenge.getStatus() == ChallengeStatus.ENDED) {
+            return new WithdrawResult(WithdrawOutcome.FORBIDDEN_CHALLENGE_ENDED);
+        }
+        submissionRepository.delete(submission);
+        return new WithdrawResult(WithdrawOutcome.OK);
+    }
+
+    @Override
+    public List<ArtworkDTO> findEligibleArtworksForChallenge(Long challengeId, String username) {
+        if (username == null) return List.of();
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) return List.of();
+        Optional<Challenge> challengeOpt = challengeRepository.findById(challengeId);
+        if (challengeOpt.isEmpty()) return List.of();
+        Challenge challenge = challengeOpt.get();
+        if (challenge.getStatus() != ChallengeStatus.ACTIVE) return List.of();
+        LocalDateTime startsAt = challenge.getStartsAt();
+        if (startsAt == null) startsAt = LocalDateTime.MIN;
+        List<Long> ids = submissionRepository.findEligibleArtworkIds(user.get().getId(), startsAt);
+        return artworkService.findByIdsOrdered(ids, username);
+    }
+
+    @Override
+    public List<ChallengeDTO> findEligibleChallengesForArtwork(Long artworkId, String username) {
+        if (username == null) return List.of();
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) return List.of();
+        Optional<Artwork> artworkOpt = artworkRepository.findById(artworkId);
+        if (artworkOpt.isEmpty()) return List.of();
+        Artwork artwork = artworkOpt.get();
+        if (artwork.getAuthor() == null || !user.get().getId().equals(artwork.getAuthor().getId())) {
+            return List.of();
+        }
+        if (artwork.getPublishedAt() == null) return List.of();
+        List<Long> ids = submissionRepository
+                .findEligibleChallengeIdsForArtwork(artworkId, artwork.getPublishedAt());
+        if (ids.isEmpty()) return List.of();
+        return challengeRepository.findAllById(ids).stream()
+                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS))
+                .toList();
     }
 
     private SubmissionThumbnailDTO mapToThumbnail(ChallengeSubmission submission) {

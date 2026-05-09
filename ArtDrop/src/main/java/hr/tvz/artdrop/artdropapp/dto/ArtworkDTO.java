@@ -28,5 +28,8 @@ public record ArtworkDTO(
         LocalDateTime publishedAt,
         Integer likeCount,
         Integer commentCount,
-        boolean likedByMe
-) {}
+        boolean likedByMe,
+        CurrentSubmissionDTO currentSubmission
+) {
+    public record CurrentSubmissionDTO(Long challengeId, String challengeTitle) {}
+}

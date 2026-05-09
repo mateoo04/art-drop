@@ -1,8 +1,9 @@
 import { ArrowRight, ChevronDown, ImagePlus, Loader, Plus, X } from 'lucide-react'
 import { type FormEvent, type KeyboardEvent, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { createArtwork, fetchMediums } from '../api/artworksApi'
+import { fetchChallenge } from '../api/challengesApi'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useFooterVisible } from '../hooks/useFooterVisible'
 import { useMySellerApplication } from '../hooks/useMySellerApplication'
@@ -10,6 +11,7 @@ import { SellerApplicationModal } from '../components/SellerApplicationModal'
 import { BackButton } from '../components/ui/BackButton'
 import { cloudinaryUrl, openCloudinaryUpload } from '../lib/cloudinary'
 import type { DimensionUnit, SaleStatus } from '../types/artwork'
+import type { Challenge } from '../types/challenge'
 
 type ProgressTab = 'FINISHED' | 'WIP'
 
@@ -18,9 +20,43 @@ type EditionStatus = 'ORIGINAL' | 'EDITION' | 'AVAILABLE'
 export function ArtworkDropPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { user } = useCurrentUser()
   const { application, refetch: refetchApp } = useMySellerApplication()
   const footerVisible = useFooterVisible()
+
+  const rawChallengeId = searchParams.get('challengeId')
+  const challengeId =
+    rawChallengeId != null && Number.isFinite(Number(rawChallengeId))
+      ? Number(rawChallengeId)
+      : null
+  const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [challengeError, setChallengeError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (challengeId == null) {
+      setChallenge(null)
+      setChallengeError(null)
+      return
+    }
+    let cancelled = false
+    fetchChallenge(challengeId)
+      .then((c) => {
+        if (cancelled) return
+        setChallenge(c)
+        if (c.status !== 'ACTIVE') {
+          setChallengeError(t('artwork.drop.challengeContext.notActive'))
+        } else {
+          setChallengeError(null)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setChallengeError(t('artwork.drop.challengeContext.notFound'))
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [challengeId, t])
 
   const EDITION_LABELS: Record<EditionStatus, string> = {
     ORIGINAL: t('artwork.drop.edition.original'),
@@ -145,6 +181,10 @@ export function ArtworkDropPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setMessage(null)
+    if (challengeId != null && challengeError != null) {
+      setMessage(challengeError)
+      return
+    }
     if (images.length === 0) {
       setMessage(t('artwork.drop.error.noImages'))
       return
@@ -191,8 +231,11 @@ export function ArtworkDropPage() {
         tags: tags.length > 0 ? tags : undefined,
         price: priceNumber,
         saleStatus,
+        challengeId: challengeId ?? undefined,
       })
-      if (created?.id) {
+      if (challengeId != null) {
+        navigate(`/challenges/${challengeId}`)
+      } else if (created?.id) {
         navigate(`/details/${created.id}`)
       } else {
         navigate('/')
@@ -204,6 +247,10 @@ export function ArtworkDropPage() {
         setMessage(t('artwork.drop.error.forbiddenSale'))
       } else if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
         setMessage(t('artwork.drop.error.unauthenticated'))
+      } else if (err instanceof Error && err.message === 'CHALLENGE_NOT_ACTIVE') {
+        setMessage(t('artwork.drop.challengeContext.notActive'))
+      } else if (err instanceof Error && err.message === 'CHALLENGE_NOT_FOUND') {
+        setMessage(t('artwork.drop.challengeContext.notFound'))
       } else {
         setMessage(err instanceof Error ? err.message : t('artwork.drop.error.fallback'))
       }
@@ -215,6 +262,24 @@ export function ArtworkDropPage() {
   return (
     <>
       <main className="w-full max-w-[640px] mx-auto flex flex-col pt-16 pb-32 px-6">
+        {challenge != null ? (
+          <div
+            className={`mb-8 border px-4 py-3 ${
+              challengeError
+                ? 'border-error/40 bg-error-container/10 text-error'
+                : 'border-tertiary/30 bg-tertiary-container/30 text-on-tertiary-container'
+            }`}
+            role="status"
+          >
+            <span className="font-label text-[10px] uppercase tracking-[0.15em] block mb-1">
+              {t('artwork.drop.challengeContext.label')}
+            </span>
+            <p className="font-display text-lg leading-snug">{challenge.title}</p>
+            {challengeError ? (
+              <p className="font-body text-xs mt-2">{challengeError}</p>
+            ) : null}
+          </div>
+        ) : null}
         <header className="mb-12">
           <BackButton to="/" label={t('artwork.drop.cancelLabel')} className="mb-8" />
           <h1 className="font-display text-4xl md:text-5xl text-on-surface mb-4 tracking-tight leading-tight">
@@ -660,7 +725,7 @@ export function ArtworkDropPage() {
           <button
             type="submit"
             form="drop-form"
-            disabled={submitting}
+            disabled={submitting || (challengeId != null && challengeError != null)}
             className="bg-on-surface text-surface font-label text-sm uppercase tracking-[0.1em] px-8 py-4 hover:bg-primary transition-colors flex items-center disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? t('artwork.drop.submitting') : t('artwork.drop.submit')}

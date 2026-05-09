@@ -8,12 +8,17 @@ import hr.tvz.artdrop.artdropapp.dto.ArtworkUpdateCommand;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.ArtworkImage;
 import hr.tvz.artdrop.artdropapp.model.ArtworkLike;
+import hr.tvz.artdrop.artdropapp.model.Challenge;
+import hr.tvz.artdrop.artdropapp.model.ChallengeStatus;
+import hr.tvz.artdrop.artdropapp.model.ChallengeSubmission;
 import hr.tvz.artdrop.artdropapp.model.DimensionUnit;
 import hr.tvz.artdrop.artdropapp.model.ProgressStatus;
 import hr.tvz.artdrop.artdropapp.model.SaleStatus;
 import hr.tvz.artdrop.artdropapp.model.User;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkLikeJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.ChallengeSubmissionJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.CommentJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
 import org.springframework.data.domain.PageRequest;
@@ -38,17 +43,23 @@ public class ArtworkServiceImpl implements ArtworkService {
     private final ArtworkLikeJpaRepository likeRepository;
     private final UserJpaRepository userRepository;
     private final CommentJpaRepository commentRepository;
+    private final ChallengeJpaRepository challengeRepository;
+    private final ChallengeSubmissionJpaRepository submissionRepository;
 
     public ArtworkServiceImpl(
             ArtworkJpaRepository artworkRepository,
             ArtworkLikeJpaRepository likeRepository,
             UserJpaRepository userRepository,
-            CommentJpaRepository commentRepository
+            CommentJpaRepository commentRepository,
+            ChallengeJpaRepository challengeRepository,
+            ChallengeSubmissionJpaRepository submissionRepository
     ) {
         this.artworkRepository = artworkRepository;
         this.likeRepository = likeRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
+        this.challengeRepository = challengeRepository;
+        this.submissionRepository = submissionRepository;
     }
 
     @Override
@@ -71,7 +82,12 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     public Optional<ArtworkDTO> findById(Long id, String viewerUsername) {
         return artworkRepository.findById(id)
-                .map(a -> mapToDTO(a, likedSetFor(viewerUsername, List.of(a)), commentCountsFor(List.of(a))));
+                .map(a -> mapToDTO(
+                        a,
+                        likedSetFor(viewerUsername, List.of(a)),
+                        commentCountsFor(List.of(a)),
+                        activeSubmissionsFor(List.of(a))
+                ));
     }
 
     @Override
@@ -213,7 +229,28 @@ public class ArtworkServiceImpl implements ArtworkService {
         applyDimensions(artwork, command.width(), command.height(), command.depth(), command.dimensionUnit());
         artwork.setImages(buildImages(artwork, command.images()));
         Artwork saved = artworkRepository.save(artwork);
-        return new CreateResult(CreateOutcome.CREATED, mapToDTO(saved, Set.of(), Map.of()));
+
+        Map<Long, ChallengeSubmission> activeSubmission = Map.of();
+        if (command.challengeId() != null) {
+            Optional<Challenge> challengeOpt = challengeRepository.findById(command.challengeId());
+            if (challengeOpt.isEmpty()) {
+                org.springframework.transaction.interceptor.TransactionAspectSupport
+                        .currentTransactionStatus().setRollbackOnly();
+                return new CreateResult(CreateOutcome.CHALLENGE_NOT_FOUND, null);
+            }
+            Challenge challenge = challengeOpt.get();
+            if (challenge.getStatus() != ChallengeStatus.ACTIVE) {
+                org.springframework.transaction.interceptor.TransactionAspectSupport
+                        .currentTransactionStatus().setRollbackOnly();
+                return new CreateResult(CreateOutcome.CHALLENGE_NOT_ACTIVE, null);
+            }
+            ChallengeSubmission submission = submissionRepository.save(new ChallengeSubmission(
+                    null, challenge, saved, author.getId(), LocalDateTime.now()
+            ));
+            activeSubmission = Map.of(saved.getId(), submission);
+        }
+
+        return new CreateResult(CreateOutcome.CREATED, mapToDTO(saved, Set.of(), Map.of(), activeSubmission));
     }
 
     @Override
@@ -350,6 +387,18 @@ public class ArtworkServiceImpl implements ArtworkService {
         return new HashSet<>(likeRepository.findArtworkIdsLikedByUser(viewer.get().getId(), ids));
     }
 
+    private Map<Long, ChallengeSubmission> activeSubmissionsFor(List<Artwork> rows) {
+        if (rows.isEmpty()) return Map.of();
+        Map<Long, ChallengeSubmission> result = new HashMap<>();
+        for (Artwork a : rows) {
+            if (a.getId() == null) continue;
+            submissionRepository
+                    .findFirstByArtworkIdAndChallenge_StatusNot(a.getId(), ChallengeStatus.ENDED)
+                    .ifPresent(s -> result.put(a.getId(), s));
+        }
+        return result;
+    }
+
     private Map<Long, Integer> commentCountsFor(List<Artwork> rows) {
         if (rows.isEmpty()) return Map.of();
         List<Long> ids = rows.stream().map(Artwork::getId).filter(java.util.Objects::nonNull).toList();
@@ -362,6 +411,15 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     private ArtworkDTO mapToDTO(Artwork artwork, Set<Long> likedByViewer, Map<Long, Integer> commentCounts) {
+        return mapToDTO(artwork, likedByViewer, commentCounts, Map.of());
+    }
+
+    private ArtworkDTO mapToDTO(
+            Artwork artwork,
+            Set<Long> likedByViewer,
+            Map<Long, Integer> commentCounts,
+            Map<Long, ChallengeSubmission> activeSubmissionByArtworkId
+    ) {
         User author = artwork.getAuthor();
         List<ArtworkImageDTO> imageDtos = artwork.getImages() == null
                 ? List.of()
@@ -374,6 +432,12 @@ public class ArtworkServiceImpl implements ArtworkService {
                                 img.getCaption()
                         ))
                         .toList();
+        ChallengeSubmission activeSubmission = activeSubmissionByArtworkId.get(artwork.getId());
+        ArtworkDTO.CurrentSubmissionDTO currentSubmission = null;
+        if (activeSubmission != null && activeSubmission.getChallenge() != null) {
+            Challenge c = activeSubmission.getChallenge();
+            currentSubmission = new ArtworkDTO.CurrentSubmissionDTO(c.getId(), c.getTitle());
+        }
         return new ArtworkDTO(
                 artwork.getId(),
                 artwork.getTitle(),
@@ -398,7 +462,8 @@ public class ArtworkServiceImpl implements ArtworkService {
                 artwork.getPublishedAt(),
                 artwork.getLikeCount() == null ? 0 : artwork.getLikeCount(),
                 commentCounts.getOrDefault(artwork.getId(), 0),
-                likedByViewer.contains(artwork.getId())
+                likedByViewer.contains(artwork.getId()),
+                currentSubmission
         );
     }
 

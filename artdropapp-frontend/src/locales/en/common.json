@@ -230,6 +230,25 @@
         "label": "Quantity selector",
         "decrease": "Decrease quantity",
         "increase": "Increase quantity"
+      },
+      "challenge": {
+        "inChallengeLabel": "Currently in challenge",
+        "submitCta": "Submit to a challenge",
+        "withdraw": "Withdraw",
+        "withdrawing": "Withdrawing…",
+        "confirmWithdrawTitle": "Withdraw from challenge?",
+        "confirmWithdrawMessage": "This will remove your artwork from “{{title}}”. You can resubmit it later while the challenge is still active.",
+        "errorEnded": "This challenge has ended — you can no longer withdraw.",
+        "errorNotOwner": "Only the artist can withdraw this artwork.",
+        "errorFallback": "Could not withdraw. Please try again."
+      },
+      "submitToChallenge": {
+        "title": "Submit to a challenge",
+        "subtitle": "Pick an active challenge this artwork is eligible for.",
+        "loading": "Loading challenges",
+        "noEligible": "No active challenges this artwork is eligible for.",
+        "submitting": "Submitting…",
+        "errorLoad": "Could not load challenges."
       }
     },
     "drop": {
@@ -302,6 +321,11 @@
         "forbiddenSale": "Listing for sale requires verified seller status.",
         "unauthenticated": "Please sign in to drop an artwork.",
         "fallback": "Something went wrong."
+      },
+      "challengeContext": {
+        "label": "Submitting to challenge",
+        "notActive": "This challenge is not active right now.",
+        "notFound": "Could not find that challenge."
       }
     },
     "edit": {
@@ -394,6 +418,24 @@
       "timeClosed": "Challenge Closed",
       "timeRemaining": "Time Remaining",
       "timeFormat": "{{days}} Days : {{hours}} Hrs : {{minutes}} Mins"
+    },
+    "join": {
+      "title": "Join {{title}}",
+      "subtitle": "Create a brand new artwork for this challenge, or submit one you already have.",
+      "createNewLabel": "Create something new",
+      "createNewCta": "Create a new artwork",
+      "existingLabel": "Or submit an existing artwork",
+      "loading": "Loading your eligible artworks",
+      "noEligible": "No eligible existing artworks. New artworks made for this challenge will count.",
+      "submitting": "Submitting…",
+      "errorLoad": "Could not load eligible artworks.",
+      "errorNotActive": "This challenge is not active right now.",
+      "errorTooOld": "This artwork was published before the challenge started.",
+      "errorAlreadySubmitted": "This artwork is already in this challenge.",
+      "errorInOther": "This artwork is currently in another challenge — withdraw it first.",
+      "errorNotOwner": "Only the artist can submit this artwork.",
+      "errorUnauthenticated": "Please sign in to submit.",
+      "errorFallback": "Could not submit. Please try again."
     },
     "sort": {
       "label": "Sort submissions",

@@ -17,6 +17,7 @@ type ChallengeHeroBannerProps = {
   challenge: Challenge
   secondaryAction?: SecondaryAction
   showBack?: boolean
+  onJoin?: () => void
 }
 
 function pickHeroSubmission(
@@ -31,6 +32,7 @@ export function ChallengeHeroBanner({
   challenge,
   secondaryAction,
   showBack = true,
+  onJoin,
 }: ChallengeHeroBannerProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -129,9 +131,13 @@ export function ChallengeHeroBanner({
               {challenge.status !== 'ENDED' ? (
                 <button
                   type="button"
-                  onClick={() =>
-                    alert('Submitting artwork will be available once sign-in ships.')
-                  }
+                  onClick={() => {
+                    if (onJoin) {
+                      onJoin()
+                    } else {
+                      alert('Open the challenge to join.')
+                    }
+                  }}
                   className="bg-white text-black px-8 py-4 font-label uppercase tracking-widest text-xs font-bold hover:bg-surface-variant transition-colors"
                 >
                   {t('challenges.hero.joinChallenge')}

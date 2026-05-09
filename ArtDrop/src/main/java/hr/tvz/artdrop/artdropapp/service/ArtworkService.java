@@ -31,7 +31,14 @@ public interface ArtworkService {
 
     boolean createArtwork(ArtworkCommand command);
 
-    enum CreateOutcome { CREATED, CONFLICT, FORBIDDEN_SALE_GATE, UNAUTHENTICATED }
+    enum CreateOutcome {
+        CREATED,
+        CONFLICT,
+        FORBIDDEN_SALE_GATE,
+        UNAUTHENTICATED,
+        CHALLENGE_NOT_FOUND,
+        CHALLENGE_NOT_ACTIVE
+    }
 
     record CreateResult(CreateOutcome outcome, ArtworkDTO artwork) {}
 

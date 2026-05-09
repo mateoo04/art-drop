@@ -105,6 +105,17 @@ export function mapApiArtwork(raw: Record<string, unknown>): Artwork {
     likeCount: Number(raw.likeCount ?? 0),
     commentCount: Number(raw.commentCount ?? 0),
     likedByMe: Boolean(raw.likedByMe),
+    currentSubmission:
+      raw.currentSubmission != null && typeof raw.currentSubmission === 'object'
+        ? {
+            challengeId: Number(
+              (raw.currentSubmission as Record<string, unknown>).challengeId,
+            ),
+            challengeTitle: String(
+              (raw.currentSubmission as Record<string, unknown>).challengeTitle ?? '',
+            ),
+          }
+        : null,
   }
 }
 
@@ -259,6 +270,19 @@ export type CreateArtworkPayload = {
   tags?: string[]
   price?: number | null
   saleStatus?: SaleStatus | null
+  challengeId?: number | null
+}
+
+async function readErrorCode(res: Response): Promise<string | null> {
+  try {
+    const body = (await res.json()) as Record<string, unknown> | null
+    if (body && typeof body === 'object' && typeof body.error === 'string') {
+      return body.error
+    }
+  } catch {
+    // ignore
+  }
+  return null
 }
 
 export async function createArtwork(payload: CreateArtworkPayload): Promise<Artwork | null> {
@@ -273,20 +297,15 @@ export async function createArtwork(payload: CreateArtworkPayload): Promise<Artw
   if (res.status === 401) {
     throw new Error('UNAUTHENTICATED')
   }
+  if (res.status === 404) {
+    const code = await readErrorCode(res)
+    if (code === 'CHALLENGE_NOT_FOUND') throw new Error('CHALLENGE_NOT_FOUND')
+    throw new Error(`Create failed (${res.status})`)
+  }
   if (res.status === 403) {
-    let body: unknown = null
-    try {
-      body = await res.json()
-    } catch {
-      body = null
-    }
-    if (
-      body != null &&
-      typeof body === 'object' &&
-      (body as Record<string, unknown>).error === 'FORBIDDEN_SALE_GATE'
-    ) {
-      throw new Error('FORBIDDEN_SALE_GATE')
-    }
+    const code = await readErrorCode(res)
+    if (code === 'FORBIDDEN_SALE_GATE') throw new Error('FORBIDDEN_SALE_GATE')
+    if (code === 'CHALLENGE_NOT_ACTIVE') throw new Error('CHALLENGE_NOT_ACTIVE')
     throw new Error(`Create failed (${res.status})`)
   }
   if (res.status !== 201) {
@@ -298,6 +317,36 @@ export async function createArtwork(payload: CreateArtworkPayload): Promise<Artw
   } catch {
     return null
   }
+}
+
+export async function fetchEligibleArtworksForChallenge(
+  challengeId: number,
+): Promise<Artwork[]> {
+  const res = await authFetch(`/api/challenges/${challengeId}/eligible-artworks`)
+  if (res.status === 401) throw new Error('UNAUTHENTICATED')
+  if (!res.ok) {
+    throw new Error(`Failed to load eligible artworks (${res.status})`)
+  }
+  const json: unknown = await res.json()
+  if (!Array.isArray(json)) {
+    throw new Error('Unexpected server response')
+  }
+  return json.map((el) => mapApiArtwork(el as Record<string, unknown>))
+}
+
+export async function fetchEligibleChallengesForArtwork(
+  artworkId: number,
+): Promise<Challenge[]> {
+  const res = await authFetch(`/api/artworks/${artworkId}/eligible-challenges`)
+  if (res.status === 401) throw new Error('UNAUTHENTICATED')
+  if (!res.ok) {
+    throw new Error(`Failed to load eligible challenges (${res.status})`)
+  }
+  const json: unknown = await res.json()
+  if (!Array.isArray(json)) {
+    throw new Error('Unexpected server response')
+  }
+  return json.map((el) => mapChallenge(el as Record<string, unknown>))
 }
 
 export type UpdateArtworkPayload = {

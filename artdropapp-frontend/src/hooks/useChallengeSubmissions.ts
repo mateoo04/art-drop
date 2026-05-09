@@ -32,5 +32,6 @@ export function useChallengeSubmissions(
     error: query.error?.message ?? null,
     hasNextPage: query.hasNextPage ?? false,
     fetchNextPage: query.fetchNextPage,
+    refetch: query.refetch,
   }
 }

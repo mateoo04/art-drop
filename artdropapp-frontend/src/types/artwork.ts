@@ -18,6 +18,11 @@ export interface ArtworkImage {
   caption: string | null
 }
 
+export interface CurrentChallengeSubmission {
+  challengeId: number
+  challengeTitle: string
+}
+
 export interface Artwork {
   id: number
   title: string
@@ -41,4 +46,5 @@ export interface Artwork {
   likeCount: number
   commentCount: number
   likedByMe: boolean
+  currentSubmission: CurrentChallengeSubmission | null
 }

@@ -3,7 +3,9 @@ package hr.tvz.artdrop.artdropapp.controller;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkUpdateCommand;
+import hr.tvz.artdrop.artdropapp.dto.ChallengeDTO;
 import hr.tvz.artdrop.artdropapp.service.ArtworkService;
+import hr.tvz.artdrop.artdropapp.service.ChallengeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +19,11 @@ import java.util.List;
 public class ArtworkController {
 
     private final ArtworkService artworkService;
+    private final ChallengeService challengeService;
 
-    public ArtworkController(ArtworkService artworkService) {
+    public ArtworkController(ArtworkService artworkService, ChallengeService challengeService) {
         this.artworkService = artworkService;
+        this.challengeService = challengeService;
     }
 
     @GetMapping
@@ -84,7 +88,22 @@ public class ArtworkController {
                     .status(HttpStatus.FORBIDDEN)
                     .body(java.util.Map.of("error", "FORBIDDEN_SALE_GATE"));
             case UNAUTHENTICATED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            case CHALLENGE_NOT_FOUND -> ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(java.util.Map.of("error", "CHALLENGE_NOT_FOUND"));
+            case CHALLENGE_NOT_ACTIVE -> ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(java.util.Map.of("error", "CHALLENGE_NOT_ACTIVE"));
         };
+    }
+
+    @GetMapping("/{id}/eligible-challenges")
+    public ResponseEntity<List<ChallengeDTO>> getEligibleChallenges(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        if (authentication == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.ok(challengeService.findEligibleChallengesForArtwork(id, authentication.getName()));
     }
 
     @PostMapping("/{id}/likes")

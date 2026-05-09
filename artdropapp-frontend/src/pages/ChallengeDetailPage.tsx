@@ -5,6 +5,7 @@ import type { SubmissionSort } from '../api/challengesApi'
 import { ChallengeHeroBanner } from '../components/challenges/ChallengeHeroBanner'
 import { ChallengeSortTabs } from '../components/challenges/ChallengeSortTabs'
 import { ChallengeSubmissionsMasonry } from '../components/challenges/ChallengeSubmissionsMasonry'
+import { JoinChallengeModal } from '../components/challenges/JoinChallengeModal'
 import { InfiniteScrollSentinel } from '../components/home/InfiniteScrollSentinel'
 import { Spinner } from '../components/ui/Spinner'
 import { useChallenge } from '../hooks/useChallenge'
@@ -17,7 +18,8 @@ export function ChallengeDetailPage() {
   const validId = challengeId != null && Number.isFinite(challengeId) ? challengeId : null
 
   const [sort, setSort] = useState<SubmissionSort>('top')
-  const { data: challenge, loading, error } = useChallenge(validId)
+  const [joinOpen, setJoinOpen] = useState(false)
+  const { data: challenge, loading, error, refetch: refetchChallenge } = useChallenge(validId)
   const {
     submissions,
     isLoading: submissionsLoading,
@@ -25,6 +27,7 @@ export function ChallengeDetailPage() {
     error: submissionsError,
     hasNextPage,
     fetchNextPage,
+    refetch: refetchSubmissions,
   } = useChallengeSubmissions(validId, sort)
 
   if (loading) {
@@ -50,7 +53,7 @@ export function ChallengeDetailPage() {
 
   return (
     <main className="max-w-[1920px] mx-auto pb-20">
-      <ChallengeHeroBanner challenge={challenge} />
+      <ChallengeHeroBanner challenge={challenge} onJoin={() => setJoinOpen(true)} />
       <section className="py-16">
         <ChallengeSortTabs active={sort} onChange={setSort} />
         {submissionsLoading ? (
@@ -76,6 +79,15 @@ export function ChallengeDetailPage() {
           </>
         )}
       </section>
+      <JoinChallengeModal
+        open={joinOpen}
+        onClose={() => setJoinOpen(false)}
+        challenge={challenge}
+        onSubmitted={() => {
+          void refetchChallenge()
+          void refetchSubmissions()
+        }}
+      />
     </main>
   )
 }
