@@ -98,10 +98,22 @@ public class ArtworkServiceImpl implements ArtworkService {
         if (trimmed.isEmpty()) {
             return List.of();
         }
+        String tsq = toPrefixTsQuery(trimmed);
+        if (tsq.isEmpty()) {
+            tsq = " ";
+        }
         int cappedLimit = Math.max(1, Math.min(limit, 50));
-        Pageable page = paged(cappedLimit, offset, Sort.by(Sort.Direction.DESC, "publishedAt"));
-        List<Artwork> rows = artworkRepository.searchArtworks(trimmed, page);
+        Pageable page = paged(cappedLimit, offset);
+        List<Artwork> rows = artworkRepository.searchArtworks(tsq, trimmed, page);
         return mapMany(rows, viewerUsername);
+    }
+
+    private static String toPrefixTsQuery(String input) {
+        return java.util.Arrays.stream(input.toLowerCase().split("\\s+"))
+                .map(s -> s.replaceAll("[^a-z0-9]", ""))
+                .filter(s -> !s.isEmpty())
+                .map(s -> s + ":*")
+                .collect(java.util.stream.Collectors.joining(" & "));
     }
 
     private static Pageable paged(int limit, int offset) {

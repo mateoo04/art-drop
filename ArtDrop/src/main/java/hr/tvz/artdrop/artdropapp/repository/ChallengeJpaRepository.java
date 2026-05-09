@@ -12,13 +12,16 @@ import java.util.List;
 public interface ChallengeJpaRepository extends JpaRepository<Challenge, Long> {
     List<Challenge> findByStatus(ChallengeStatus status);
 
-    @Query("SELECT c FROM Challenge c WHERE " +
-            "LOWER(c.title) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-            "(c.description IS NOT NULL AND LOWER(c.description) LIKE LOWER(CONCAT('%', :q, '%'))) OR " +
-            "(c.theme IS NOT NULL AND LOWER(c.theme) LIKE LOWER(CONCAT('%', :q, '%'))) " +
-            "ORDER BY CASE c.status " +
-            "WHEN hr.tvz.artdrop.artdropapp.model.ChallengeStatus.ACTIVE THEN 0 " +
-            "WHEN hr.tvz.artdrop.artdropapp.model.ChallengeStatus.UPCOMING THEN 1 " +
-            "ELSE 2 END, c.endsAt ASC")
+    @Query(value = """
+            SELECT * FROM challenge c
+            WHERE c.search_tsv @@ websearch_to_tsquery('english', :q)
+            ORDER BY CASE c.status
+                       WHEN 'ACTIVE'   THEN 0
+                       WHEN 'UPCOMING' THEN 1
+                       ELSE 2
+                     END,
+                     ts_rank_cd(c.search_tsv, websearch_to_tsquery('english', :q)) DESC,
+                     c.ends_at ASC
+            """, nativeQuery = true)
     List<Challenge> searchChallenges(@Param("q") String q, Pageable pageable);
 }

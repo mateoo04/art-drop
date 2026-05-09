@@ -27,12 +27,16 @@ public class DevDataRebaser {
         if (deltaMs == 0) {
             return;
         }
-        jdbc.update("UPDATE artwork SET published_at = DATEADD('MILLISECOND', ?, published_at)", deltaMs);
         jdbc.update(
-                "UPDATE comment SET created_at = DATEADD('MILLISECOND', ?, created_at),"
-                        + " updated_at = DATEADD('MILLISECOND', ?, updated_at)",
+                "UPDATE artwork SET published_at = published_at + make_interval(secs => ? / 1000.0)",
+                deltaMs);
+        jdbc.update(
+                "UPDATE comment SET created_at = created_at + make_interval(secs => ? / 1000.0),"
+                        + " updated_at = updated_at + make_interval(secs => ? / 1000.0)",
                 deltaMs,
                 deltaMs);
-        jdbc.update("UPDATE artwork_like SET created_at = DATEADD('MILLISECOND', ?, created_at)", deltaMs);
+        jdbc.update(
+                "UPDATE artwork_like SET created_at = created_at + make_interval(secs => ? / 1000.0)",
+                deltaMs);
     }
 }

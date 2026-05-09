@@ -10,6 +10,7 @@ import hr.tvz.artdrop.artdropapp.model.SellerApplicationStatus;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.SellerApplicationJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
+import hr.tvz.artdrop.artdropapp.support.AbstractPostgresIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -35,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @ActiveProfiles("test")
-class SellerFlowIntegrationTest {
+class SellerFlowIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Autowired private WebApplicationContext context;
     @Autowired private SellerApplicationJpaRepository applicationRepository;
@@ -44,12 +43,6 @@ class SellerFlowIntegrationTest {
     @Autowired private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
-
-    @DynamicPropertySource
-    static void datasource(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url",
-                () -> "jdbc:h2:mem:sellertest;DB_CLOSE_DELAY=-1;MODE=LEGACY");
-    }
 
     @BeforeEach
     void init() {

@@ -37,10 +37,21 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
             @org.springframework.data.repository.query.Param("q") String q,
             org.springframework.data.domain.Pageable pageable);
 
-    @Query("SELECT u FROM User u WHERE u.enabled = true AND (" +
-            "LOWER(u.displayName) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-            "LOWER(u.slug) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-            "LOWER(u.username) LIKE LOWER(CONCAT('%', :q, '%'))) " +
-            "ORDER BY u.displayName ASC")
+    @Query(value = """
+            SELECT * FROM app_user u
+            WHERE u.enabled = TRUE
+              AND (u.display_name ILIKE '%' || :q || '%'
+                OR u.slug         ILIKE '%' || :q || '%'
+                OR u.username     ILIKE '%' || :q || '%'
+                OR u.display_name % :q
+                OR u.slug         % :q
+                OR u.username     % :q)
+            ORDER BY GREATEST(
+                       similarity(u.display_name, :q),
+                       similarity(u.slug,         :q),
+                       similarity(u.username,     :q)
+                     ) DESC,
+                     u.display_name ASC
+            """, nativeQuery = true)
     java.util.List<User> searchPublic(@Param("q") String q, org.springframework.data.domain.Pageable pageable);
 }

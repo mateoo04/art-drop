@@ -58,6 +58,10 @@ stitch-downloads/
 .cursor/
 docs/
 
-# --- Local H2 file DB ---
-ArtDrop/data/
+# --- Local secrets ---
+.env
+ArtDrop/.env
 artdropapp-frontend/.env
+
+# --- Legacy local H2 file DB (no longer used; safe to delete) ---
+ArtDrop/data/
