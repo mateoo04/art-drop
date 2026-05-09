@@ -1,9 +1,7 @@
 package hr.tvz.artdrop.artdropapp.controller;
 
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommand;
-import hr.tvz.artdrop.artdropapp.dto.ArtworkCommentCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
-import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkUpdateCommand;
 import hr.tvz.artdrop.artdropapp.service.ArtworkService;
 import jakarta.validation.Valid;
@@ -110,22 +108,6 @@ public class ArtworkController {
             case UNAUTHENTICATED -> ResponseEntity.status(401).build();
             default -> ResponseEntity.internalServerError().build();
         };
-    }
-
-    @PostMapping("/comments")
-    public ResponseEntity<Void> createArtworkComment(@Valid @RequestBody ArtworkCommentCommand command) {
-        if (!artworkService.createArtworkComment(command)) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @PostMapping("/reviews")
-    public ResponseEntity<Void> createArtworkReview(@Valid @RequestBody ArtworkReviewCommand command) {
-        if (!artworkService.createArtworkReview(command)) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PatchMapping("/{id}")

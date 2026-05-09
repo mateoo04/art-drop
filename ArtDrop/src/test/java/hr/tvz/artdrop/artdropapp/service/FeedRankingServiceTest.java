@@ -28,6 +28,7 @@ class FeedRankingServiceTest {
                 null,
                 null,
                 null,
+                null,
                 Caffeine.newBuilder().<String, List<FeedSnapshotEntry>>build(),
                 1.5,  // wCircle
                 1.0,  // wEngage
@@ -84,8 +85,8 @@ class FeedRankingServiceTest {
     @Test
     void anonymousViewerIgnoresCircleAndSeen() {
         Artwork a = artwork(1L, 100L, 5, 0, now.minusHours(1));
-        double whenAnon = service.scoreArtwork(a, null, true, now.minusMinutes(1), now);
-        double whenAnonNoCircle = service.scoreArtwork(a, null, false, null, now);
+        double whenAnon = service.scoreArtwork(a, a.getComments().size(), null, true, now.minusMinutes(1), now);
+        double whenAnonNoCircle = service.scoreArtwork(a, a.getComments().size(), null, false, null, now);
         assertThat(whenAnon).isEqualTo(whenAnonNoCircle);
     }
 
@@ -93,8 +94,8 @@ class FeedRankingServiceTest {
     void followedArtworkOutranksUnfollowedEquivalent() {
         Artwork followed = artwork(1L, 100L, 5, 1, now.minusHours(2));
         Artwork unfollowed = artwork(2L, 200L, 5, 1, now.minusHours(2));
-        double sFollowed = service.scoreArtwork(followed, 42L, true, null, now);
-        double sUnfollowed = service.scoreArtwork(unfollowed, 42L, false, null, now);
+        double sFollowed = service.scoreArtwork(followed, followed.getComments().size(), 42L, true, null, now);
+        double sUnfollowed = service.scoreArtwork(unfollowed, unfollowed.getComments().size(), 42L, false, null, now);
         assertThat(sFollowed).isGreaterThan(sUnfollowed);
     }
 
@@ -102,8 +103,8 @@ class FeedRankingServiceTest {
     void seenArtworkRanksLowerThanUnseen() {
         Artwork seen = artwork(1L, 100L, 5, 1, now.minusHours(2));
         Artwork unseen = artwork(2L, 100L, 5, 1, now.minusHours(2));
-        double sSeen = service.scoreArtwork(seen, 42L, false, now.minusMinutes(2), now);
-        double sUnseen = service.scoreArtwork(unseen, 42L, false, null, now);
+        double sSeen = service.scoreArtwork(seen, seen.getComments().size(), 42L, false, now.minusMinutes(2), now);
+        double sUnseen = service.scoreArtwork(unseen, unseen.getComments().size(), 42L, false, null, now);
         assertThat(sUnseen).isGreaterThan(sSeen);
     }
 
@@ -111,24 +112,24 @@ class FeedRankingServiceTest {
     void recentlySeenPenalizedHarderThanLongAgoSeen() {
         Artwork recent = artwork(1L, 100L, 5, 1, now.minusHours(2));
         Artwork ancient = artwork(2L, 100L, 5, 1, now.minusHours(2));
-        double sRecent = service.scoreArtwork(recent, 42L, false, now.minusMinutes(5), now);
-        double sAncient = service.scoreArtwork(ancient, 42L, false, now.minusDays(5), now);
+        double sRecent = service.scoreArtwork(recent, recent.getComments().size(), 42L, false, now.minusMinutes(5), now);
+        double sAncient = service.scoreArtwork(ancient, ancient.getComments().size(), 42L, false, now.minusDays(5), now);
         assertThat(sAncient).isGreaterThan(sRecent);
     }
 
     @Test
     void justSeenAppliesNearMaxPenalty() {
         Artwork a = artwork(1L, 100L, 5, 1, now.minusHours(2));
-        double sUnseen = service.scoreArtwork(a, 42L, false, null, now);
-        double sJustSeen = service.scoreArtwork(a, 42L, false, now.minusMinutes(1), now);
+        double sUnseen = service.scoreArtwork(a, a.getComments().size(), 42L, false, null, now);
+        double sJustSeen = service.scoreArtwork(a, a.getComments().size(), 42L, false, now.minusMinutes(1), now);
         assertThat(sUnseen - sJustSeen).isGreaterThan(3.5);
     }
 
     @Test
     void seenAtTimeConstantAppliesOneOverEPenalty() {
         Artwork a = artwork(1L, 100L, 5, 1, now.minusHours(2));
-        double sUnseen = service.scoreArtwork(a, 42L, false, null, now);
-        double sSeenAtTau = service.scoreArtwork(a, 42L, false, now.minusHours(24), now);
+        double sUnseen = service.scoreArtwork(a, a.getComments().size(), 42L, false, null, now);
+        double sSeenAtTau = service.scoreArtwork(a, a.getComments().size(), 42L, false, now.minusHours(24), now);
         double penalty = sUnseen - sSeenAtTau;
         assertThat(penalty).isBetween(1.3, 1.6);
     }
@@ -137,8 +138,8 @@ class FeedRankingServiceTest {
     void recencyDecaysOverTime() {
         Artwork fresh = artwork(1L, 100L, 0, 0, now.minusHours(1));
         Artwork stale = artwork(2L, 100L, 0, 0, now.minusDays(7));
-        double sFresh = service.scoreArtwork(fresh, 42L, false, null, now);
-        double sStale = service.scoreArtwork(stale, 42L, false, null, now);
+        double sFresh = service.scoreArtwork(fresh, fresh.getComments().size(), 42L, false, null, now);
+        double sStale = service.scoreArtwork(stale, stale.getComments().size(), 42L, false, null, now);
         assertThat(sFresh).isGreaterThan(sStale);
     }
 
@@ -146,8 +147,8 @@ class FeedRankingServiceTest {
     void freshLowEngagementBeatsStaleHighEngagement() {
         Artwork stalePopular = artwork(1L, 100L, 50, 20, now.minusDays(21));
         Artwork freshQuiet = artwork(2L, 100L, 5, 0, now.minusDays(1));
-        double sStale = service.scoreArtwork(stalePopular, 42L, false, null, now);
-        double sFresh = service.scoreArtwork(freshQuiet, 42L, false, null, now);
+        double sStale = service.scoreArtwork(stalePopular, stalePopular.getComments().size(), 42L, false, null, now);
+        double sFresh = service.scoreArtwork(freshQuiet, freshQuiet.getComments().size(), 42L, false, null, now);
         assertThat(sFresh).isGreaterThan(sStale);
     }
 

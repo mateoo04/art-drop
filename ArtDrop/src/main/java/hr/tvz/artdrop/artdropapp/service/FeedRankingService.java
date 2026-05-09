@@ -13,6 +13,7 @@ import hr.tvz.artdrop.artdropapp.model.ChallengeStatus;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeSubmissionJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.CommentJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.FeedSeenJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserFollowJpaRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +42,7 @@ public class FeedRankingService {
     private final ChallengeJpaRepository challengeJpaRepository;
     private final ChallengeSubmissionJpaRepository challengeSubmissionJpaRepository;
     private final ChallengeService challengeService;
+    private final CommentJpaRepository commentRepository;
     private final Cache<String, List<FeedSnapshotEntry>> feedSnapshotCache;
 
     private final double wCircle;
@@ -65,6 +67,7 @@ public class FeedRankingService {
             ChallengeJpaRepository challengeJpaRepository,
             ChallengeSubmissionJpaRepository challengeSubmissionJpaRepository,
             ChallengeService challengeService,
+            CommentJpaRepository commentRepository,
             Cache<String, List<FeedSnapshotEntry>> feedSnapshotCache,
             @Value("${feed.ranking.w-circle:1.5}") double wCircle,
             @Value("${feed.ranking.w-engage:1.0}") double wEngage,
@@ -87,6 +90,7 @@ public class FeedRankingService {
         this.challengeJpaRepository = challengeJpaRepository;
         this.challengeSubmissionJpaRepository = challengeSubmissionJpaRepository;
         this.challengeService = challengeService;
+        this.commentRepository = commentRepository;
         this.feedSnapshotCache = feedSnapshotCache;
         this.wCircle = wCircle;
         this.wEngage = wEngage;
@@ -270,11 +274,18 @@ public class FeedRankingService {
             }
         }
 
+        List<Long> candidateIds = candidates.stream().map(Artwork::getId).toList();
+        Map<Long, Integer> commentCounts = new HashMap<>();
+        for (Object[] row : commentRepository.countActiveByArtworkIds(candidateIds)) {
+            commentCounts.put((Long) row[0], ((Number) row[1]).intValue());
+        }
+
         record Scored(Long id, double score) {}
         List<Scored> scored = new ArrayList<>(candidates.size());
         for (Artwork a : candidates) {
             double s = scoreArtwork(
                     a,
+                    commentCounts.getOrDefault(a.getId(), 0),
                     viewerId,
                     circleSet.contains(a.getAuthor() == null ? null : a.getAuthor().getId()),
                     lastSeen.get(a.getId()),
@@ -287,12 +298,12 @@ public class FeedRankingService {
         return out;
     }
 
-    public double scoreArtwork(Artwork artwork, Long viewerId, boolean isFollowed, LocalDateTime lastSeenAt, LocalDateTime now) {
+    public double scoreArtwork(Artwork artwork, int commentCount, Long viewerId, boolean isFollowed, LocalDateTime lastSeenAt, LocalDateTime now) {
         boolean anonymous = viewerId == null;
         double circleTerm = anonymous ? 0.0 : (isFollowed ? wCircle : 0.0);
 
         int likes = artwork.getLikeCount() == null ? 0 : artwork.getLikeCount();
-        int comments = artwork.getComments() == null ? 0 : artwork.getComments().size();
+        int comments = commentCount;
 
         double ageHours = artwork.getPublishedAt() == null
                 ? Double.POSITIVE_INFINITY

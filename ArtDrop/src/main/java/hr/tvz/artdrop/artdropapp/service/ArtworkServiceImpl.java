@@ -1,22 +1,20 @@
 package hr.tvz.artdrop.artdropapp.service;
 
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommand;
-import hr.tvz.artdrop.artdropapp.dto.ArtworkCommentCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkImageCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkImageDTO;
-import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkUpdateCommand;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.ArtworkImage;
 import hr.tvz.artdrop.artdropapp.model.ArtworkLike;
-import hr.tvz.artdrop.artdropapp.model.Comment;
 import hr.tvz.artdrop.artdropapp.model.DimensionUnit;
 import hr.tvz.artdrop.artdropapp.model.ProgressStatus;
 import hr.tvz.artdrop.artdropapp.model.SaleStatus;
 import hr.tvz.artdrop.artdropapp.model.User;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkLikeJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.CommentJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,17 +37,18 @@ public class ArtworkServiceImpl implements ArtworkService {
     private final ArtworkJpaRepository artworkRepository;
     private final ArtworkLikeJpaRepository likeRepository;
     private final UserJpaRepository userRepository;
-    private final Map<String, List<ArtworkCommentCommand>> commentsByTitle = new HashMap<>();
-    private final Map<String, List<ArtworkReviewCommand>> reviewsByTitle = new HashMap<>();
+    private final CommentJpaRepository commentRepository;
 
     public ArtworkServiceImpl(
             ArtworkJpaRepository artworkRepository,
             ArtworkLikeJpaRepository likeRepository,
-            UserJpaRepository userRepository
+            UserJpaRepository userRepository,
+            CommentJpaRepository commentRepository
     ) {
         this.artworkRepository = artworkRepository;
         this.likeRepository = likeRepository;
         this.userRepository = userRepository;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -72,7 +71,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     public Optional<ArtworkDTO> findById(Long id, String viewerUsername) {
         return artworkRepository.findById(id)
-                .map(a -> mapToDTO(a, likedSetFor(viewerUsername, List.of(a))));
+                .map(a -> mapToDTO(a, likedSetFor(viewerUsername, List.of(a)), commentCountsFor(List.of(a))));
     }
 
     @Override
@@ -137,7 +136,8 @@ public class ArtworkServiceImpl implements ArtworkService {
         Set<Long> likedSet = rows.isEmpty() ? Set.of() : new HashSet<>(
                 likeRepository.findArtworkIdsLikedByUser(viewerId, rows.stream().map(Artwork::getId).toList())
         );
-        return rows.stream().map(a -> mapToDTO(a, likedSet)).toList();
+        Map<Long, Integer> commentCounts = commentCountsFor(rows);
+        return rows.stream().map(a -> mapToDTO(a, likedSet, commentCounts)).toList();
     }
 
     @Override
@@ -157,7 +157,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     public Optional<ArtworkDTO> findOneByTitle(String title, String viewerUsername) {
         return artworkRepository.findByTitleIgnoreCase(title)
-                .map(a -> mapToDTO(a, likedSetFor(viewerUsername, List.of(a))));
+                .map(a -> mapToDTO(a, likedSetFor(viewerUsername, List.of(a)), commentCountsFor(List.of(a))));
     }
 
     @Override
@@ -213,7 +213,7 @@ public class ArtworkServiceImpl implements ArtworkService {
         applyDimensions(artwork, command.width(), command.height(), command.depth(), command.dimensionUnit());
         artwork.setImages(buildImages(artwork, command.images()));
         Artwork saved = artworkRepository.save(artwork);
-        return new CreateResult(CreateOutcome.CREATED, mapToDTO(saved, Set.of()));
+        return new CreateResult(CreateOutcome.CREATED, mapToDTO(saved, Set.of(), Map.of()));
     }
 
     @Override
@@ -238,60 +238,6 @@ public class ArtworkServiceImpl implements ArtworkService {
         if (!artworkRepository.existsById(artworkId)) return LikeResult.NOT_FOUND;
         long removed = likeRepository.deleteByArtworkIdAndUserId(artworkId, viewer.get().getId());
         return removed > 0 ? LikeResult.UNLIKED : LikeResult.NOT_LIKED;
-    }
-
-    @Override
-    @Transactional
-    public boolean createArtworkComment(ArtworkCommentCommand command) {
-        Optional<Artwork> maybeArtwork = artworkRepository.findByTitleIgnoreCase(command.title());
-        if (maybeArtwork.isEmpty()) {
-            return false;
-        }
-
-        Artwork artwork = maybeArtwork.get();
-        Comment comment = new Comment(
-                null,
-                artwork,
-                null,
-                command.content(),
-                null,
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                false
-        );
-        if (artwork.getComments() == null) {
-            artwork.setComments(new ArrayList<>());
-        }
-        artwork.getComments().add(comment);
-        artwork.setUpdatedAt(LocalDateTime.now());
-        artworkRepository.save(artwork);
-
-        String key = artwork.getTitle().toLowerCase();
-        List<ArtworkCommentCommand> comments = commentsByTitle.get(key);
-        if (comments == null) {
-            comments = new ArrayList<>();
-            commentsByTitle.put(key, comments);
-        }
-        comments.add(command);
-        return true;
-    }
-
-    @Override
-    @Transactional
-    public boolean createArtworkReview(ArtworkReviewCommand command) {
-        Optional<Artwork> maybeArtwork = artworkRepository.findByTitleIgnoreCase(command.title());
-        if (maybeArtwork.isEmpty()) {
-            return false;
-        }
-
-        String key = maybeArtwork.get().getTitle().toLowerCase();
-        List<ArtworkReviewCommand> reviews = reviewsByTitle.get(key);
-        if (reviews == null) {
-            reviews = new ArrayList<>();
-            reviewsByTitle.put(key, reviews);
-        }
-        reviews.add(command);
-        return true;
     }
 
     @Override
@@ -346,7 +292,7 @@ public class ArtworkServiceImpl implements ArtworkService {
         }
         artwork.setUpdatedAt(LocalDateTime.now());
         artworkRepository.save(artwork);
-        return new UpdateResult(UpdateOutcome.OK, mapToDTO(artwork, Set.of()));
+        return new UpdateResult(UpdateOutcome.OK, mapToDTO(artwork, Set.of(), commentCountsFor(List.of(artwork))));
     }
 
     @Override
@@ -357,13 +303,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     @Transactional
     public boolean deleteByTitle(String title) {
-        boolean deleted = artworkRepository.deleteByTitleIgnoreCase(title) > 0;
-        if (deleted) {
-            String key = title.toLowerCase();
-            commentsByTitle.remove(key);
-            reviewsByTitle.remove(key);
-        }
-        return deleted;
+        return artworkRepository.deleteByTitleIgnoreCase(title) > 0;
     }
 
     private List<ArtworkImage> buildImages(Artwork artwork, List<ArtworkImageCommand> commands) {
@@ -398,7 +338,8 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     private List<ArtworkDTO> mapMany(List<Artwork> rows, String viewerUsername) {
         Set<Long> likedSet = likedSetFor(viewerUsername, rows);
-        return rows.stream().map(a -> mapToDTO(a, likedSet)).toList();
+        Map<Long, Integer> commentCounts = commentCountsFor(rows);
+        return rows.stream().map(a -> mapToDTO(a, likedSet, commentCounts)).toList();
     }
 
     private Set<Long> likedSetFor(String viewerUsername, List<Artwork> rows) {
@@ -409,7 +350,18 @@ public class ArtworkServiceImpl implements ArtworkService {
         return new HashSet<>(likeRepository.findArtworkIdsLikedByUser(viewer.get().getId(), ids));
     }
 
-    private ArtworkDTO mapToDTO(Artwork artwork, Set<Long> likedByViewer) {
+    private Map<Long, Integer> commentCountsFor(List<Artwork> rows) {
+        if (rows.isEmpty()) return Map.of();
+        List<Long> ids = rows.stream().map(Artwork::getId).filter(java.util.Objects::nonNull).toList();
+        if (ids.isEmpty()) return Map.of();
+        Map<Long, Integer> result = new HashMap<>();
+        for (Object[] row : commentRepository.countActiveByArtworkIds(ids)) {
+            result.put((Long) row[0], ((Number) row[1]).intValue());
+        }
+        return result;
+    }
+
+    private ArtworkDTO mapToDTO(Artwork artwork, Set<Long> likedByViewer, Map<Long, Integer> commentCounts) {
         User author = artwork.getAuthor();
         List<ArtworkImageDTO> imageDtos = artwork.getImages() == null
                 ? List.of()
@@ -445,20 +397,9 @@ public class ArtworkServiceImpl implements ArtworkService {
                 artwork.getTags(),
                 artwork.getPublishedAt(),
                 artwork.getLikeCount() == null ? 0 : artwork.getLikeCount(),
-                artwork.getComments() == null ? getCommentCount(artwork.getTitle()) : artwork.getComments().size(),
+                commentCounts.getOrDefault(artwork.getId(), 0),
                 likedByViewer.contains(artwork.getId())
         );
-    }
-
-    private int getCommentCount(String title) {
-        if (title == null) {
-            return 0;
-        }
-        List<ArtworkCommentCommand> comments = commentsByTitle.get(title.toLowerCase());
-        if (comments == null) {
-            return 0;
-        }
-        return comments.size();
     }
 
     private double estimateAspectRatio(Artwork artwork) {

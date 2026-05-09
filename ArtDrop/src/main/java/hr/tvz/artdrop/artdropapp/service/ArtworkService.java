@@ -1,9 +1,7 @@
 package hr.tvz.artdrop.artdropapp.service;
 
 import hr.tvz.artdrop.artdropapp.dto.ArtworkCommand;
-import hr.tvz.artdrop.artdropapp.dto.ArtworkCommentCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
-import hr.tvz.artdrop.artdropapp.dto.ArtworkReviewCommand;
 import hr.tvz.artdrop.artdropapp.dto.ArtworkUpdateCommand;
 
 import java.util.List;
@@ -44,10 +42,6 @@ public interface ArtworkService {
     LikeResult like(Long artworkId, String username);
 
     LikeResult unlike(Long artworkId, String username);
-
-    boolean createArtworkComment(ArtworkCommentCommand command);
-
-    boolean createArtworkReview(ArtworkReviewCommand command);
 
     enum UpdateOutcome { OK, NOT_FOUND, FORBIDDEN_SALE_GATE }
 

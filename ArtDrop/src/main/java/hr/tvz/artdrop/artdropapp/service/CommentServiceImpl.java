@@ -48,7 +48,6 @@ public class CommentServiceImpl implements CommentService {
         Long viewerId = viewerUsername == null
                 ? null
                 : userRepository.findByUsername(viewerUsername).map(User::getId).orElse(null);
-        Map<Long, User> authorCache = new HashMap<>();
 
         if (topLevel.isEmpty()) {
             return List.of();
@@ -67,9 +66,9 @@ public class CommentServiceImpl implements CommentService {
                     List<Comment> all = repliesByParent.getOrDefault(c.getId(), List.of());
                     List<CommentDTO> preview = all.stream()
                             .limit(REPLY_PREVIEW_COUNT)
-                            .map(r -> toDTO(r, viewerId, authorCache, 0, List.of()))
+                            .map(r -> toDTO(r, viewerId, 0, List.of()))
                             .toList();
-                    return toDTO(c, viewerId, authorCache, all.size(), preview);
+                    return toDTO(c, viewerId, all.size(), preview);
                 })
                 .toList();
     }
@@ -84,9 +83,8 @@ public class CommentServiceImpl implements CommentService {
         Long viewerId = viewerUsername == null
                 ? null
                 : userRepository.findByUsername(viewerUsername).map(User::getId).orElse(null);
-        Map<Long, User> authorCache = new HashMap<>();
         return replies.stream()
-                .map(r -> toDTO(r, viewerId, authorCache, 0, List.of()))
+                .map(r -> toDTO(r, viewerId, 0, List.of()))
                 .toList();
     }
 
@@ -118,10 +116,16 @@ public class CommentServiceImpl implements CommentService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        Comment comment = new Comment(null, artwork, author.getId(), command.text(), parentId, now, now, false);
+        Comment comment = new Comment();
+        comment.setArtwork(artwork);
+        comment.setAuthor(author);
+        comment.setText(command.text());
+        comment.setParentCommentId(parentId);
+        comment.setCreatedAt(now);
+        comment.setUpdatedAt(now);
+        comment.setIsDeleted(false);
         Comment saved = commentRepository.save(comment);
-        Map<Long, User> cache = new HashMap<>();
-        return Optional.of(toDTO(saved, author.getId(), cache, 0, List.of()));
+        return Optional.of(toDTO(saved, author.getId(), 0, List.of()));
     }
 
     @Override
@@ -136,7 +140,8 @@ public class CommentServiceImpl implements CommentService {
             return DeleteResult.OK;
         }
         Optional<User> requester = userRepository.findByUsername(requesterUsername);
-        if (requester.isEmpty() || !requester.get().getId().equals(comment.getAuthorId())) {
+        Long authorId = comment.getAuthor() == null ? null : comment.getAuthor().getId();
+        if (requester.isEmpty() || authorId == null || !requester.get().getId().equals(authorId)) {
             return DeleteResult.FORBIDDEN;
         }
         comment.setIsDeleted(true);
@@ -148,26 +153,17 @@ public class CommentServiceImpl implements CommentService {
     private CommentDTO toDTO(
             Comment comment,
             Long viewerId,
-            Map<Long, User> authorCache,
             int replyCount,
             List<CommentDTO> replies
     ) {
-        User author = null;
-        if (comment.getAuthorId() != null) {
-            author = authorCache.get(comment.getAuthorId());
-            if (author == null) {
-                author = userRepository.findById(comment.getAuthorId()).orElse(null);
-                if (author != null) {
-                    authorCache.put(author.getId(), author);
-                }
-            }
-        }
-        boolean isAuthor = viewerId != null && comment.getAuthorId() != null && viewerId.equals(comment.getAuthorId());
+        User author = comment.getAuthor();
+        Long authorId = author == null ? null : author.getId();
+        boolean isAuthor = viewerId != null && authorId != null && viewerId.equals(authorId);
         return new CommentDTO(
                 comment.getId(),
                 comment.getText(),
                 comment.getCreatedAt(),
-                author == null ? null : author.getId(),
+                authorId,
                 author == null ? null : author.getDisplayName(),
                 author == null ? null : author.getSlug(),
                 author == null ? null : author.getAvatarUrl(),

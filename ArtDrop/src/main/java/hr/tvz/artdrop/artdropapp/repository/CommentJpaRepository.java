@@ -29,4 +29,10 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long> {
     @Query("SELECT COUNT(c) FROM Comment c WHERE c.parentCommentId = :parentId " +
             "AND (c.isDeleted = false OR c.isDeleted IS NULL)")
     long countRepliesByParentId(@Param("parentId") Long parentId);
+
+    @Query("SELECT c.artwork.id, COUNT(c) FROM Comment c " +
+            "WHERE c.artwork.id IN :artworkIds " +
+            "AND (c.isDeleted = false OR c.isDeleted IS NULL) " +
+            "GROUP BY c.artwork.id")
+    List<Object[]> countActiveByArtworkIds(@Param("artworkIds") List<Long> artworkIds);
 }
