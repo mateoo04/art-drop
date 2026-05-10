@@ -34,6 +34,21 @@ public interface ChallengeSubmissionJpaRepository extends JpaRepository<Challeng
     Optional<ChallengeSubmission> findFirstByArtworkIdAndChallenge_StatusNot(
             Long artworkId, ChallengeStatus status);
 
+    boolean existsByChallenge_IdAndSubmittedBy(Long challengeId, Long submittedBy);
+
+    @Query("""
+            SELECT s.artwork.id FROM ChallengeSubmission s
+            WHERE s.challenge.id = :challengeId AND s.submittedBy = :userId
+            """)
+    Optional<Long> findArtworkIdByChallengeIdAndSubmittedBy(
+            @Param("challengeId") Long challengeId, @Param("userId") Long userId);
+
+    @Query("""
+            SELECT s.challenge.id, s.artwork.id FROM ChallengeSubmission s
+            WHERE s.submittedBy = :userId AND s.challenge.status <> 'ENDED'
+            """)
+    List<Object[]> findActiveEntriesBySubmittedBy(@Param("userId") Long userId);
+
     @Query("""
             SELECT a.id FROM Artwork a
             WHERE a.author.id = :authorId
@@ -54,11 +69,13 @@ public interface ChallengeSubmissionJpaRepository extends JpaRepository<Challeng
               AND c.startsAt <= :artworkPublishedAt
               AND NOT EXISTS (
                   SELECT 1 FROM ChallengeSubmission s
-                  WHERE s.challenge.id = c.id AND s.artwork.id = :artworkId
+                  WHERE s.challenge.id = c.id
+                    AND (s.artwork.id = :artworkId OR s.submittedBy = :userId)
               )
             ORDER BY c.endsAt ASC
             """)
     List<Long> findEligibleChallengeIdsForArtwork(
             @Param("artworkId") Long artworkId,
+            @Param("userId") Long userId,
             @Param("artworkPublishedAt") java.time.LocalDateTime artworkPublishedAt);
 }

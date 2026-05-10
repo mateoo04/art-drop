@@ -24,4 +24,6 @@ export interface Challenge {
   endsAt: string | null
   submissionCount: number
   submissions: SubmissionThumbnail[]
+  viewerHasEntry: boolean
+  viewerEntryArtworkId: number | null
 }

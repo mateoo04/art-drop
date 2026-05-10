@@ -2,13 +2,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { withdrawArtworkFromChallenge } from '../api/challengesApi'
 import type { Artwork } from '../types/artwork'
 
-type WithdrawVars = { challengeId: number; artworkId: number }
-type Snapshot = { previous: Artwork | undefined }
-
 export function useWithdrawFromChallenge() {
   const queryClient = useQueryClient()
 
-  return useMutation<void, Error, WithdrawVars, Snapshot>({
+  return useMutation<
+    void,
+    Error,
+    { challengeId: number; artworkId: number },
+    { previous: Artwork | undefined }
+  >({
     mutationFn: ({ challengeId, artworkId }) =>
       withdrawArtworkFromChallenge(challengeId, artworkId),
 
@@ -30,6 +32,8 @@ export function useWithdrawFromChallenge() {
 
     onSettled: (_data, _err, { artworkId, challengeId }) => {
       void queryClient.invalidateQueries({ queryKey: ['artworks', 'detail', artworkId] })
+      void queryClient.invalidateQueries({ queryKey: ['challenges', 'detail', challengeId] })
+      void queryClient.invalidateQueries({ queryKey: ['challenge-submissions', challengeId] })
       void queryClient.invalidateQueries({
         queryKey: ['challenges', 'eligible-artworks', challengeId],
       })

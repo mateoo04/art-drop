@@ -129,19 +129,28 @@ export function ChallengeHeroBanner({
           {challenge.status !== 'ENDED' || secondaryAction ? (
             <div className="flex items-center gap-6 mt-8">
               {challenge.status !== 'ENDED' ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (onJoin) {
-                      onJoin()
-                    } else {
-                      alert('Open the challenge to join.')
-                    }
-                  }}
-                  className="bg-white text-black px-8 py-4 font-label uppercase tracking-widest text-xs font-bold hover:bg-surface-variant transition-colors"
-                >
-                  {t('challenges.hero.joinChallenge')}
-                </button>
+                challenge.viewerHasEntry && challenge.viewerEntryArtworkId != null ? (
+                  <Link
+                    to={`/details/${challenge.viewerEntryArtworkId}`}
+                    className="bg-white text-black px-8 py-4 font-label uppercase tracking-widest text-xs font-bold hover:bg-surface-variant transition-colors"
+                  >
+                    {t('challenges.hero.viewYourEntry')}
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onJoin) {
+                        onJoin()
+                      } else {
+                        alert('Open the challenge to join.')
+                      }
+                    }}
+                    className="bg-white text-black px-8 py-4 font-label uppercase tracking-widest text-xs font-bold hover:bg-surface-variant transition-colors"
+                  >
+                    {t('challenges.hero.joinChallenge')}
+                  </button>
+                )
               ) : null}
               {secondaryAction ? (
                 secondaryAction.to ? (

@@ -813,23 +813,32 @@ INSERT INTO challenge (id, created_by, title, description, quote, kind, status, 
 (14, 1, 'Paper Works',        'Folded, torn, and printed studies on paper.',                                                                                                                      NULL,                                                                                                     'OPEN',     'ENDED',    'Paper',         NULL, (CURRENT_TIMESTAMP + -375 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -345 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (id) DO NOTHING;
 
+-- Wipe and re-seed: avoids ON CONFLICT clashing with the
+-- UNIQUE(challenge_id, submitted_by) constraint added in V4.
+-- User-created submissions in dev (ids >= 1000) get cleared too — acceptable for a dev seed.
+DELETE FROM challenge_submission;
+
+-- Rules enforced: submitted_by = artwork.author_id (ownership),
+-- one entry per (challenge, user), and each artwork only in one non-ENDED challenge.
 INSERT INTO challenge_submission (id, challenge_id, artwork_id, submitted_by, submitted_at) VALUES
-(1,  1, 1,  1, (CURRENT_TIMESTAMP + -2 * INTERVAL '1 hour')),
-(2,  1, 7,  1, (CURRENT_TIMESTAMP + -5 * INTERVAL '1 hour')),
-(3,  1, 5,  5, (CURRENT_TIMESTAMP + -8 * INTERVAL '1 hour')),
-(4,  1, 4,  4, (CURRENT_TIMESTAMP + -12 * INTERVAL '1 hour')),
-(5,  1, 3,  3, (CURRENT_TIMESTAMP + -20 * INTERVAL '1 hour')),
-(6,  1, 8,  4, (CURRENT_TIMESTAMP + -26 * INTERVAL '1 hour')),
-(7,  2, 6,  6, (CURRENT_TIMESTAMP + -1 * INTERVAL '1 hour')),
-(8,  2, 2,  2, (CURRENT_TIMESTAMP + -6 * INTERVAL '1 hour')),
-(9,  2, 4,  4, (CURRENT_TIMESTAMP + -14 * INTERVAL '1 hour')),
-(10, 2, 1,  1, (CURRENT_TIMESTAMP + -22 * INTERVAL '1 hour')),
-(11, 2, 5,  5, (CURRENT_TIMESTAMP + -30 * INTERVAL '1 hour')),
-(12, 3, 3,  3, (CURRENT_TIMESTAMP + -3 * INTERVAL '1 hour')),
-(13, 3, 8,  4, (CURRENT_TIMESTAMP + -9 * INTERVAL '1 hour')),
-(14, 3, 7,  1, (CURRENT_TIMESTAMP + -16 * INTERVAL '1 hour')),
-(15, 3, 6,  6, (CURRENT_TIMESTAMP + -28 * INTERVAL '1 hour'))
-ON CONFLICT (id) DO NOTHING;
+-- Challenge 1: The Light of Dusk (ACTIVE)
+(1,  1, 1,  1, (CURRENT_TIMESTAMP + -2  * INTERVAL '1 hour')),  -- Mateo
+(2,  1, 7,  3, (CURRENT_TIMESTAMP + -5  * INTERVAL '1 hour')),  -- Sarah
+(3,  1, 5,  2, (CURRENT_TIMESTAMP + -8  * INTERVAL '1 hour')),  -- Julian
+(4,  1, 10, 4, (CURRENT_TIMESTAMP + -12 * INTERVAL '1 hour')),  -- Marc
+(5,  1, 13, 5, (CURRENT_TIMESTAMP + -20 * INTERVAL '1 hour')),  -- Claire
+(6,  1, 15, 6, (CURRENT_TIMESTAMP + -26 * INTERVAL '1 hour')),  -- Thomas
+-- Challenge 2: Brutalist Forms (ACTIVE)
+(7,  2, 6,  2, (CURRENT_TIMESTAMP + -1  * INTERVAL '1 hour')),  -- Julian
+(8,  2, 2,  1, (CURRENT_TIMESTAMP + -6  * INTERVAL '1 hour')),  -- Mateo
+(9,  2, 11, 4, (CURRENT_TIMESTAMP + -14 * INTERVAL '1 hour')),  -- Marc
+(10, 2, 14, 5, (CURRENT_TIMESTAMP + -22 * INTERVAL '1 hour')),  -- Claire
+(11, 2, 16, 6, (CURRENT_TIMESTAMP + -30 * INTERVAL '1 hour')),  -- Thomas
+-- Challenge 3: Neon Nights (ACTIVE)
+(12, 3, 3,  1, (CURRENT_TIMESTAMP + -3  * INTERVAL '1 hour')),  -- Mateo
+(13, 3, 8,  3, (CURRENT_TIMESTAMP + -9  * INTERVAL '1 hour')),  -- Sarah
+(14, 3, 12, 4, (CURRENT_TIMESTAMP + -16 * INTERVAL '1 hour')),  -- Marc
+(15, 3, 17, 6, (CURRENT_TIMESTAMP + -28 * INTERVAL '1 hour'));  -- Thomas
 
 ALTER TABLE app_user             ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE authority            ALTER COLUMN id RESTART WITH 1000;

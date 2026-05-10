@@ -10,22 +10,13 @@ export function translateChallengeSubmitError(code: string, t: TFunction): strin
       return t('challenges.join.errorAlreadySubmitted')
     case 'IN_OTHER_CHALLENGE':
       return t('challenges.join.errorInOther')
+    case 'USER_ALREADY_HAS_ENTRY':
+      return t('challenges.join.errorAlreadyEntered')
     case 'NOT_OWNER':
       return t('challenges.join.errorNotOwner')
     case 'UNAUTHENTICATED':
       return t('challenges.join.errorUnauthenticated')
     default:
       return t('challenges.join.errorFallback')
-  }
-}
-
-export function translateChallengeWithdrawError(code: string, t: TFunction): string {
-  switch (code) {
-    case 'CHALLENGE_ENDED':
-      return t('artwork.detail.challenge.errorEnded')
-    case 'NOT_OWNER':
-      return t('artwork.detail.challenge.errorNotOwner')
-    default:
-      return t('artwork.detail.challenge.errorFallback')
   }
 }

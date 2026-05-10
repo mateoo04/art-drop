@@ -251,6 +251,8 @@ export function ArtworkDropPage() {
         setMessage(t('artwork.drop.challengeContext.notActive'))
       } else if (err instanceof Error && err.message === 'CHALLENGE_NOT_FOUND') {
         setMessage(t('artwork.drop.challengeContext.notFound'))
+      } else if (err instanceof Error && err.message === 'CHALLENGE_USER_ALREADY_HAS_ENTRY') {
+        setMessage(t('artwork.drop.challengeContext.alreadyEntered'))
       } else {
         setMessage(err instanceof Error ? err.message : t('artwork.drop.error.fallback'))
       }

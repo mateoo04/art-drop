@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ChallengeService {
-    List<ChallengeDTO> findAll();
+    List<ChallengeDTO> findAll(String viewerUsername);
 
-    Optional<ChallengeDTO> findById(Long id);
+    Optional<ChallengeDTO> findById(Long id, String viewerUsername);
 
     List<SubmissionThumbnailDTO> findSubmissions(Long challengeId, int limit, int offset, String sort);
 
-    List<ChallengeDTO> searchChallenges(String query, int limit, int offset);
+    List<ChallengeDTO> searchChallenges(String query, int limit, int offset, String viewerUsername);
 
     SubmitResult submitArtwork(Long challengeId, Long artworkId, String username);
 
@@ -32,7 +32,8 @@ public interface ChallengeService {
         FORBIDDEN_CHALLENGE_NOT_ACTIVE,
         FORBIDDEN_ARTWORK_TOO_OLD,
         CONFLICT_ALREADY_SUBMITTED,
-        CONFLICT_IN_OTHER_CHALLENGE
+        CONFLICT_IN_OTHER_CHALLENGE,
+        CONFLICT_USER_ALREADY_HAS_ENTRY
     }
 
     record SubmitResult(SubmitOutcome outcome, Long submissionId) {}

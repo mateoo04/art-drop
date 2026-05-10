@@ -37,7 +37,8 @@ public interface ArtworkService {
         FORBIDDEN_SALE_GATE,
         UNAUTHENTICATED,
         CHALLENGE_NOT_FOUND,
-        CHALLENGE_NOT_ACTIVE
+        CHALLENGE_NOT_ACTIVE,
+        CHALLENGE_USER_ALREADY_HAS_ENTRY
     }
 
     record CreateResult(CreateOutcome outcome, ArtworkDTO artwork) {}

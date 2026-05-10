@@ -162,7 +162,7 @@ public class FeedRankingService {
             if (e.kind() == FeedSnapshotRowKind.CHALLENGE_PROMO) {
                 long cid = e.id();
                 if (!chById.containsKey(cid)) {
-                    challengeService.findById(cid).ifPresent(d -> chById.put(cid, d));
+                    challengeService.findById(cid, viewerUsername).ifPresent(d -> chById.put(cid, d));
                 }
             }
         }

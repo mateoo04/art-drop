@@ -20,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -49,17 +51,18 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public List<ChallengeDTO> findAll() {
+    public List<ChallengeDTO> findAll(String viewerUsername) {
         Comparator<Challenge> byStatus = Comparator.comparingInt(c -> statusRank(c.getStatus()));
         Comparator<Challenge> featuredFirst = Comparator.comparingInt(c ->
                 c.getKind() == ChallengeKind.FEATURED ? 0 : 1);
         Comparator<Challenge> byStartsAtDesc = Comparator
                 .comparing((Challenge c) -> c.getStartsAt() == null ? LocalDateTime.MIN : c.getStartsAt())
                 .reversed();
+        Map<Long, Long> viewerEntries = loadViewerEntries(viewerUsername);
         return challengeRepository.findAll()
                 .stream()
                 .sorted(byStatus.thenComparing(featuredFirst).thenComparing(byStartsAtDesc))
-                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS))
+                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, viewerEntries))
                 .toList();
     }
 
@@ -71,12 +74,13 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public Optional<ChallengeDTO> findById(Long id) {
-        return challengeRepository.findById(id).map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS));
+    public Optional<ChallengeDTO> findById(Long id, String viewerUsername) {
+        Map<Long, Long> viewerEntries = loadViewerEntryFor(id, viewerUsername);
+        return challengeRepository.findById(id).map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, viewerEntries));
     }
 
     @Override
-    public List<ChallengeDTO> searchChallenges(String query, int limit, int offset) {
+    public List<ChallengeDTO> searchChallenges(String query, int limit, int offset, String viewerUsername) {
         String trimmed = query == null ? "" : query.trim();
         if (trimmed.isEmpty()) {
             return List.of();
@@ -84,9 +88,31 @@ public class ChallengeServiceImpl implements ChallengeService {
         int safeLimit = Math.max(1, Math.min(limit, 50));
         int safeOffset = Math.max(0, offset);
         PageRequest pageRequest = PageRequest.of(safeOffset / safeLimit, safeLimit);
+        Map<Long, Long> viewerEntries = loadViewerEntries(viewerUsername);
         return challengeRepository.searchChallenges(trimmed, pageRequest).stream()
-                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS))
+                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, viewerEntries))
                 .toList();
+    }
+
+    private Map<Long, Long> loadViewerEntries(String viewerUsername) {
+        if (viewerUsername == null) return Map.of();
+        Optional<User> viewer = userRepository.findByUsername(viewerUsername);
+        if (viewer.isEmpty()) return Map.of();
+        Map<Long, Long> result = new HashMap<>();
+        for (Object[] row : submissionRepository.findActiveEntriesBySubmittedBy(viewer.get().getId())) {
+            result.put((Long) row[0], (Long) row[1]);
+        }
+        return result;
+    }
+
+    private Map<Long, Long> loadViewerEntryFor(Long challengeId, String viewerUsername) {
+        if (viewerUsername == null) return Map.of();
+        Optional<User> viewer = userRepository.findByUsername(viewerUsername);
+        if (viewer.isEmpty()) return Map.of();
+        return submissionRepository
+                .findArtworkIdByChallengeIdAndSubmittedBy(challengeId, viewer.get().getId())
+                .map(artworkId -> Map.of(challengeId, artworkId))
+                .orElse(Map.of());
     }
 
     @Override
@@ -100,13 +126,14 @@ public class ChallengeServiceImpl implements ChallengeService {
         return submissions.stream().map(this::mapToThumbnail).toList();
     }
 
-    private ChallengeDTO mapToDto(Challenge challenge, int previewLimit) {
+    private ChallengeDTO mapToDto(Challenge challenge, int previewLimit, Map<Long, Long> viewerEntries) {
         long total = submissionRepository.countByChallengeId(challenge.getId());
         List<SubmissionThumbnailDTO> preview = submissionRepository
                 .findByChallengeIdOrderBySubmittedAtDesc(challenge.getId(), PageRequest.of(0, previewLimit))
                 .stream()
                 .map(this::mapToThumbnail)
                 .toList();
+        Long viewerEntryArtworkId = viewerEntries.get(challenge.getId());
         return new ChallengeDTO(
                 challenge.getId(),
                 challenge.getTitle(),
@@ -119,7 +146,9 @@ public class ChallengeServiceImpl implements ChallengeService {
                 challenge.getStartsAt(),
                 challenge.getEndsAt(),
                 total,
-                preview
+                preview,
+                viewerEntryArtworkId != null,
+                viewerEntryArtworkId
         );
     }
 
@@ -155,6 +184,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
         if (submissionRepository.findByChallengeIdAndArtworkId(challengeId, artworkId).isPresent()) {
             return new SubmitResult(SubmitOutcome.CONFLICT_ALREADY_SUBMITTED, null);
+        }
+        if (submissionRepository.existsByChallenge_IdAndSubmittedBy(challengeId, user.get().getId())) {
+            return new SubmitResult(SubmitOutcome.CONFLICT_USER_ALREADY_HAS_ENTRY, null);
         }
         Optional<ChallengeSubmission> existing = submissionRepository
                 .findFirstByArtworkIdAndChallenge_StatusNot(artworkId, ChallengeStatus.ENDED);
@@ -207,6 +239,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         if (challengeOpt.isEmpty()) return List.of();
         Challenge challenge = challengeOpt.get();
         if (challenge.getStatus() != ChallengeStatus.ACTIVE) return List.of();
+        if (submissionRepository.existsByChallenge_IdAndSubmittedBy(challengeId, user.get().getId())) {
+            return List.of();
+        }
         LocalDateTime startsAt = challenge.getStartsAt();
         if (startsAt == null) startsAt = LocalDateTime.MIN;
         List<Long> ids = submissionRepository.findEligibleArtworkIds(user.get().getId(), startsAt);
@@ -226,10 +261,10 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
         if (artwork.getPublishedAt() == null) return List.of();
         List<Long> ids = submissionRepository
-                .findEligibleChallengeIdsForArtwork(artworkId, artwork.getPublishedAt());
+                .findEligibleChallengeIdsForArtwork(artworkId, user.get().getId(), artwork.getPublishedAt());
         if (ids.isEmpty()) return List.of();
         return challengeRepository.findAllById(ids).stream()
-                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS))
+                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, Map.of()))
                 .toList();
     }
 

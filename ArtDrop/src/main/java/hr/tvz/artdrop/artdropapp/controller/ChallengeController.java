@@ -30,22 +30,26 @@ public class ChallengeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ChallengeDTO>> getAll() {
-        return ResponseEntity.ok(challengeService.findAll());
+    public ResponseEntity<List<ChallengeDTO>> getAll(Authentication authentication) {
+        String viewer = authentication == null ? null : authentication.getName();
+        return ResponseEntity.ok(challengeService.findAll(viewer));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<ChallengeDTO>> searchChallenges(
             @RequestParam String q,
             @RequestParam(defaultValue = "20") int limit,
-            @RequestParam(defaultValue = "0") int offset
+            @RequestParam(defaultValue = "0") int offset,
+            Authentication authentication
     ) {
-        return ResponseEntity.ok(challengeService.searchChallenges(q, limit, offset));
+        String viewer = authentication == null ? null : authentication.getName();
+        return ResponseEntity.ok(challengeService.searchChallenges(q, limit, offset, viewer));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ChallengeDTO> getById(@PathVariable Long id) {
-        return challengeService.findById(id)
+    public ResponseEntity<ChallengeDTO> getById(@PathVariable Long id, Authentication authentication) {
+        String viewer = authentication == null ? null : authentication.getName();
+        return challengeService.findById(id, viewer)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -89,6 +93,8 @@ public class ChallengeController {
                     .status(HttpStatus.CONFLICT).body(Map.of("error", "ALREADY_SUBMITTED"));
             case CONFLICT_IN_OTHER_CHALLENGE -> ResponseEntity
                     .status(HttpStatus.CONFLICT).body(Map.of("error", "IN_OTHER_CHALLENGE"));
+            case CONFLICT_USER_ALREADY_HAS_ENTRY -> ResponseEntity
+                    .status(HttpStatus.CONFLICT).body(Map.of("error", "USER_ALREADY_HAS_ENTRY"));
         };
     }
 

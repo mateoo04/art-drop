@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useEligibleArtworksForChallenge } from '../../hooks/useEligibleArtworksForChallenge'
 import { useSubmitArtworkToChallenge } from '../../hooks/useSubmitArtworkToChallenge'
 import { translateChallengeSubmitError } from '../../lib/challengeErrors'
@@ -13,7 +13,7 @@ type Props = {
   open: boolean
   onClose: () => void
   challenge: Challenge
-  onSubmitted: () => void
+  onSubmitted?: () => void
 }
 
 export function JoinChallengeModal({ open, onClose, challenge, onSubmitted }: Props) {
@@ -37,7 +37,7 @@ export function JoinChallengeModal({ open, onClose, challenge, onSubmitted }: Pr
       { challengeId: challenge.id, artworkId },
       {
         onSuccess: () => {
-          onSubmitted()
+          onSubmitted?.()
           onClose()
         },
         onError: (e) => setError(translateChallengeSubmitError(e.message, t)),
@@ -71,6 +71,29 @@ export function JoinChallengeModal({ open, onClose, challenge, onSubmitted }: Pr
         <h2 id="join-challenge-modal-title" className="font-display text-2xl text-on-surface mb-2">
           {t('challenges.join.title', { title: challenge.title })}
         </h2>
+
+        {challenge.viewerHasEntry ? (
+          <>
+            <p className="font-body text-sm text-on-surface-variant leading-relaxed mb-8">
+              {t('challenges.join.alreadyEnteredBody')}
+            </p>
+            <div className="flex justify-end gap-3">
+              {challenge.viewerEntryArtworkId != null ? (
+                <Link
+                  to={`/details/${challenge.viewerEntryArtworkId}`}
+                  onClick={onClose}
+                  className="inline-flex items-center justify-center py-5 px-6 font-label text-[11px] uppercase tracking-[0.2em] font-semibold transition-all duration-200 bg-on-surface text-surface hover:opacity-90"
+                >
+                  {t('challenges.join.viewYourEntry')}
+                </Link>
+              ) : null}
+              <Button variant="secondary" onClick={onClose}>
+                {t('common.close')}
+              </Button>
+            </div>
+          </>
+        ) : (
+        <>
         <p className="font-body text-sm text-on-surface-variant leading-relaxed mb-8">
           {t('challenges.join.subtitle')}
         </p>
@@ -144,6 +167,8 @@ export function JoinChallengeModal({ open, onClose, challenge, onSubmitted }: Pr
             {t('common.close')}
           </Button>
         </div>
+        </>
+        )}
       </div>
     </div>
   )

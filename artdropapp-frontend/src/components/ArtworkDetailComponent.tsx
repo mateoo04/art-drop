@@ -14,7 +14,6 @@ import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useLikeArtwork } from '../hooks/useLikeArtwork'
 import { useWithdrawFromChallenge } from '../hooks/useWithdrawFromChallenge'
 import { useAuthPrompt } from '../contexts/AuthPromptContext'
-import { translateChallengeWithdrawError } from '../lib/challengeErrors'
 import { getToken } from '../lib/auth'
 import { CommentComposer } from './artwork/CommentComposer'
 import { CommentList } from './artwork/CommentList'
@@ -79,7 +78,13 @@ export function ArtworkDetailComponent({
       {
         onSuccess: () => setWithdrawConfirmOpen(false),
         onError: (e) => {
-          setWithdrawError(translateChallengeWithdrawError(e.message, t))
+          const message =
+            e.message === 'CHALLENGE_ENDED'
+              ? t('artwork.detail.challenge.errorEnded')
+              : e.message === 'NOT_OWNER'
+                ? t('artwork.detail.challenge.errorNotOwner')
+                : t('artwork.detail.challenge.errorFallback')
+          setWithdrawError(message)
           setWithdrawConfirmOpen(false)
         },
       },

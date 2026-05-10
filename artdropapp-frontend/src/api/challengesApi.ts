@@ -62,11 +62,14 @@ export function mapChallenge(raw: Record<string, unknown>): Challenge {
     submissions: Array.isArray(raw.submissions)
       ? raw.submissions.map((s) => mapThumbnail(s as Record<string, unknown>))
       : [],
+    viewerHasEntry: Boolean(raw.viewerHasEntry),
+    viewerEntryArtworkId:
+      raw.viewerEntryArtworkId == null ? null : Number(raw.viewerEntryArtworkId),
   }
 }
 
 export async function fetchChallenges(): Promise<Challenge[]> {
-  const res = await fetch(`/api/challenges`)
+  const res = await authFetch(`/api/challenges`)
   if (!res.ok) {
     throw new Error(`Failed to load challenges (${res.status})`)
   }
@@ -87,7 +90,7 @@ export async function fetchSearchChallenges(
     limit: String(limit),
     offset: String(offset),
   })
-  const res = await fetch(`/api/challenges/search?${params.toString()}`)
+  const res = await authFetch(`/api/challenges/search?${params.toString()}`)
   if (!res.ok) {
     throw new Error(`Failed to search challenges (${res.status})`)
   }
@@ -99,7 +102,7 @@ export async function fetchSearchChallenges(
 }
 
 export async function fetchChallenge(challengeId: number): Promise<Challenge> {
-  const res = await fetch(`/api/challenges/${challengeId}`)
+  const res = await authFetch(`/api/challenges/${challengeId}`)
   if (!res.ok) {
     throw new Error(`Failed to load challenge (${res.status})`)
   }
@@ -119,7 +122,7 @@ export async function fetchChallengeSubmissions(
     offset: String(offset),
     sort,
   })
-  const res = await fetch(`/api/challenges/${challengeId}/submissions?${params}`)
+  const res = await authFetch(`/api/challenges/${challengeId}/submissions?${params}`)
   if (!res.ok) {
     throw new Error(`Failed to load submissions (${res.status})`)
   }
@@ -133,6 +136,7 @@ export async function fetchChallengeSubmissions(
 export type ChallengeSubmitErrorCode =
   | 'ALREADY_SUBMITTED'
   | 'IN_OTHER_CHALLENGE'
+  | 'USER_ALREADY_HAS_ENTRY'
   | 'CHALLENGE_NOT_ACTIVE'
   | 'ARTWORK_TOO_OLD'
   | 'NOT_OWNER'

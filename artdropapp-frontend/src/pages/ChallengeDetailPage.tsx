@@ -19,7 +19,7 @@ export function ChallengeDetailPage() {
 
   const [sort, setSort] = useState<SubmissionSort>('top')
   const [joinOpen, setJoinOpen] = useState(false)
-  const { data: challenge, loading, error, refetch: refetchChallenge } = useChallenge(validId)
+  const { data: challenge, isLoading, error } = useChallenge(validId)
   const {
     submissions,
     isLoading: submissionsLoading,
@@ -27,10 +27,9 @@ export function ChallengeDetailPage() {
     error: submissionsError,
     hasNextPage,
     fetchNextPage,
-    refetch: refetchSubmissions,
   } = useChallengeSubmissions(validId, sort)
 
-  if (loading) {
+  if (isLoading) {
     return (
       <main className="max-w-[1920px] mx-auto py-32 flex justify-center">
         <Spinner label={t('challenges.detail.loading')} />
@@ -45,7 +44,7 @@ export function ChallengeDetailPage() {
           className="py-12 text-center text-error border border-error-container/40 bg-error-container/10"
           role="alert"
         >
-          {error ?? t('challenges.detail.notFound')}
+          {error?.message ?? t('challenges.detail.notFound')}
         </p>
       </main>
     )
@@ -83,10 +82,6 @@ export function ChallengeDetailPage() {
         open={joinOpen}
         onClose={() => setJoinOpen(false)}
         challenge={challenge}
-        onSubmitted={() => {
-          void refetchChallenge()
-          void refetchSubmissions()
-        }}
       />
     </main>
   )

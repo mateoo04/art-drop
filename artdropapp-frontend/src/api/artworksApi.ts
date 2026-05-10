@@ -291,9 +291,6 @@ export async function createArtwork(payload: CreateArtworkPayload): Promise<Artw
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
-  if (res.status === 409) {
-    throw new Error('TITLE_TAKEN')
-  }
   if (res.status === 401) {
     throw new Error('UNAUTHENTICATED')
   }
@@ -307,6 +304,13 @@ export async function createArtwork(payload: CreateArtworkPayload): Promise<Artw
     if (code === 'FORBIDDEN_SALE_GATE') throw new Error('FORBIDDEN_SALE_GATE')
     if (code === 'CHALLENGE_NOT_ACTIVE') throw new Error('CHALLENGE_NOT_ACTIVE')
     throw new Error(`Create failed (${res.status})`)
+  }
+  if (res.status === 409) {
+    const code = await readErrorCode(res)
+    if (code === 'CHALLENGE_USER_ALREADY_HAS_ENTRY') {
+      throw new Error('CHALLENGE_USER_ALREADY_HAS_ENTRY')
+    }
+    throw new Error('TITLE_TAKEN')
   }
   if (res.status !== 201) {
     throw new Error(`Create failed (${res.status})`)

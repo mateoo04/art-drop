@@ -244,6 +244,11 @@ public class ArtworkServiceImpl implements ArtworkService {
                         .currentTransactionStatus().setRollbackOnly();
                 return new CreateResult(CreateOutcome.CHALLENGE_NOT_ACTIVE, null);
             }
+            if (submissionRepository.existsByChallenge_IdAndSubmittedBy(challenge.getId(), author.getId())) {
+                org.springframework.transaction.interceptor.TransactionAspectSupport
+                        .currentTransactionStatus().setRollbackOnly();
+                return new CreateResult(CreateOutcome.CHALLENGE_USER_ALREADY_HAS_ENTRY, null);
+            }
             ChallengeSubmission submission = submissionRepository.save(new ChallengeSubmission(
                     null, challenge, saved, author.getId(), LocalDateTime.now()
             ));

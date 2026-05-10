@@ -15,5 +15,7 @@ public record ChallengeDTO(
         LocalDateTime startsAt,
         LocalDateTime endsAt,
         long submissionCount,
-        List<SubmissionThumbnailDTO> submissions
+        List<SubmissionThumbnailDTO> submissions,
+        boolean viewerHasEntry,
+        Long viewerEntryArtworkId
 ) {}

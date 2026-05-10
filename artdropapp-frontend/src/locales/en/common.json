@@ -325,7 +325,8 @@
       "challengeContext": {
         "label": "Submitting to challenge",
         "notActive": "This challenge is not active right now.",
-        "notFound": "Could not find that challenge."
+        "notFound": "Could not find that challenge.",
+        "alreadyEntered": "You already have an entry in this challenge. Withdraw it first to submit a different artwork."
       }
     },
     "edit": {
@@ -415,6 +416,7 @@
       },
       "backLabel": "Back",
       "joinChallenge": "Join Challenge",
+      "viewYourEntry": "View Your Entry",
       "timeClosed": "Challenge Closed",
       "timeRemaining": "Time Remaining",
       "timeFormat": "{{days}} Days : {{hours}} Hrs : {{minutes}} Mins"
@@ -428,11 +430,14 @@
       "loading": "Loading your eligible artworks",
       "noEligible": "No eligible existing artworks. New artworks made for this challenge will count.",
       "submitting": "Submitting…",
+      "alreadyEnteredBody": "You've already entered this challenge. Withdraw your current entry first if you want to submit a different artwork.",
+      "viewYourEntry": "View your entry",
       "errorLoad": "Could not load eligible artworks.",
       "errorNotActive": "This challenge is not active right now.",
       "errorTooOld": "This artwork was published before the challenge started.",
       "errorAlreadySubmitted": "This artwork is already in this challenge.",
       "errorInOther": "This artwork is currently in another challenge — withdraw it first.",
+      "errorAlreadyEntered": "You already have an entry in this challenge. Withdraw it first to submit a different artwork.",
       "errorNotOwner": "Only the artist can submit this artwork.",
       "errorUnauthenticated": "Please sign in to submit.",
       "errorFallback": "Could not submit. Please try again."

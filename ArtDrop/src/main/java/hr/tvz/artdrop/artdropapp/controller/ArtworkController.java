@@ -94,6 +94,9 @@ public class ArtworkController {
             case CHALLENGE_NOT_ACTIVE -> ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
                     .body(java.util.Map.of("error", "CHALLENGE_NOT_ACTIVE"));
+            case CHALLENGE_USER_ALREADY_HAS_ENTRY -> ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(java.util.Map.of("error", "CHALLENGE_USER_ALREADY_HAS_ENTRY"));
         };
     }
 
