@@ -76,7 +76,7 @@ class ChallengeSubmissionFlowIntegrationTest extends AbstractPostgresIntegration
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
     void submitOwnArtworkToActiveChallenge_returnsCreated() throws Exception {
-        Challenge c = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(1));
+        Challenge c = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(30));
         mockMvc.perform(post("/api/challenges/" + c.getId() + "/submissions")
                         .contentType("application/json")
                         .content("{\"artworkId\":" + userArtworkId + "}"))
@@ -88,7 +88,7 @@ class ChallengeSubmissionFlowIntegrationTest extends AbstractPostgresIntegration
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
     void submitNotOwnArtwork_returnsForbidden() throws Exception {
-        Challenge c = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(1));
+        Challenge c = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(30));
         mockMvc.perform(post("/api/challenges/" + c.getId() + "/submissions")
                         .contentType("application/json")
                         .content("{\"artworkId\":" + otherUserArtworkId + "}"))
@@ -121,7 +121,7 @@ class ChallengeSubmissionFlowIntegrationTest extends AbstractPostgresIntegration
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
     void submitSamePairTwice_returnsConflict() throws Exception {
-        Challenge c = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(1));
+        Challenge c = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(30));
         mockMvc.perform(post("/api/challenges/" + c.getId() + "/submissions")
                         .contentType("application/json")
                         .content("{\"artworkId\":" + userArtworkId + "}"))
@@ -136,8 +136,8 @@ class ChallengeSubmissionFlowIntegrationTest extends AbstractPostgresIntegration
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
     void submitToSecondChallengeWhileInOther_returnsConflict() throws Exception {
-        Challenge c1 = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(1));
-        Challenge c2 = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(1));
+        Challenge c1 = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(30));
+        Challenge c2 = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(30));
         mockMvc.perform(post("/api/challenges/" + c1.getId() + "/submissions")
                         .contentType("application/json")
                         .content("{\"artworkId\":" + userArtworkId + "}"))
@@ -152,7 +152,7 @@ class ChallengeSubmissionFlowIntegrationTest extends AbstractPostgresIntegration
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
     void withdrawOwnSubmission_returnsNoContent() throws Exception {
-        Challenge c = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(1));
+        Challenge c = persistChallenge(ChallengeStatus.ACTIVE, LocalDateTime.now().minusDays(30));
         Artwork a = artworkRepository.findById(userArtworkId).orElseThrow();
         Long userId = userRepository.findByUsername("user").orElseThrow().getId();
         submissionRepository.save(new ChallengeSubmission(null, c, a, userId, LocalDateTime.now()));
