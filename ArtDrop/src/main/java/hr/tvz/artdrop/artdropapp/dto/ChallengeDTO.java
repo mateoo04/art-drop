@@ -8,7 +8,7 @@ public record ChallengeDTO(
         String title,
         String description,
         String quote,
-        String kind,
+        boolean isFeatured,
         String status,
         String theme,
         String coverImageUrl,

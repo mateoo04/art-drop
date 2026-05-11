@@ -11,8 +11,8 @@ import type { Challenge } from '../../types/challenge'
 
 function sortActiveForHome(list: Challenge[]): Challenge[] {
   return [...list].sort((a, b) => {
-    const af = a.kind === 'FEATURED' ? 0 : 1
-    const bf = b.kind === 'FEATURED' ? 0 : 1
+    const af = a.isFeatured ? 0 : 1
+    const bf = b.isFeatured ? 0 : 1
     if (af !== bf) return af - bf
     const ae = a.endsAt ? new Date(a.endsAt).getTime() : Number.POSITIVE_INFINITY
     const be = b.endsAt ? new Date(b.endsAt).getTime() : Number.POSITIVE_INFINITY

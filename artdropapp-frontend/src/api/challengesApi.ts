@@ -1,19 +1,11 @@
 import { authFetch } from '../lib/authFetch'
 import type {
   Challenge,
-  ChallengeKind,
   ChallengeStatus,
   SubmissionThumbnail,
 } from '../types/challenge'
 
-const KIND_VALUES: ChallengeKind[] = ['FEATURED', 'OPEN']
 const STATUS_VALUES: ChallengeStatus[] = ['UPCOMING', 'ACTIVE', 'ENDED']
-
-function parseKind(value: unknown): ChallengeKind | null {
-  return typeof value === 'string' && (KIND_VALUES as string[]).includes(value)
-    ? (value as ChallengeKind)
-    : null
-}
 
 function parseStatus(value: unknown): ChallengeStatus | null {
   return typeof value === 'string' && (STATUS_VALUES as string[]).includes(value)
@@ -52,7 +44,7 @@ export function mapChallenge(raw: Record<string, unknown>): Challenge {
     title: String(raw.title ?? ''),
     description: raw.description == null ? null : String(raw.description),
     quote: raw.quote == null ? null : String(raw.quote),
-    kind: parseKind(raw.kind),
+    isFeatured: raw.isFeatured === true,
     status: parseStatus(raw.status),
     theme: raw.theme == null ? null : String(raw.theme),
     coverImageUrl: raw.coverImageUrl == null ? null : String(raw.coverImageUrl),

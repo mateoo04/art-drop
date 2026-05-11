@@ -1,4 +1,3 @@
-export type ChallengeKind = 'FEATURED' | 'OPEN'
 export type ChallengeStatus = 'UPCOMING' | 'ACTIVE' | 'ENDED'
 
 export interface SubmissionThumbnail {
@@ -16,7 +15,7 @@ export interface Challenge {
   title: string
   description: string | null
   quote: string | null
-  kind: ChallengeKind | null
+  isFeatured: boolean
   status: ChallengeStatus | null
   theme: string | null
   coverImageUrl: string | null

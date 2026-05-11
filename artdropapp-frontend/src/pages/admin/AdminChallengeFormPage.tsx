@@ -29,7 +29,6 @@ const emptyForm: AdminChallengeUpsert = {
   title: '',
   description: '',
   quote: '',
-  kind: 'OPEN',
   status: 'UPCOMING',
   theme: '',
   coverImageUrl: '',
@@ -61,7 +60,6 @@ export function AdminChallengeFormPage() {
           title: row.title,
           description: row.description,
           quote: row.quote,
-          kind: (row.kind === 'FEATURED' ? 'FEATURED' : 'OPEN'),
           status: (row.status === 'ACTIVE' || row.status === 'ENDED' || row.status === 'UPCOMING')
             ? row.status
             : 'UPCOMING',
@@ -152,31 +150,18 @@ export function AdminChallengeFormPage() {
             className="w-full bg-surface-container-lowest p-4 font-body text-sm border border-outline-variant/15 focus:border-on-surface focus:outline-none"
           />
         </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label className="block">
-            <span className="block font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-1.5">{t('admin.challenges.fieldKind')}</span>
-            <select
-              value={form.kind}
-              onChange={(e) => setForm({ ...form, kind: e.target.value as AdminChallengeUpsert['kind'] })}
-              className="w-full bg-surface-container-lowest p-4 font-body text-sm border border-outline-variant/15"
-            >
-              <option value="OPEN">OPEN</option>
-              <option value="FEATURED">FEATURED</option>
-            </select>
-          </label>
-          <label className="block">
-            <span className="block font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-1.5">{t('admin.challenges.fieldStatus')}</span>
-            <select
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as AdminChallengeUpsert['status'] })}
-              className="w-full bg-surface-container-lowest p-4 font-body text-sm border border-outline-variant/15"
-            >
-              <option value="UPCOMING">UPCOMING</option>
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="ENDED">ENDED</option>
-            </select>
-          </label>
-        </div>
+        <label className="block">
+          <span className="block font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-1.5">{t('admin.challenges.fieldStatus')}</span>
+          <select
+            value={form.status}
+            onChange={(e) => setForm({ ...form, status: e.target.value as AdminChallengeUpsert['status'] })}
+            className="w-full bg-surface-container-lowest p-4 font-body text-sm border border-outline-variant/15"
+          >
+            <option value="UPCOMING">UPCOMING</option>
+            <option value="ACTIVE">ACTIVE</option>
+            <option value="ENDED">ENDED</option>
+          </select>
+        </label>
         <label className="block">
           <span className="block font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-1.5">{t('admin.challenges.fieldTheme')}</span>
           <Input value={form.theme ?? ''} onChange={(e) => setForm({ ...form, theme: e.target.value })} />

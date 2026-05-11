@@ -41,10 +41,6 @@ public class Challenge {
     private String quote;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 30)
-    private ChallengeKind kind;
-
-    @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private ChallengeStatus status;
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -6,6 +6,7 @@ import {
   activateAdminChallenge,
   deactivateAdminChallenge,
   deleteAdminChallenge,
+  searchAdminChallenges,
   type AdminChallengeFilters,
   type AdminChallengeRow,
 } from '../../api/adminApi'
@@ -14,6 +15,7 @@ import { AdminChallengeExpandPanel } from '../../components/admin/AdminChallenge
 import { ExpandRowToggle } from '../../components/admin/ExpandRowToggle'
 import { AdminChallengeFiltersDrawer } from '../../components/admin/AdminChallengeFiltersDrawer'
 import { ChallengeStatusBadge } from '../../components/admin/ChallengeStatusBadge'
+import { FeaturedChallengePanel } from '../../components/admin/FeaturedChallengePanel'
 import { Button } from '../../components/ui/Button'
 import { ConfirmModal } from '../../components/ui/ConfirmModal'
 import { Input } from '../../components/ui/Input'
@@ -51,8 +53,17 @@ export function AdminChallengesPage() {
   const { data, loading, error, refetch } = useAdminChallenges(query, page, size, filters)
   const fc = filterCount(filters)
 
+  const [allChallenges, setAllChallenges] = useState<AdminChallengeRow[]>([])
+  useEffect(() => {
+    searchAdminChallenges('', {}, 0, 200)
+      .then((result) => setAllChallenges(result.content))
+      .catch(() => { /* picker degrades to empty list */ })
+  }, [])
+
   return (
     <section>
+      <FeaturedChallengePanel allChallenges={allChallenges} />
+
       <div className="flex gap-3 items-stretch mb-6 flex-wrap">
         <Input
           type="search"

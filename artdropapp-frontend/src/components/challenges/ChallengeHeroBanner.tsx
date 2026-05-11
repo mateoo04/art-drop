@@ -47,7 +47,7 @@ export function ChallengeHeroBanner({
 
   function statusLabel(c: Challenge): string {
     if (c.status === 'ENDED') return t('challenges.hero.status.past')
-    if (c.kind === 'FEATURED') return t('challenges.hero.status.featured')
+    if (c.isFeatured) return t('challenges.hero.status.featured')
     if (c.status === 'UPCOMING') return t('challenges.hero.status.upcoming')
     return t('challenges.hero.status.active')
   }

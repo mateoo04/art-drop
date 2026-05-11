@@ -35,8 +35,8 @@ export function AdminChallengeExpandPanel({ challenge: c, onDeleteRequest, onAct
       </h4>
       <dl className="grid gap-2 text-sm">
         <div>
-          <dt className="text-on-surface-variant text-xs uppercase tracking-wide">{t('admin.challenges.fieldKind')}</dt>
-          <dd className="text-on-surface">{c.kind ?? '—'}</dd>
+          <dt className="text-on-surface-variant text-xs uppercase tracking-wide">Featured</dt>
+          <dd className="text-on-surface">{c.isFeatured ? 'Yes' : 'No'}</dd>
         </div>
         {c.theme ? (
           <div>

@@ -5,13 +5,14 @@ import hr.tvz.artdrop.artdropapp.dto.ChallengeDTO;
 import hr.tvz.artdrop.artdropapp.dto.SubmissionThumbnailDTO;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.Challenge;
-import hr.tvz.artdrop.artdropapp.model.ChallengeKind;
 import hr.tvz.artdrop.artdropapp.model.ChallengeStatus;
 import hr.tvz.artdrop.artdropapp.model.ChallengeSubmission;
+import hr.tvz.artdrop.artdropapp.model.FeaturedChallenge;
 import hr.tvz.artdrop.artdropapp.model.User;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeSubmissionJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.FeaturedChallengeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +35,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final ChallengeSubmissionJpaRepository submissionRepository;
     private final ArtworkJpaRepository artworkRepository;
     private final UserJpaRepository userRepository;
+    private final FeaturedChallengeJpaRepository featuredChallengeRepository;
     private final ArtworkService artworkService;
 
     public ChallengeServiceImpl(
@@ -41,20 +43,25 @@ public class ChallengeServiceImpl implements ChallengeService {
             ChallengeSubmissionJpaRepository submissionRepository,
             ArtworkJpaRepository artworkRepository,
             UserJpaRepository userRepository,
+            FeaturedChallengeJpaRepository featuredChallengeRepository,
             @Lazy ArtworkService artworkService
     ) {
         this.challengeRepository = challengeRepository;
         this.submissionRepository = submissionRepository;
         this.artworkRepository = artworkRepository;
         this.userRepository = userRepository;
+        this.featuredChallengeRepository = featuredChallengeRepository;
         this.artworkService = artworkService;
     }
 
     @Override
     public List<ChallengeDTO> findAll(String viewerUsername) {
+        Long featuredId = featuredChallengeRepository.findById(FeaturedChallenge.SINGLETON_ID)
+                .map(f -> f.getCurrentChallengeId())
+                .orElse(null);
         Comparator<Challenge> byStatus = Comparator.comparingInt(c -> statusRank(c.getStatus()));
         Comparator<Challenge> featuredFirst = Comparator.comparingInt(c ->
-                c.getKind() == ChallengeKind.FEATURED ? 0 : 1);
+                featuredId != null && featuredId.equals(c.getId()) ? 0 : 1);
         Comparator<Challenge> byStartsAtDesc = Comparator
                 .comparing((Challenge c) -> c.getStartsAt() == null ? LocalDateTime.MIN : c.getStartsAt())
                 .reversed();
@@ -62,7 +69,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         return challengeRepository.findAll()
                 .stream()
                 .sorted(byStatus.thenComparing(featuredFirst).thenComparing(byStartsAtDesc))
-                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, viewerEntries))
+                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, viewerEntries, featuredId))
                 .toList();
     }
 
@@ -75,8 +82,11 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public Optional<ChallengeDTO> findById(Long id, String viewerUsername) {
+        Long featuredId = featuredChallengeRepository.findById(FeaturedChallenge.SINGLETON_ID)
+                .map(f -> f.getCurrentChallengeId())
+                .orElse(null);
         Map<Long, Long> viewerEntries = loadViewerEntryFor(id, viewerUsername);
-        return challengeRepository.findById(id).map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, viewerEntries));
+        return challengeRepository.findById(id).map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, viewerEntries, featuredId));
     }
 
     @Override
@@ -88,9 +98,12 @@ public class ChallengeServiceImpl implements ChallengeService {
         int safeLimit = Math.max(1, Math.min(limit, 50));
         int safeOffset = Math.max(0, offset);
         PageRequest pageRequest = PageRequest.of(safeOffset / safeLimit, safeLimit);
+        Long featuredId = featuredChallengeRepository.findById(FeaturedChallenge.SINGLETON_ID)
+                .map(f -> f.getCurrentChallengeId())
+                .orElse(null);
         Map<Long, Long> viewerEntries = loadViewerEntries(viewerUsername);
         return challengeRepository.searchChallenges(trimmed, pageRequest).stream()
-                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, viewerEntries))
+                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, viewerEntries, featuredId))
                 .toList();
     }
 
@@ -126,7 +139,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         return submissions.stream().map(this::mapToThumbnail).toList();
     }
 
-    private ChallengeDTO mapToDto(Challenge challenge, int previewLimit, Map<Long, Long> viewerEntries) {
+    private ChallengeDTO mapToDto(Challenge challenge, int previewLimit, Map<Long, Long> viewerEntries, Long featuredId) {
         long total = submissionRepository.countByChallengeId(challenge.getId());
         List<SubmissionThumbnailDTO> preview = submissionRepository
                 .findByChallengeIdOrderBySubmittedAtDesc(challenge.getId(), PageRequest.of(0, previewLimit))
@@ -134,12 +147,13 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .map(this::mapToThumbnail)
                 .toList();
         Long viewerEntryArtworkId = viewerEntries.get(challenge.getId());
+        boolean isFeatured = featuredId != null && featuredId.equals(challenge.getId());
         return new ChallengeDTO(
                 challenge.getId(),
                 challenge.getTitle(),
                 challenge.getDescription(),
                 challenge.getQuote(),
-                challenge.getKind() == null ? null : challenge.getKind().name(),
+                isFeatured,
                 challenge.getStatus() == null ? null : challenge.getStatus().name(),
                 challenge.getTheme(),
                 challenge.getCoverImageUrl(),
@@ -263,8 +277,11 @@ public class ChallengeServiceImpl implements ChallengeService {
         List<Long> ids = submissionRepository
                 .findEligibleChallengeIdsForArtwork(artworkId, user.get().getId(), artwork.getPublishedAt());
         if (ids.isEmpty()) return List.of();
+        Long featuredId = featuredChallengeRepository.findById(FeaturedChallenge.SINGLETON_ID)
+                .map(f -> f.getCurrentChallengeId())
+                .orElse(null);
         return challengeRepository.findAllById(ids).stream()
-                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, Map.of()))
+                .map(c -> mapToDto(c, DEFAULT_PREVIEW_SUBMISSIONS, Map.of(), featuredId))
                 .toList();
     }
 

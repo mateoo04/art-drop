@@ -14,7 +14,7 @@ function partition(challenges: Challenge[]) {
   for (const challenge of challenges) {
     if (challenge.status === 'ENDED') {
       past.push(challenge)
-    } else if (challenge.kind === 'FEATURED' && !featured) {
+    } else if (challenge.isFeatured && !featured) {
       featured = challenge
     } else {
       activeOthers.push(challenge)

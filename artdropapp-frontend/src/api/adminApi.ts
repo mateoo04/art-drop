@@ -154,7 +154,7 @@ export type AdminChallengeRow = {
   title: string
   description: string | null
   quote: string | null
-  kind: string | null
+  isFeatured: boolean
   status: string | null
   theme: string | null
   coverImageUrl: string | null
@@ -174,7 +174,7 @@ function mapChallengeRow(raw: Record<string, unknown>): AdminChallengeRow {
     title: String(raw.title ?? ''),
     description: raw.description == null ? null : String(raw.description),
     quote: raw.quote == null ? null : String(raw.quote),
-    kind: raw.kind == null ? null : String(raw.kind),
+    isFeatured: raw.isFeatured === true,
     status: raw.status == null ? null : String(raw.status),
     theme: raw.theme == null ? null : String(raw.theme),
     coverImageUrl: raw.coverImageUrl == null ? null : String(raw.coverImageUrl),
@@ -188,7 +188,6 @@ export type AdminChallengeUpsert = {
   title: string
   description: string | null
   quote: string | null
-  kind: 'FEATURED' | 'OPEN'
   status: 'UPCOMING' | 'ACTIVE' | 'ENDED'
   theme: string | null
   coverImageUrl: string | null

@@ -3,11 +3,12 @@ package hr.tvz.artdrop.artdropapp.service;
 import hr.tvz.artdrop.artdropapp.dto.AdminChallengeRowDTO;
 import hr.tvz.artdrop.artdropapp.dto.AdminChallengeUpsertDTO;
 import hr.tvz.artdrop.artdropapp.model.Challenge;
-import hr.tvz.artdrop.artdropapp.model.ChallengeKind;
 import hr.tvz.artdrop.artdropapp.model.ChallengeStatus;
 import hr.tvz.artdrop.artdropapp.model.User;
+import hr.tvz.artdrop.artdropapp.model.FeaturedChallenge;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeSubmissionJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.FeaturedChallengeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,15 +28,24 @@ public class AdminChallengeServiceImpl implements AdminChallengeService {
     private final ChallengeJpaRepository challengeRepository;
     private final ChallengeSubmissionJpaRepository submissionRepository;
     private final UserJpaRepository userRepository;
+    private final FeaturedChallengeJpaRepository featuredChallengeRepository;
 
     public AdminChallengeServiceImpl(
             ChallengeJpaRepository challengeRepository,
             ChallengeSubmissionJpaRepository submissionRepository,
-            UserJpaRepository userRepository
+            UserJpaRepository userRepository,
+            FeaturedChallengeJpaRepository featuredChallengeRepository
     ) {
         this.challengeRepository = challengeRepository;
         this.submissionRepository = submissionRepository;
         this.userRepository = userRepository;
+        this.featuredChallengeRepository = featuredChallengeRepository;
+    }
+
+    private Long currentFeaturedId() {
+        return featuredChallengeRepository.findById(FeaturedChallenge.SINGLETON_ID)
+                .map(FeaturedChallenge::getCurrentChallengeId)
+                .orElse(null);
     }
 
     @Override
@@ -85,9 +95,6 @@ public class AdminChallengeServiceImpl implements AdminChallengeService {
         c.setCreatedBy(resolveAdminUserId(adminUsername));
         c.setCreatedAt(LocalDateTime.now());
         c.setUpdatedAt(LocalDateTime.now());
-        if (c.getKind() == null) {
-            c.setKind(ChallengeKind.OPEN);
-        }
         if (c.getStatus() == null) {
             c.setStatus(ChallengeStatus.UPCOMING);
         }
@@ -137,7 +144,6 @@ public class AdminChallengeServiceImpl implements AdminChallengeService {
         c.setTitle(dto.title().trim());
         c.setDescription(dto.description());
         c.setQuote(dto.quote());
-        c.setKind(dto.kind());
         c.setStatus(dto.status());
         c.setTheme(dto.theme());
         c.setCoverImageUrl(dto.coverImageUrl());
@@ -147,18 +153,19 @@ public class AdminChallengeServiceImpl implements AdminChallengeService {
 
     private AdminChallengeRowDTO toRow(Challenge c) {
         long count = submissionRepository.countByChallengeId(c.getId());
+        Long featuredId = currentFeaturedId();
         return new AdminChallengeRowDTO(
                 c.getId(),
                 c.getTitle(),
                 c.getDescription(),
                 c.getQuote(),
-                c.getKind() == null ? null : c.getKind().name(),
                 c.getStatus() == null ? null : c.getStatus().name(),
                 c.getTheme(),
                 c.getCoverImageUrl(),
                 c.getStartsAt(),
                 c.getEndsAt(),
-                count
+                count,
+                featuredId != null && featuredId.equals(c.getId())
         );
     }
 }
