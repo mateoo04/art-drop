@@ -3,6 +3,7 @@ package hr.tvz.artdrop.artdropapp.controller;
 import hr.tvz.artdrop.artdropapp.dto.CheckoutSessionResponse;
 import hr.tvz.artdrop.artdropapp.dto.CreateCheckoutSessionCommand;
 import hr.tvz.artdrop.artdropapp.exception.InventoryUnavailableException;
+import hr.tvz.artdrop.artdropapp.exception.ReservationConflictException;
 import hr.tvz.artdrop.artdropapp.exception.SelfPurchaseException;
 import hr.tvz.artdrop.artdropapp.service.CheckoutService;
 import hr.tvz.artdrop.artdropapp.service.StripeWebhookService;
@@ -67,6 +68,17 @@ public class CheckoutController {
     public ResponseEntity<Map<String, String>> handleInventory(InventoryUnavailableException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", "INVENTORY_UNAVAILABLE", "message", e.getMessage()));
+    }
+
+    @ExceptionHandler(ReservationConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleReservationConflict(ReservationConflictException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                "error", "RESERVATION_CONFLICT",
+                "existingArtwork", Map.of(
+                        "id", e.getExistingArtworkId(),
+                        "title", e.getExistingArtworkTitle()
+                )
+        ));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

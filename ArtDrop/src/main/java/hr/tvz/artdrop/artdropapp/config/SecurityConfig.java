@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/*/circle-status").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/feed/home").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/feed/**").authenticated()
+                        .requestMatchers("/api/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/**").authenticated()

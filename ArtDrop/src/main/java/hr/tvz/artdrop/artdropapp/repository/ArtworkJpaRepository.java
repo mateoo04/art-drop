@@ -99,4 +99,11 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
     @Query("SELECT a FROM Artwork a WHERE a.saleState = hr.tvz.artdrop.artdropapp.model.SaleState.RESERVED " +
             "AND a.reservedUntil < :now")
     List<Artwork> findExpiredReservations(@Param("now") LocalDateTime now);
+
+    @Query("SELECT a FROM Artwork a " +
+            "WHERE a.reservedByUserId = :userId " +
+            "AND a.saleState = hr.tvz.artdrop.artdropapp.model.SaleState.RESERVED " +
+            "AND a.reservedUntil > :now")
+    Optional<Artwork> findActiveReservationByUser(@Param("userId") Long userId,
+                                                  @Param("now") LocalDateTime now);
 }

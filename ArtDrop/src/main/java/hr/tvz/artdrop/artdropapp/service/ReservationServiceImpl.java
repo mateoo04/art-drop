@@ -1,6 +1,7 @@
 package hr.tvz.artdrop.artdropapp.service;
 
 import hr.tvz.artdrop.artdropapp.exception.InventoryUnavailableException;
+import hr.tvz.artdrop.artdropapp.exception.ReservationConflictException;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.SaleState;
 import hr.tvz.artdrop.artdropapp.model.SaleType;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -36,10 +38,18 @@ public class ReservationServiceImpl implements ReservationService {
         if (incoming.getSaleType() == SaleType.EDITION) {
             return;
         }
+
+        LocalDateTime now = LocalDateTime.now(clock);
+
+        Optional<Artwork> existing = artworkRepository.findActiveReservationByUser(user.getId(), now);
+        if (existing.isPresent() && !existing.get().getId().equals(incoming.getId())) {
+            Artwork e = existing.get();
+            throw new ReservationConflictException(e.getId(), e.getTitle());
+        }
+
         Artwork a = artworkRepository.findByIdForUpdate(incoming.getId())
                 .orElseThrow(() -> new InventoryUnavailableException("artwork not found"));
 
-        LocalDateTime now = LocalDateTime.now(clock);
         boolean activeReservation =
                 a.getSaleState() == SaleState.RESERVED
                 && a.getReservedUntil() != null
@@ -60,6 +70,12 @@ public class ReservationServiceImpl implements ReservationService {
         incoming.setSaleState(SaleState.RESERVED);
         incoming.setReservedByUserId(user.getId());
         incoming.setReservedUntil(until);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Artwork> findActiveReservation(Long userId) {
+        return artworkRepository.findActiveReservationByUser(userId, LocalDateTime.now(clock));
     }
 
     @Override

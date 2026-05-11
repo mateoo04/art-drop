@@ -257,7 +257,8 @@
         "available": "Available",
         "original": "Original",
         "edition": "Edition",
-        "sold": "Sold"
+        "sold": "Sold",
+        "reserved_by_other": "Reserved"
       }
     }
   },
@@ -753,6 +754,17 @@
       "body": "Sign up or log in to like artworks, follow artists, and participate in challenges.",
       "signup": "Sign up",
       "login": "Log in"
+    }
+  },
+  "reservation": {
+    "header": {
+      "release_confirm": "Release reservation on {{title}}?"
+    },
+    "swap": {
+      "title": "Reservation conflict",
+      "body": "You already have <strong>{{existing}}</strong> reserved. Release it and reserve <strong>{{incoming}}</strong> instead?",
+      "cancel": "Cancel",
+      "confirm": "Release & Continue"
     }
   }
 }

@@ -116,13 +116,16 @@ export function ArtworkCard({ artwork, onSeen }: ArtworkCardProps) {
     (img) => img.imageUrl && img.imageUrl !== artwork.imageUrl,
   )
 
+  const reservedByOther =
+    artwork.saleState === 'RESERVED' && !artwork.reservedByCurrentUser
+
   return (
     <article ref={seenRef} className="masonry-item group">
       <Link to={`/details/${artwork.id}`} className="block cursor-pointer">
         <div className={`relative bg-surface-container-lowest overflow-hidden ${aspectClass(artwork.aspectRatio)}`}>
           <img
             alt={artwork.imageAlt}
-            className="absolute inset-0 w-full h-full object-cover"
+            className={`absolute inset-0 w-full h-full object-cover ${reservedByOther ? 'opacity-60' : ''}`}
             src={artwork.coverPublicId ? cloudinaryUrl(artwork.coverPublicId, { width: 480 }) : artwork.imageUrl}
             srcSet={artwork.coverPublicId ? cloudinarySrcSet(artwork.coverPublicId, CARD_WIDTHS) : undefined}
             sizes={CARD_SIZES}
@@ -140,6 +143,11 @@ export function ArtworkCard({ artwork, onSeen }: ArtworkCardProps) {
             />
           ) : null}
           <div className="absolute top-4 left-4 flex gap-2 z-10">
+            {reservedByOther ? (
+              <span className="bg-surface/90 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-on-surface">
+                {t('home.card.sale.reserved_by_other')}
+              </span>
+            ) : null}
             {progress ? (
               <span className="bg-surface/90 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-on-surface">
                 {progress}

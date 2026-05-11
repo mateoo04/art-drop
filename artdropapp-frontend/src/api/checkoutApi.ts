@@ -6,6 +6,7 @@ export type CheckoutSessionRequest = {
   quantity: number
   addressId: number | null
   inlineAddress: ShippingAddressInput | null
+  replaceExistingReservation?: boolean
 }
 
 export type CheckoutSessionResponse = {
@@ -16,13 +17,25 @@ export type CheckoutSessionResponse = {
 export type CheckoutErrorKind =
   | 'SELF_PURCHASE'
   | 'INVENTORY_UNAVAILABLE'
+  | 'RESERVATION_CONFLICT'
   | 'BAD_REQUEST'
   | 'UNKNOWN'
 
+export type ReservationConflictExistingArtwork = { id: number; title: string }
+
 export class CheckoutError extends Error {
-  constructor(public kind: CheckoutErrorKind, message: string) {
+  kind: CheckoutErrorKind
+  existingArtwork?: ReservationConflictExistingArtwork
+
+  constructor(
+    kind: CheckoutErrorKind,
+    message: string,
+    existingArtwork?: ReservationConflictExistingArtwork,
+  ) {
     super(message)
     this.name = 'CheckoutError'
+    this.kind = kind
+    this.existingArtwork = existingArtwork
   }
 }
 
@@ -35,7 +48,7 @@ export async function createCheckoutSession(
     body: JSON.stringify(req),
   })
   if (!res.ok) {
-    let body: { error?: string; message?: string } = {}
+    let body: { error?: string; message?: string; existingArtwork?: ReservationConflictExistingArtwork } = {}
     try {
       body = (await res.json()) as typeof body
     } catch {
@@ -44,9 +57,14 @@ export async function createCheckoutSession(
     const kind: CheckoutErrorKind =
       body.error === 'SELF_PURCHASE' ? 'SELF_PURCHASE'
       : body.error === 'INVENTORY_UNAVAILABLE' ? 'INVENTORY_UNAVAILABLE'
+      : body.error === 'RESERVATION_CONFLICT' ? 'RESERVATION_CONFLICT'
       : body.error === 'BAD_REQUEST' ? 'BAD_REQUEST'
       : 'UNKNOWN'
-    throw new CheckoutError(kind, body.message ?? `Checkout failed (${res.status})`)
+    throw new CheckoutError(
+      kind,
+      body.message ?? `Checkout failed (${res.status})`,
+      body.existingArtwork,
+    )
   }
   return (await res.json()) as CheckoutSessionResponse
 }

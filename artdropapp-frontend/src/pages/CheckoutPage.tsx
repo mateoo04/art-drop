@@ -1,6 +1,10 @@
 import { type FormEvent, type ReactNode, useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { ChevronDown } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { MY_RESERVATION_KEY } from '../hooks/useMyReservation'
+import { ReservationSwapModal } from '../components/checkout/ReservationSwapModal'
 import { fetchArtworkById } from '../api/artworksApi'
 import { fetchMyAddresses } from '../api/addressesApi'
 import { CheckoutError, createCheckoutSession } from '../api/checkoutApi'
@@ -54,6 +58,9 @@ export function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const qc = useQueryClient()
+  const [swap, setSwap] = useState<{ existingTitle: string; incomingTitle: string } | null>(null)
+  const [swapPending, setSwapPending] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -84,16 +91,21 @@ export function CheckoutPage() {
     if (artwork == null) return
     setError(null)
     setSubmitting(true)
-    try {
-      const useExisting = selectedAddressId !== 'new'
-      if (!useExisting) {
-        if (!form.recipientName || !form.line1 || !form.city || !form.postalCode || !form.country) {
-          setError(t('checkout.errors.address_incomplete'))
-          setSubmitting(false)
-          return
-        }
+    const useExisting = selectedAddressId !== 'new'
+    if (!useExisting) {
+      if (!form.recipientName || !form.line1 || !form.city || !form.postalCode || !form.country) {
+        setError(t('checkout.errors.address_incomplete'))
+        setSubmitting(false)
+        return
       }
+    }
+    await runCheckout(false)
+  }
 
+  async function runCheckout(replace: boolean) {
+    if (artwork == null) return
+    const useExisting = selectedAddressId !== 'new'
+    try {
       const { checkoutUrl } = await createCheckoutSession({
         artworkId: artwork.id,
         quantity,
@@ -109,10 +121,20 @@ export function CheckoutPage() {
               country: form.country,
               phone: form.phone.trim() || null,
             },
+        replaceExistingReservation: replace ? true : undefined,
       })
+      qc.invalidateQueries({ queryKey: MY_RESERVATION_KEY })
       window.location.assign(checkoutUrl)
     } catch (err) {
       if (err instanceof CheckoutError) {
+        if (err.kind === 'RESERVATION_CONFLICT' && err.existingArtwork) {
+          setSwap({
+            existingTitle: err.existingArtwork.title,
+            incomingTitle: artwork.title,
+          })
+          setSubmitting(false)
+          return
+        }
         if (err.kind === 'SELF_PURCHASE') setError(t('checkout.errors.self_purchase'))
         else if (err.kind === 'INVENTORY_UNAVAILABLE') setError(t('checkout.errors.unavailable'))
         else setError(err.message)
@@ -201,16 +223,19 @@ export function CheckoutPage() {
                   </Field>
                 </div>
                 <Field label={t('checkout.fields.country')}>
-                  <select
-                    className={inputCls}
-                    value={form.country}
-                    onChange={(e) => setFormField('country', e.target.value)}
-                  >
-                    <option value="">{t('checkout.fields.country_placeholder')}</option>
-                    {listCountries().map((c) => (
-                      <option key={c.code} value={c.code}>{c.name}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      className={`${inputCls} appearance-none pr-10`}
+                      value={form.country}
+                      onChange={(e) => setFormField('country', e.target.value)}
+                    >
+                      <option value="">{t('checkout.fields.country_placeholder')}</option>
+                      {listCountries().map((c) => (
+                        <option key={c.code} value={c.code}>{c.name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 size-4 text-on-surface-variant" />
+                  </div>
                 </Field>
                 <Field label={t('checkout.fields.phone')}>
                   <input className={inputCls} value={form.phone} onChange={(e) => setFormField('phone', e.target.value)} />
@@ -283,6 +308,24 @@ export function CheckoutPage() {
           </dl>
         </aside>
       </div>
+      {swap ? (
+        <ReservationSwapModal
+          existingTitle={swap.existingTitle}
+          incomingTitle={swap.incomingTitle}
+          isPending={swapPending}
+          onCancel={() => setSwap(null)}
+          onConfirm={async () => {
+            setSwapPending(true)
+            setSubmitting(true)
+            try {
+              await runCheckout(true)
+            } finally {
+              setSwapPending(false)
+              setSwap(null)
+            }
+          }}
+        />
+      ) : null}
     </main>
   )
 }

@@ -1,6 +1,7 @@
 package hr.tvz.artdrop.artdropapp.service;
 
 import hr.tvz.artdrop.artdropapp.exception.InventoryUnavailableException;
+import hr.tvz.artdrop.artdropapp.exception.ReservationConflictException;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.SaleState;
 import hr.tvz.artdrop.artdropapp.model.SaleType;
@@ -123,5 +124,53 @@ class ReservationServiceTest {
         assertThat(stale.getSaleState()).isEqualTo(SaleState.AVAILABLE);
         assertThat(stale.getReservedByUserId()).isNull();
         assertThat(stale.getReservedUntil()).isNull();
+    }
+
+    @Test
+    void rejectsWhenUserHasDifferentActiveReservation() {
+        Artwork other = new Artwork();
+        other.setId(2L);
+        other.setTitle("The Wave");
+        other.setSaleType(SaleType.ORIGINAL);
+        other.setSaleState(SaleState.RESERVED);
+        other.setReservedByUserId(10L);
+        other.setReservedUntil(LocalDateTime.now(fixed).plusMinutes(10));
+        Mockito.when(repo.findActiveReservationByUser(
+                Mockito.eq(10L), Mockito.any(LocalDateTime.class)))
+                .thenReturn(Optional.of(other));
+
+        assertThatThrownBy(() -> svc.reserve(artwork, alice))
+                .isInstanceOf(ReservationConflictException.class)
+                .satisfies(ex -> {
+                    ReservationConflictException rce = (ReservationConflictException) ex;
+                    assertThat(rce.getExistingArtworkId()).isEqualTo(2L);
+                    assertThat(rce.getExistingArtworkTitle()).isEqualTo("The Wave");
+                });
+    }
+
+    @Test
+    void allowsSameArtworkRefresh() {
+        Mockito.when(repo.findActiveReservationByUser(
+                Mockito.eq(10L), Mockito.any(LocalDateTime.class)))
+                .thenReturn(Optional.of(artwork));
+        artwork.setSaleState(SaleState.RESERVED);
+        artwork.setReservedByUserId(10L);
+        artwork.setReservedUntil(LocalDateTime.now(fixed).plusMinutes(5));
+
+        svc.reserve(artwork, alice);
+
+        assertThat(artwork.getReservedUntil())
+                .isEqualTo(LocalDateTime.now(fixed).plusMinutes(15));
+    }
+
+    @Test
+    void findsActiveReservation() {
+        Mockito.when(repo.findActiveReservationByUser(
+                Mockito.eq(10L), Mockito.any(LocalDateTime.class)))
+                .thenReturn(Optional.of(artwork));
+
+        Optional<Artwork> found = svc.findActiveReservation(10L);
+        assertThat(found).isPresent();
+        assertThat(found.get().getId()).isEqualTo(1L);
     }
 }

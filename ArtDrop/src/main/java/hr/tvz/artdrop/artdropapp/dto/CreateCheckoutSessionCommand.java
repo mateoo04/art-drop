@@ -8,5 +8,6 @@ public record CreateCheckoutSessionCommand(
         @NotNull Long artworkId,
         @Positive Integer quantity,
         Long addressId,
-        @Valid ShippingAddressCommand inlineAddress
+        @Valid ShippingAddressCommand inlineAddress,
+        Boolean replaceExistingReservation
 ) {}

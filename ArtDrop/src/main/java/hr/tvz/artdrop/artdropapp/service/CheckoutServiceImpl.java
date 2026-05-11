@@ -92,6 +92,12 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         ShippingAddress address = addressService.resolveForOrder(buyer.getId(), cmd.addressId(), cmd.inlineAddress());
 
+        if (Boolean.TRUE.equals(cmd.replaceExistingReservation())) {
+            reservationService.findActiveReservation(buyer.getId())
+                    .filter(existing -> !existing.getId().equals(artwork.getId()))
+                    .ifPresent(existing -> reservationService.release(existing.getId()));
+        }
+
         reservationService.reserve(artwork, buyer);
 
         Pricing pricing = pricingService.compute(artwork.getPrice(), quantity);

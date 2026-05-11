@@ -3,6 +3,8 @@ package hr.tvz.artdrop.artdropapp.service;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.User;
 
+import java.util.Optional;
+
 public interface ReservationService {
     /**
      * For ORIGINAL artworks: acquire an exclusive 15-minute reservation under a pessimistic row lock.
@@ -16,4 +18,7 @@ public interface ReservationService {
 
     /** Releases all reservations past their deadline. Returns count released. */
     int releaseExpired();
+
+    /** Returns the user's currently active reservation, if any. */
+    Optional<Artwork> findActiveReservation(Long userId);
 }

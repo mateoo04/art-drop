@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { getToken } from '../../lib/auth'
 import { useCurrentUser } from '../../hooks/useCurrentUser'
 import { useSearchOverlay } from '../../hooks/useSearchOverlay'
+import { ReservationHeaderTimer } from './ReservationHeaderTimer'
 
 export function AppHeader() {
   const navigate = useNavigate()
@@ -31,6 +32,7 @@ export function AppHeader() {
       </NavLink>
 
       <div className="flex items-center gap-6">
+        <ReservationHeaderTimer />
         <button
           type="button"
           aria-label={t('nav.search')}
