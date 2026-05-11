@@ -10,12 +10,10 @@ import { useMySellerApplication } from '../hooks/useMySellerApplication'
 import { SellerApplicationModal } from '../components/SellerApplicationModal'
 import { BackButton } from '../components/ui/BackButton'
 import { cloudinaryUrl, openCloudinaryUpload } from '../lib/cloudinary'
-import type { DimensionUnit, SaleStatus } from '../types/artwork'
+import type { DimensionUnit, SaleType } from '../types/artwork'
 import type { Challenge } from '../types/challenge'
 
 type ProgressTab = 'FINISHED' | 'WIP'
-
-type EditionStatus = 'ORIGINAL' | 'EDITION' | 'AVAILABLE'
 
 export function ArtworkDropPage() {
   const { t } = useTranslation()
@@ -58,10 +56,9 @@ export function ArtworkDropPage() {
     }
   }, [challengeId, t])
 
-  const EDITION_LABELS: Record<EditionStatus, string> = {
+  const SALE_TYPE_LABELS: Record<SaleType, string> = {
     ORIGINAL: t('artwork.drop.edition.original'),
     EDITION: t('artwork.drop.edition.limited'),
-    AVAILABLE: t('artwork.drop.edition.open'),
   }
 
   type DropImage = { publicId: string; url: string }
@@ -81,7 +78,8 @@ export function ArtworkDropPage() {
   const [unit, setUnit] = useState<DimensionUnit>('CM')
   const [listForSale, setListForSale] = useState(true)
   const [priceText, setPriceText] = useState('')
-  const [editionStatus, setEditionStatus] = useState<EditionStatus>('ORIGINAL')
+  const [saleType, setSaleType] = useState<SaleType>('ORIGINAL')
+  const [editionSizeText, setEditionSizeText] = useState('')
 
   const [mediums, setMediums] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
@@ -199,14 +197,23 @@ export function ArtworkDropPage() {
     }
     const wantsListing = listForSale && isSeller
     let priceNumber: number | null = null
-    let saleStatus: SaleStatus | null = null
+    let sendSaleType: SaleType | null = null
+    let editionSizeNumber: number | null = null
     if (wantsListing) {
       priceNumber = priceText.trim() === '' ? null : Number.parseFloat(priceText)
       if (priceNumber == null || !Number.isFinite(priceNumber) || priceNumber < 0) {
         setMessage(t('artwork.drop.error.invalidPrice'))
         return
       }
-      saleStatus = editionStatus
+      sendSaleType = saleType
+      if (saleType === 'EDITION') {
+        editionSizeNumber =
+          editionSizeText.trim() === '' ? null : Number.parseInt(editionSizeText, 10)
+        if (editionSizeNumber == null || !Number.isFinite(editionSizeNumber) || editionSizeNumber < 1) {
+          setMessage(t('artwork.drop.error.invalidEditionSize'))
+          return
+        }
+      }
     }
     setSubmitting(true)
     try {
@@ -230,7 +237,8 @@ export function ArtworkDropPage() {
         progressStatus: progress,
         tags: tags.length > 0 ? tags : undefined,
         price: priceNumber,
-        saleStatus,
+        saleType: sendSaleType,
+        editionSize: editionSizeNumber,
         challengeId: challengeId ?? undefined,
       })
       if (challengeId != null) {
@@ -674,21 +682,21 @@ export function ArtworkDropPage() {
                 </div>
                 <div>
                   <label
-                    htmlFor="sale_status"
+                    htmlFor="sale_type"
                     className="block font-label text-xs uppercase tracking-[0.15em] text-on-surface-variant mb-3"
                   >
-                    {t('artwork.drop.fields.editionStatus')}
+                    {t('artwork.drop.fields.saleType')}
                   </label>
                   <div className="relative">
                     <select
-                      id="sale_status"
-                      value={editionStatus}
-                      onChange={(ev) => setEditionStatus(ev.target.value as EditionStatus)}
+                      id="sale_type"
+                      value={saleType}
+                      onChange={(ev) => setSaleType(ev.target.value as SaleType)}
                       className="w-full bg-surface-container-lowest border border-outline-variant/30 py-3 pl-4 pr-10 appearance-none text-sm text-on-surface focus:outline-none focus:border-primary"
                     >
-                      {(['ORIGINAL', 'EDITION', 'AVAILABLE'] as const).map((opt) => (
+                      {(['ORIGINAL', 'EDITION'] as const).map((opt) => (
                         <option key={opt} value={opt}>
-                          {EDITION_LABELS[opt]}
+                          {SALE_TYPE_LABELS[opt]}
                         </option>
                       ))}
                     </select>
@@ -697,6 +705,26 @@ export function ArtworkDropPage() {
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
                     />
                   </div>
+                  {saleType === 'EDITION' ? (
+                    <div className="mt-3">
+                      <label
+                        htmlFor="edition_size"
+                        className="block font-label text-xs uppercase tracking-[0.15em] text-on-surface-variant mb-2"
+                      >
+                        {t('artwork.drop.fields.editionSize')}
+                      </label>
+                      <input
+                        id="edition_size"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={editionSizeText}
+                        onChange={(ev) => setEditionSizeText(ev.target.value)}
+                        placeholder={t('artwork.drop.fields.editionSizePlaceholder')}
+                        className="w-full bg-surface-container-lowest border border-outline-variant/30 py-3 px-4 text-sm text-on-surface focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </fieldset>

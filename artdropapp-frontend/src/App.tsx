@@ -12,6 +12,10 @@ import { ChallengesPage } from './pages/ChallengesPage'
 import { CollectionsPage } from './pages/CollectionsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
+import { CheckoutPage } from './pages/CheckoutPage'
+import { OrdersPage } from './pages/OrdersPage'
+import { OrderDetailPage } from './pages/OrderDetailPage'
+import { SalesPage } from './pages/SalesPage'
 import { SearchPage } from './pages/SearchPage'
 import { SignupPage } from './pages/SignupPage'
 import { AdminChallengeFormPage } from './pages/admin/AdminChallengeFormPage'
@@ -46,6 +50,38 @@ function App() {
           element={
             <ProtectedRoute>
               <AccountPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout/:artworkId"
+          element={
+            <ProtectedRoute>
+              <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrdersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/:id"
+          element={
+            <ProtectedRoute>
+              <OrderDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales"
+          element={
+            <ProtectedRoute>
+              <SalesPage />
             </ProtectedRoute>
           }
         />

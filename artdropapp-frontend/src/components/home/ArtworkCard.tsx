@@ -7,7 +7,7 @@ import { useAuthPrompt } from '../../contexts/AuthPromptContext'
 import { useLikeArtwork } from '../../hooks/useLikeArtwork'
 import { getToken } from '../../lib/auth'
 import { cloudinarySrcSet, cloudinaryUrl } from '../../lib/cloudinary'
-import type { Artwork, ProgressStatus, SaleStatus } from '../../types/artwork'
+import type { Artwork, ProgressStatus, SaleState, SaleType } from '../../types/artwork'
 
 const CARD_WIDTHS = [240, 360, 480, 720, 960]
 const CARD_SIZES = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
@@ -51,40 +51,26 @@ function progressKey(status: ProgressStatus | null): string | null {
   return null
 }
 
-function saleKey(status: SaleStatus | null): string | null {
-  switch (status) {
-    case 'AVAILABLE':
-      return 'home.card.sale.available'
-    case 'ORIGINAL':
-      return 'home.card.sale.original'
-    case 'EDITION':
-      return 'home.card.sale.edition'
-    case 'SOLD':
-      return 'home.card.sale.sold'
-    default:
-      return null
+function saleKey(state: SaleState | null, type: SaleType | null): string | null {
+  if (state === 'SOLD') return 'home.card.sale.sold'
+  if (state === 'AVAILABLE' || state === 'RESERVED') {
+    if (type === 'EDITION') return 'home.card.sale.edition'
+    return 'home.card.sale.original'
   }
+  return null
 }
 
-function saleBadgeClasses(status: SaleStatus | null): string {
-  switch (status) {
-    case 'AVAILABLE':
-      return 'bg-tertiary text-on-tertiary'
-    case 'ORIGINAL':
-      return 'bg-primary text-on-primary'
-    case 'EDITION':
-      return 'bg-secondary text-on-secondary'
-    case 'SOLD':
-      return 'bg-inverse-surface text-inverse-on-surface'
-    default:
-      return 'bg-primary text-on-primary'
-  }
+function saleBadgeClasses(state: SaleState | null, type: SaleType | null): string {
+  if (state === 'SOLD') return 'bg-inverse-surface text-inverse-on-surface'
+  if (state === 'RESERVED') return 'bg-surface-container text-on-surface'
+  if (type === 'EDITION') return 'bg-secondary text-on-secondary'
+  return 'bg-primary text-on-primary'
 }
 
 export function ArtworkCard({ artwork, onSeen }: ArtworkCardProps) {
   const { t } = useTranslation()
   const progressKey_ = progressKey(artwork.progressStatus)
-  const saleKey_ = saleKey(artwork.saleStatus)
+  const saleKey_ = saleKey(artwork.saleState, artwork.saleType)
   const progress = progressKey_ ? t(progressKey_) : null
   const sale = saleKey_ ? t(saleKey_) : null
   const { promptToAuth } = useAuthPrompt()
@@ -161,7 +147,7 @@ export function ArtworkCard({ artwork, onSeen }: ArtworkCardProps) {
             ) : null}
             {sale ? (
               <span
-                className={`${saleBadgeClasses(artwork.saleStatus)} px-3 py-1 text-[10px] font-bold uppercase tracking-widest`}
+                className={`${saleBadgeClasses(artwork.saleState, artwork.saleType)} px-3 py-1 text-[10px] font-bold uppercase tracking-widest`}
               >
                 {sale}
               </span>

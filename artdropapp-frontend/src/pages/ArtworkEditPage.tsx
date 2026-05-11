@@ -6,8 +6,9 @@ import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useMySellerApplication } from '../hooks/useMySellerApplication'
 import { SellerApplicationModal } from '../components/SellerApplicationModal'
 import { Spinner } from '../components/ui/Spinner'
+import type { SaleType } from '../types/artwork'
 
-type SaleStatus = 'ORIGINAL' | 'EDITION' | 'AVAILABLE' | 'SOLD' | ''
+type SaleTypeChoice = SaleType | ''
 
 export function ArtworkEditPage() {
   const { t } = useTranslation()
@@ -22,7 +23,8 @@ export function ArtworkEditPage() {
   const [description, setDescription] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [priceText, setPriceText] = useState('')
-  const [saleStatus, setSaleStatus] = useState<SaleStatus>('')
+  const [saleType, setSaleType] = useState<SaleTypeChoice>('')
+  const [editionSizeText, setEditionSizeText] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -51,7 +53,12 @@ export function ArtworkEditPage() {
         setDescription(data.description ?? '')
         setImageUrl(data.imageUrl)
         setPriceText(data.price == null ? '' : String(data.price))
-        setSaleStatus((data.saleStatus ?? '') as SaleStatus)
+        if (data.saleState === 'DRAFT') {
+          setSaleType('')
+        } else {
+          setSaleType(data.saleType ?? '')
+        }
+        setEditionSizeText(data.editionSize == null ? '' : String(data.editionSize))
       })
       .catch((err: unknown) => {
         if (cancelled) return
@@ -77,13 +84,18 @@ export function ArtworkEditPage() {
     try {
       const trimmedUrl = imageUrl.trim()
       const priceNumber = priceText.trim() === '' ? null : Number.parseFloat(priceText)
+      const editionSizeNumber =
+        editionSizeText.trim() === '' ? null : Number.parseInt(editionSizeText, 10)
+      const unlist = isSeller && saleType === ''
       await updateArtwork(id, {
         title: title.trim(),
         medium: medium.trim(),
         description: description.trim(),
         images: trimmedUrl ? [{ publicId: trimmedUrl, sortOrder: 0, isCover: true }] : undefined,
         price: isSeller ? priceNumber : undefined,
-        saleStatus: isSeller ? (saleStatus === '' ? null : saleStatus) : undefined,
+        saleType: isSeller && saleType !== '' ? saleType : undefined,
+        editionSize: isSeller && saleType === 'EDITION' ? editionSizeNumber : undefined,
+        unlist: unlist ? true : undefined,
       })
       setMessage(t('common.save'))
       navigate(`/details/${id}`)
@@ -173,18 +185,29 @@ export function ArtworkEditPage() {
               />
             </label>
             <label>
-              {t('artwork.edit.fields.saleStatus')}
+              {t('artwork.edit.fields.saleType')}
               <select
-                value={saleStatus}
-                onChange={(ev) => setSaleStatus(ev.target.value as SaleStatus)}
+                value={saleType}
+                onChange={(ev) => setSaleType(ev.target.value as SaleTypeChoice)}
               >
-                <option value="">{t('artwork.edit.fields.saleStatusOptions.notListed')}</option>
-                <option value="AVAILABLE">{t('artwork.edit.fields.saleStatusOptions.available')}</option>
-                <option value="ORIGINAL">{t('artwork.edit.fields.saleStatusOptions.original')}</option>
-                <option value="EDITION">{t('artwork.edit.fields.saleStatusOptions.edition')}</option>
-                <option value="SOLD">{t('artwork.edit.fields.saleStatusOptions.sold')}</option>
+                <option value="">{t('artwork.edit.fields.saleTypeOptions.notListed')}</option>
+                <option value="ORIGINAL">{t('artwork.edit.fields.saleTypeOptions.original')}</option>
+                <option value="EDITION">{t('artwork.edit.fields.saleTypeOptions.edition')}</option>
               </select>
             </label>
+            {saleType === 'EDITION' ? (
+              <label>
+                {t('artwork.edit.fields.editionSize')}
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={editionSizeText}
+                  onChange={(ev) => setEditionSizeText(ev.target.value)}
+                  placeholder={t('artwork.edit.fields.editionSizePlaceholder')}
+                />
+              </label>
+            ) : null}
           </fieldset>
 
           <button

@@ -117,9 +117,21 @@ public class StripeWebhookServiceImpl implements StripeWebhookService {
         orderService.markRefundedFromWebhook(chargeOpt.get().getPaymentIntent());
     }
 
+    // Falls back to deserializeUnsafe() when the SDK's API version differs from the event's
+    // (e.g. account on a preview API version). The fallback skips the version compat check;
+    // signature has already been verified upstream.
     @SuppressWarnings("unchecked")
     private <T extends StripeObject> Optional<T> deserialize(Event event, Class<T> type) {
         EventDataObjectDeserializer deser = event.getDataObjectDeserializer();
-        return deser.getObject().filter(type::isInstance).map(o -> (T) o);
+        Optional<StripeObject> obj = deser.getObject();
+        if (obj.isEmpty()) {
+            try {
+                obj = Optional.ofNullable(deser.deserializeUnsafe());
+            } catch (Exception e) {
+                log.warn("deserializeUnsafe failed for event {}: {}", event.getId(), e.getMessage());
+                return Optional.empty();
+            }
+        }
+        return obj.filter(type::isInstance).map(o -> (T) o);
     }
 }
