@@ -8,7 +8,7 @@ import type { Swiper as SwiperType } from 'swiper'
 import 'swiper/css'
 import 'swiper/css/pagination'
 
-import type { Artwork, DimensionUnit, SaleStatus } from '../types/artwork'
+import type { Artwork, DimensionUnit, SaleState, SaleType } from '../types/artwork'
 import { useComments } from '../hooks/useComments'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useLikeArtwork } from '../hooks/useLikeArtwork'
@@ -109,30 +109,16 @@ export function ArtworkDetailComponent({
     likeMutation.mutate({ artworkId: artwork.id, like: next })
   }
 
-  function saleRibbon(status: SaleStatus): string {
-    switch (status) {
-      case 'ORIGINAL':
-        return t('artwork.detail.sale.originalAvailable')
-      case 'EDITION':
-        return t('artwork.detail.sale.editionAvailable')
-      case 'AVAILABLE':
-        return t('artwork.detail.sale.available')
-      case 'SOLD':
-        return t('artwork.detail.sale.sold')
-    }
+  function saleRibbon(state: SaleState, type: SaleType | null): string {
+    if (state === 'SOLD') return t('artwork.detail.sale.sold')
+    if (state === 'RESERVED') return t('artwork.detail.sale.reserved')
+    if (type === 'EDITION') return t('artwork.detail.sale.editionAvailable')
+    return t('artwork.detail.sale.originalAvailable')
   }
 
-  function purchaseLabel(status: SaleStatus): string {
-    switch (status) {
-      case 'ORIGINAL':
-        return t('artwork.detail.sale.purchaseOriginal')
-      case 'EDITION':
-        return t('artwork.detail.sale.purchaseEdition')
-      case 'AVAILABLE':
-        return t('artwork.detail.sale.purchase')
-      case 'SOLD':
-        return t('artwork.detail.sale.sold')
-    }
+  function purchaseLabel(type: SaleType | null): string {
+    if (type === 'EDITION') return t('artwork.detail.sale.purchaseEdition')
+    return t('artwork.detail.sale.purchaseOriginal')
   }
 
   if (loading) {
@@ -176,12 +162,13 @@ export function ArtworkDetailComponent({
     artwork.dimensionUnit,
   )
 
-  const saleStatus = artwork.saleStatus
-  const showCommercePanel =
-    saleStatus != null && (artwork.price != null || saleStatus === 'SOLD')
-  const showPurchaseButton =
-    saleStatus != null && saleStatus !== 'SOLD' && artwork.price != null
-  const showQuantitySelector = showPurchaseButton && saleStatus === 'EDITION'
+  const saleState = artwork.saleState
+  const saleType = artwork.saleType
+  const isListed = saleState === 'AVAILABLE' || saleState === 'RESERVED'
+  const reservedByOther = saleState === 'RESERVED' && !artwork.reservedByCurrentUser
+  const showCommercePanel = saleState != null && (artwork.price != null || saleState === 'SOLD')
+  const showPurchaseButton = isListed && artwork.price != null && !reservedByOther
+  const showQuantitySelector = showPurchaseButton && saleType === 'EDITION'
   const effectiveQuantity = showQuantitySelector ? quantity : 1
 
   return (
@@ -291,15 +278,15 @@ export function ArtworkDetailComponent({
             </div>
           ) : null}
           <div className="bg-surface-container-lowest p-6 md:p-8 border border-outline-variant/15 mb-12 lg:mb-16 shadow-[0_10px_40px_rgba(45,52,53,0.06)] relative">
-            {showCommercePanel && saleStatus != null ? (
+            {showCommercePanel && saleState != null ? (
               <div
                 className={`absolute top-0 right-0 px-4 py-1 text-xs font-label uppercase tracking-wider translate-x-2 -translate-y-3 lg:translate-x-4 lg:-translate-y-4 ${
-                  saleStatus === 'SOLD'
+                  saleState === 'SOLD'
                     ? 'bg-on-surface text-surface'
                     : 'bg-tertiary text-on-tertiary'
                 }`}
               >
-                {saleRibbon(saleStatus)}
+                {saleRibbon(saleState, saleType)}
               </div>
             ) : null}
             {showCommercePanel && artwork.price != null ? (
@@ -349,13 +336,25 @@ export function ArtworkDetailComponent({
                 </div>
               </div>
             ) : null}
-            {showPurchaseButton && saleStatus != null ? (
-              <button
-                type="button"
-                className="w-full bg-on-surface text-surface py-4 font-label text-sm uppercase tracking-widest hover:bg-on-surface-variant transition-colors mb-6"
+            {saleType === 'EDITION' && artwork.editionRemaining != null && isListed ? (
+              <p className="text-xs text-on-surface-variant mb-3 text-center">
+                {t('artwork.detail.editionRemaining', {
+                  remaining: artwork.editionRemaining,
+                  total: artwork.editionSize ?? artwork.editionRemaining,
+                })}
+              </p>
+            ) : null}
+            {showPurchaseButton ? (
+              <Link
+                to={`/checkout/${artwork.id}${showQuantitySelector ? `?qty=${quantity}` : ''}`}
+                className="block w-full text-center bg-on-surface text-surface py-4 font-label text-sm uppercase tracking-widest hover:bg-on-surface-variant transition-colors mb-6"
               >
-                {purchaseLabel(saleStatus)}
-              </button>
+                {purchaseLabel(saleType)}
+              </Link>
+            ) : reservedByOther ? (
+              <div className="w-full bg-surface-container text-on-surface-variant py-4 font-label text-sm uppercase tracking-widest text-center mb-6">
+                {t('artwork.detail.sale.reservedHint')}
+              </div>
             ) : null}
             <div
               className={`flex gap-4 ${

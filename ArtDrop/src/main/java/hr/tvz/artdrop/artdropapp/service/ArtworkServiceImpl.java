@@ -13,7 +13,8 @@ import hr.tvz.artdrop.artdropapp.model.ChallengeStatus;
 import hr.tvz.artdrop.artdropapp.model.ChallengeSubmission;
 import hr.tvz.artdrop.artdropapp.model.DimensionUnit;
 import hr.tvz.artdrop.artdropapp.model.ProgressStatus;
-import hr.tvz.artdrop.artdropapp.model.SaleStatus;
+import hr.tvz.artdrop.artdropapp.model.SaleState;
+import hr.tvz.artdrop.artdropapp.model.SaleType;
 import hr.tvz.artdrop.artdropapp.model.User;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkLikeJpaRepository;
@@ -199,7 +200,7 @@ public class ArtworkServiceImpl implements ArtworkService {
             author = userRepository.findById(1L).orElse(null);
         }
 
-        boolean wantsSale = command.price() != null || command.saleStatus() != null;
+        boolean wantsSale = command.price() != null || command.saleType() != null;
         if (wantsSale) {
             boolean isSeller = author != null
                     && author.getAuthorities() != null
@@ -218,9 +219,14 @@ public class ArtworkServiceImpl implements ArtworkService {
         artwork.setProgressStatus(command.progressStatus() == null
                 ? ProgressStatus.FINISHED
                 : ProgressStatus.valueOf(command.progressStatus()));
-        artwork.setSaleStatus(command.saleStatus() == null
-                ? null
-                : SaleStatus.valueOf(command.saleStatus()));
+        SaleType resolvedType = command.saleType() == null
+                ? SaleType.ORIGINAL
+                : SaleType.valueOf(command.saleType());
+        artwork.setSaleType(resolvedType);
+        artwork.setSaleState(wantsSale ? SaleState.AVAILABLE : SaleState.DRAFT);
+        if (resolvedType == SaleType.EDITION) {
+            artwork.setEditionSize(command.editionSize());
+        }
         artwork.setPrice(command.price());
         artwork.setTags(command.tags() == null ? List.of() : List.copyOf(command.tags()));
         artwork.setPublishedAt(LocalDateTime.now());
@@ -291,7 +297,7 @@ public class ArtworkServiceImpl implements ArtworkService {
         }
         Artwork artwork = maybeArtwork.get();
 
-        boolean wantsSetSale = command.price() != null || command.saleStatus() != null;
+        boolean wantsSetSale = command.price() != null || command.saleType() != null;
         boolean wantsClearSale = Boolean.TRUE.equals(command.unlist());
         if (wantsSetSale) {
             Optional<User> editor = userRepository.findByUsername(editorUsername);
@@ -324,13 +330,22 @@ public class ArtworkServiceImpl implements ArtworkService {
         }
         if (wantsClearSale) {
             artwork.setPrice(null);
-            artwork.setSaleStatus(null);
+            artwork.setSaleState(SaleState.DRAFT);
         }
         if (command.price() != null) {
             artwork.setPrice(command.price());
         }
-        if (command.saleStatus() != null) {
-            artwork.setSaleStatus(SaleStatus.valueOf(command.saleStatus()));
+        if (command.saleType() != null) {
+            SaleType updatedType = SaleType.valueOf(command.saleType());
+            artwork.setSaleType(updatedType);
+            if (updatedType == SaleType.EDITION && command.editionSize() != null) {
+                artwork.setEditionSize(command.editionSize());
+            }
+            if (artwork.getSaleState() == SaleState.DRAFT) {
+                artwork.setSaleState(SaleState.AVAILABLE);
+            }
+        } else if (wantsSetSale && artwork.getSaleState() == SaleState.DRAFT) {
+            artwork.setSaleState(SaleState.AVAILABLE);
         }
         artwork.setUpdatedAt(LocalDateTime.now());
         artworkRepository.save(artwork);
@@ -458,7 +473,11 @@ public class ArtworkServiceImpl implements ArtworkService {
                 artwork.getDimensionUnit() == null ? null : artwork.getDimensionUnit().name(),
                 artwork.getPrice(),
                 artwork.getProgressStatus() == null ? null : artwork.getProgressStatus().name(),
-                artwork.getSaleStatus() == null ? null : artwork.getSaleStatus().name(),
+                artwork.getSaleType() == null ? null : artwork.getSaleType().name(),
+                artwork.getSaleState() == null ? null : artwork.getSaleState().name(),
+                artwork.getEditionSize(),
+                null,
+                false,
                 author == null ? null : author.getId(),
                 author == null ? null : author.getDisplayName(),
                 author == null ? null : author.getSlug(),

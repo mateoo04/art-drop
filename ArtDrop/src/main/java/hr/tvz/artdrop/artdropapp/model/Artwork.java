@@ -58,8 +58,21 @@ public class Artwork {
     private ProgressStatus progressStatus;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "sale_status", length = 20)
-    private SaleStatus saleStatus;
+    @Column(name = "sale_type", nullable = false, length = 20)
+    private SaleType saleType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sale_state", nullable = false, length = 20)
+    private SaleState saleState;
+
+    @Column(name = "edition_size")
+    private Integer editionSize;
+
+    @Column(name = "reserved_until")
+    private LocalDateTime reservedUntil;
+
+    @Column(name = "reserved_by_user_id")
+    private Long reservedByUserId;
 
     @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("sortOrder ASC")

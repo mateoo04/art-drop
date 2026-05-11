@@ -1,5 +1,6 @@
 export type ProgressStatus = 'WIP' | 'FINISHED'
-export type SaleStatus = 'ORIGINAL' | 'EDITION' | 'AVAILABLE' | 'SOLD'
+export type SaleType = 'ORIGINAL' | 'EDITION'
+export type SaleState = 'DRAFT' | 'AVAILABLE' | 'RESERVED' | 'SOLD'
 export type DimensionUnit = 'CM' | 'MM' | 'IN' | 'PX'
 
 export interface Artist {
@@ -39,7 +40,11 @@ export interface Artwork {
   dimensionUnit: DimensionUnit | null
   price: number | null
   progressStatus: ProgressStatus | null
-  saleStatus: SaleStatus | null
+  saleType: SaleType | null
+  saleState: SaleState | null
+  editionSize: number | null
+  editionRemaining: number | null
+  reservedByCurrentUser: boolean
   artist: Artist | null
   tags: string[]
   publishedAt: string

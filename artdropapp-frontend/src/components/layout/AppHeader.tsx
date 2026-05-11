@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { Search, ShieldUser, ShoppingBag, User } from 'lucide-react'
+import { Search, ShieldUser, ShoppingBag, Store, User } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { getToken } from '../../lib/auth'
 import { useCurrentUser } from '../../hooks/useCurrentUser'
 import { useSearchOverlay } from '../../hooks/useSearchOverlay'
+import { ReservationHeaderTimer } from './ReservationHeaderTimer'
 
 export function AppHeader() {
   const navigate = useNavigate()
@@ -11,9 +12,14 @@ export function AppHeader() {
   const { t } = useTranslation()
   const { openSearch } = useSearchOverlay()
   const isAdmin = (user?.roles ?? []).includes('ROLE_ADMIN')
+  const isSeller = (user?.roles ?? []).includes('ROLE_SELLER')
 
   const handleAccountClick = () => {
     navigate(getToken() ? '/account' : '/login')
+  }
+
+  const handleOrdersClick = () => {
+    navigate(getToken() ? '/orders' : '/login')
   }
 
   return (
@@ -26,6 +32,7 @@ export function AppHeader() {
       </NavLink>
 
       <div className="flex items-center gap-6">
+        <ReservationHeaderTimer />
         <button
           type="button"
           aria-label={t('nav.search')}
@@ -37,10 +44,21 @@ export function AppHeader() {
         <button
           type="button"
           aria-label={t('nav.bag')}
+          onClick={handleOrdersClick}
           className="text-on-surface transition-transform active:scale-95"
         >
           <ShoppingBag size={20} />
         </button>
+        {isSeller ? (
+          <button
+            type="button"
+            aria-label={t('nav.sales')}
+            onClick={() => navigate('/sales')}
+            className="text-on-surface transition-transform active:scale-95"
+          >
+            <Store size={20} />
+          </button>
+        ) : null}
         {isAdmin ? (
           <button
             type="button"

@@ -11,6 +11,80 @@
     "artworkDetails": "Selected artwork details",
     "details": "Details"
   },
+  "orders": {
+    "title": "My orders",
+    "empty": "You haven't placed any orders yet.",
+    "status": {
+      "PENDING_PAYMENT": "Pending payment",
+      "PAID": "Paid",
+      "SHIPPED": "Shipped",
+      "DELIVERED": "Delivered",
+      "CANCELLED": "Cancelled",
+      "REFUNDED": "Refunded"
+    },
+    "detail": {
+      "order_id": "Order #{{id}}",
+      "view_artwork": "View artwork details",
+      "not_found": "Order not found.",
+      "shipping_to": "Shipping to",
+      "tracking": "Tracking",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "total": "Total",
+      "cancel_button": "Cancel & refund",
+      "cancel_button_pending": "Cancel order",
+      "cancelling": "Cancelling…",
+      "confirming": "Confirming your payment…",
+      "cancelled_at_stripe": "Payment was cancelled. You can retry from the artwork page."
+    }
+  },
+  "sales": {
+    "title": "Sales",
+    "empty": "No sales yet.",
+    "order_id": "Order #{{id}}",
+    "buyer": "Buyer #{{uid}}",
+    "tracking_number": "Tracking #",
+    "carrier": "Carrier",
+    "mark_shipped": "Mark shipped",
+    "mark_delivered": "Mark delivered"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shipping_address": "Shipping address",
+    "use_new_address": "Use a new address",
+    "quantity": "Quantity",
+    "continue": "Continue to payment",
+    "redirecting": "Redirecting to Stripe…",
+    "fields": {
+      "recipient_name": "Full name",
+      "line1": "Address line 1",
+      "line2": "Address line 2 (optional)",
+      "city": "City",
+      "postal_code": "Postal code",
+      "country": "Country",
+      "country_placeholder": "Select a country…",
+      "phone": "Phone (optional)"
+    },
+    "summary": {
+      "subtotal": "Subtotal × {{qty}}",
+      "shipping": "Shipping (flat)",
+      "total": "Total"
+    },
+    "errors": {
+      "artwork_not_found": "Artwork not found.",
+      "self_purchase": "You cannot purchase your own artwork.",
+      "unavailable": "This artwork is no longer available.",
+      "address_incomplete": "Please fill in the required address fields."
+    },
+    "pendingConflict": {
+      "title": "You already have a pending order",
+      "fallbackTitle": "another artwork",
+      "bodySame": "You already have a pending order for <strong>{{existing}}</strong>. Cancel it and start a new checkout?",
+      "bodyDifferent": "You already have a pending order for <strong>{{existing}}</strong>. Cancel it to continue with <strong>{{incoming}}</strong>?",
+      "cancel": "Keep pending order",
+      "confirm": "Cancel & continue"
+    }
+  },
   "settings": {
     "title": "Settings",
     "language": "Language",
@@ -103,7 +177,8 @@
     "challenges": "Challenges",
     "mainNavLabel": "Main navigation",
     "search": "Search",
-    "bag": "Bag",
+    "bag": "Orders",
+    "sales": "Sales",
     "admin": "Admin",
     "account": "Account",
     "newDrop": "New Drop",
@@ -191,7 +266,8 @@
         "available": "Available",
         "original": "Original",
         "edition": "Edition",
-        "sold": "Sold"
+        "sold": "Sold",
+        "reserved_by_other": "Reserved"
       }
     }
   },
@@ -222,10 +298,13 @@
         "editionAvailable": "Edition Available",
         "available": "Available",
         "sold": "Sold",
+        "reserved": "In Checkout",
+        "reservedHint": "Currently in checkout by another buyer — try again in a few minutes.",
         "purchaseOriginal": "Purchase Original",
         "purchaseEdition": "Purchase Edition",
         "purchase": "Purchase"
       },
+      "editionRemaining": "{{remaining}} of {{total}} prints remaining",
       "quantity_selector": {
         "label": "Quantity selector",
         "decrease": "Decrease quantity",
@@ -283,7 +362,9 @@
         "listingSubtitle": "Make this piece available for purchase directly from your profile.",
         "enableListing": "Enable Marketplace Listing",
         "price": "Price",
-        "editionStatus": "Edition Status",
+        "saleType": "Sale Type",
+        "editionSize": "Edition Size",
+        "editionSizePlaceholder": "e.g. 10",
         "removeTag": "Remove {{tag}}"
       },
       "upload": {
@@ -317,6 +398,7 @@
         "noTitle": "Please give your piece a title.",
         "noMedium": "Please choose a medium.",
         "invalidPrice": "Enter a valid price to list this piece for sale.",
+        "invalidEditionSize": "Enter a valid edition size (1 or more) for editions.",
         "titleTaken": "That title is already taken — try another.",
         "forbiddenSale": "Listing for sale requires verified seller status.",
         "unauthenticated": "Please sign in to drop an artwork.",
@@ -343,14 +425,14 @@
         "listing": "Listing",
         "price": "Price",
         "pricePlaceholder": "e.g. 250.00",
-        "saleStatus": "Sale status",
-        "saleStatusOptions": {
+        "saleType": "Sale type",
+        "saleTypeOptions": {
           "notListed": "Not listed",
-          "available": "Available",
           "original": "Original",
-          "edition": "Edition",
-          "sold": "Sold"
-        }
+          "edition": "Edition"
+        },
+        "editionSize": "Edition size",
+        "editionSizePlaceholder": "e.g. 10"
       },
       "seller": {
         "pending": "Your seller application is under review.",
@@ -681,6 +763,11 @@
       "body": "Sign up or log in to like artworks, follow artists, and participate in challenges.",
       "signup": "Sign up",
       "login": "Log in"
+    }
+  },
+  "reservation": {
+    "header": {
+      "release_confirm": "Release reservation on {{title}}?"
     }
   }
 }

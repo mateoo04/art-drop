@@ -1,13 +1,16 @@
 package hr.tvz.artdrop.artdropapp.repository;
 
 import hr.tvz.artdrop.artdropapp.model.Artwork;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +63,8 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
             @Param("viewerId") Long viewerId,
             Pageable pageable);
 
-    @Query("SELECT COUNT(a) FROM Artwork a WHERE a.author.id = :authorId AND (a.saleStatus IS NOT NULL OR a.price IS NOT NULL)")
+    @Query("SELECT COUNT(a) FROM Artwork a WHERE a.author.id = :authorId " +
+            "AND a.saleState IN (hr.tvz.artdrop.artdropapp.model.SaleState.AVAILABLE, hr.tvz.artdrop.artdropapp.model.SaleState.RESERVED)")
     long countListedByAuthorId(Long authorId);
 
     @Query(value = """
@@ -83,6 +87,23 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE Artwork a SET a.saleStatus = NULL, a.price = NULL, a.updatedAt = CURRENT_TIMESTAMP WHERE a.author.id = :authorId AND (a.saleStatus IS NOT NULL OR a.price IS NOT NULL)")
+    @Query("UPDATE Artwork a SET a.saleState = hr.tvz.artdrop.artdropapp.model.SaleState.DRAFT, a.price = NULL, a.updatedAt = CURRENT_TIMESTAMP " +
+            "WHERE a.author.id = :authorId " +
+            "AND a.saleState IN (hr.tvz.artdrop.artdropapp.model.SaleState.AVAILABLE, hr.tvz.artdrop.artdropapp.model.SaleState.RESERVED)")
     int unlistAllForAuthor(Long authorId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT a FROM Artwork a WHERE a.id = :id")
+    Optional<Artwork> findByIdForUpdate(@Param("id") Long id);
+
+    @Query("SELECT a FROM Artwork a WHERE a.saleState = hr.tvz.artdrop.artdropapp.model.SaleState.RESERVED " +
+            "AND a.reservedUntil < :now")
+    List<Artwork> findExpiredReservations(@Param("now") LocalDateTime now);
+
+    @Query("SELECT a FROM Artwork a " +
+            "WHERE a.reservedByUserId = :userId " +
+            "AND a.saleState = hr.tvz.artdrop.artdropapp.model.SaleState.RESERVED " +
+            "AND a.reservedUntil > :now")
+    Optional<Artwork> findActiveReservationByUser(@Param("userId") Long userId,
+                                                  @Param("now") LocalDateTime now);
 }

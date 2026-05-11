@@ -6,12 +6,14 @@ import type {
   ArtworkImage,
   DimensionUnit,
   ProgressStatus,
-  SaleStatus,
+  SaleState,
+  SaleType,
 } from '../types/artwork'
 import { mapChallenge } from './challengesApi'
 
 const PROGRESS_VALUES: ProgressStatus[] = ['WIP', 'FINISHED']
-const SALE_VALUES: SaleStatus[] = ['ORIGINAL', 'EDITION', 'AVAILABLE', 'SOLD']
+const SALE_TYPE_VALUES: SaleType[] = ['ORIGINAL', 'EDITION']
+const SALE_STATE_VALUES: SaleState[] = ['DRAFT', 'AVAILABLE', 'RESERVED', 'SOLD']
 const UNIT_VALUES: DimensionUnit[] = ['CM', 'MM', 'IN', 'PX']
 
 function parseProgress(value: unknown): ProgressStatus | null {
@@ -20,10 +22,22 @@ function parseProgress(value: unknown): ProgressStatus | null {
     : null
 }
 
-function parseSale(value: unknown): SaleStatus | null {
-  return typeof value === 'string' && (SALE_VALUES as string[]).includes(value)
-    ? (value as SaleStatus)
+function parseSaleType(value: unknown): SaleType | null {
+  return typeof value === 'string' && (SALE_TYPE_VALUES as string[]).includes(value)
+    ? (value as SaleType)
     : null
+}
+
+function parseSaleState(value: unknown): SaleState | null {
+  return typeof value === 'string' && (SALE_STATE_VALUES as string[]).includes(value)
+    ? (value as SaleState)
+    : null
+}
+
+function parseInt32(value: unknown): number | null {
+  if (value == null) return null
+  const n = Number(value)
+  return Number.isFinite(n) ? Math.trunc(n) : null
 }
 
 function parseUnit(value: unknown): DimensionUnit | null {
@@ -98,7 +112,11 @@ export function mapApiArtwork(raw: Record<string, unknown>): Artwork {
     dimensionUnit: parseUnit(raw.dimensionUnit),
     price: priceRaw == null ? null : Number(priceRaw),
     progressStatus: parseProgress(raw.progressStatus),
-    saleStatus: parseSale(raw.saleStatus),
+    saleType: parseSaleType(raw.saleType),
+    saleState: parseSaleState(raw.saleState),
+    editionSize: parseInt32(raw.editionSize),
+    editionRemaining: parseInt32(raw.editionRemaining),
+    reservedByCurrentUser: Boolean(raw.reservedByCurrentUser),
     artist,
     tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [],
     publishedAt: normalizePublishedAt(raw.publishedAt),
@@ -269,7 +287,8 @@ export type CreateArtworkPayload = {
   progressStatus?: ProgressStatus
   tags?: string[]
   price?: number | null
-  saleStatus?: SaleStatus | null
+  saleType?: SaleType | null
+  editionSize?: number | null
   challengeId?: number | null
 }
 
@@ -363,7 +382,8 @@ export type UpdateArtworkPayload = {
   depth?: number | null
   dimensionUnit?: DimensionUnit | null
   price?: number | null
-  saleStatus?: 'ORIGINAL' | 'EDITION' | 'AVAILABLE' | 'SOLD' | null
+  saleType?: SaleType | null
+  editionSize?: number | null
   unlist?: boolean
 }
 
