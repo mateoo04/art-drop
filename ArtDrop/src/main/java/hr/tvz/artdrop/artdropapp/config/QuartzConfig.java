@@ -1,6 +1,7 @@
 package hr.tvz.artdrop.artdropapp.config;
 
 import hr.tvz.artdrop.artdropapp.job.FeaturedChallengeRotationJob;
+import hr.tvz.artdrop.artdropapp.job.ReservationExpiryJob;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -42,14 +43,35 @@ public class QuartzConfig {
     }
 
     @Bean
+    public JobDetail reservationExpiryJobDetail() {
+        return JobBuilder.newJob(ReservationExpiryJob.class)
+                .withIdentity("reservationexpiryjob")
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger reservationExpiryTrigger(
+            JobDetail reservationExpiryJobDetail,
+            @Value("${commerce.reservation-cleanup-cron:0 */1 * * * ?}") String cron) {
+        return TriggerBuilder.newTrigger()
+                .forJob(reservationExpiryJobDetail)
+                .withIdentity("reservationexpirytrigger")
+                .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                .build();
+    }
+
+    @Bean
     public SchedulerFactoryBean schedulerFactoryBean(
             AutowiringSpringBeanJobFactory jobFactory,
             JobDetail featuredRotationJobDetail,
-            Trigger featuredRotationTrigger) {
+            Trigger featuredRotationTrigger,
+            JobDetail reservationExpiryJobDetail,
+            Trigger reservationExpiryTrigger) {
         SchedulerFactoryBean s = new SchedulerFactoryBean();
         s.setJobFactory(jobFactory);
-        s.setJobDetails(featuredRotationJobDetail);
-        s.setTriggers(featuredRotationTrigger);
+        s.setJobDetails(featuredRotationJobDetail, reservationExpiryJobDetail);
+        s.setTriggers(featuredRotationTrigger, reservationExpiryTrigger);
         return s;
     }
 }
