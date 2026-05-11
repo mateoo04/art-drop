@@ -199,7 +199,7 @@ class ArtworkControllerIntegrationTest extends AbstractPostgresIntegrationTest {
                 "Test description",
                 List.of(new ArtworkImageCommand("test/public-id", 0, true, null)),
                 null, null, null, null, null, null,
-                null, null, null, null
+                null, null, null, null, null
         );
     }
 }

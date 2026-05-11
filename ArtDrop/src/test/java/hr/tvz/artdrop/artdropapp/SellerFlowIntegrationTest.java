@@ -4,7 +4,8 @@ import tools.jackson.databind.ObjectMapper;
 import hr.tvz.artdrop.artdropapp.dto.RevokeSellerCommand;
 import hr.tvz.artdrop.artdropapp.dto.SubmitSellerApplicationCommand;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
-import hr.tvz.artdrop.artdropapp.model.SaleStatus;
+import hr.tvz.artdrop.artdropapp.model.SaleState;
+import hr.tvz.artdrop.artdropapp.model.SaleType;
 import hr.tvz.artdrop.artdropapp.model.SellerApplication;
 import hr.tvz.artdrop.artdropapp.model.SellerApplicationStatus;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
@@ -158,7 +159,8 @@ class SellerFlowIntegrationTest extends AbstractPostgresIntegrationTest {
                 .filter(art -> art.getAuthor() != null && userId.equals(art.getAuthor().getId()))
                 .findFirst().orElseThrow();
         a.setPrice(new BigDecimal("100.00"));
-        a.setSaleStatus(SaleStatus.AVAILABLE);
+        a.setSaleType(SaleType.ORIGINAL);
+        a.setSaleState(SaleState.AVAILABLE);
         artworkRepository.save(a);
         long listedBefore = artworkRepository.countListedByAuthorId(userId);
         assertThat(listedBefore).isGreaterThanOrEqualTo(1);
@@ -190,7 +192,7 @@ class SellerFlowIntegrationTest extends AbstractPostgresIntegrationTest {
                 .filter(art -> art.getAuthor() != null && userId.equals(art.getAuthor().getId()))
                 .findFirst().orElseThrow();
 
-        String body = "{\"price\":250.00,\"saleStatus\":\"AVAILABLE\"}";
+        String body = "{\"price\":250.00,\"saleType\":\"ORIGINAL\"}";
         mockMvc.perform(patch("/api/artworks/" + a.getId())
                         .contentType("application/json")
                         .content(body))

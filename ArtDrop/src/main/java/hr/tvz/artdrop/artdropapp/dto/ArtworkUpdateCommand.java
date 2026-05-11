@@ -2,6 +2,7 @@ package hr.tvz.artdrop.artdropapp.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -20,8 +21,10 @@ public record ArtworkUpdateCommand(
         @Pattern(regexp = "CM|MM|IN|PX", message = "dimensionUnit must be CM, MM, IN or PX")
         String dimensionUnit,
         BigDecimal price,
-        @Pattern(regexp = "ORIGINAL|EDITION|AVAILABLE|SOLD", message = "saleStatus must be ORIGINAL, EDITION, AVAILABLE or SOLD")
-        String saleStatus,
+        @Pattern(regexp = "ORIGINAL|EDITION", message = "saleType must be ORIGINAL or EDITION")
+        String saleType,
+        @Positive(message = "editionSize must be positive")
+        Integer editionSize,
         Boolean unlist
 ) {
 }
