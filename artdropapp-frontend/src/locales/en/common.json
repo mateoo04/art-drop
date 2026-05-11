@@ -32,6 +32,7 @@
       "shipping": "Shipping",
       "total": "Total",
       "cancel_button": "Cancel & refund",
+      "cancel_button_pending": "Cancel order",
       "cancelling": "Cancelling…",
       "confirming": "Confirming your payment…",
       "cancelled_at_stripe": "Payment was cancelled. You can retry from the artwork page."
@@ -74,6 +75,14 @@
       "self_purchase": "You cannot purchase your own artwork.",
       "unavailable": "This artwork is no longer available.",
       "address_incomplete": "Please fill in the required address fields."
+    },
+    "pendingConflict": {
+      "title": "You already have a pending order",
+      "fallbackTitle": "another artwork",
+      "bodySame": "You already have a pending order for <strong>{{existing}}</strong>. Cancel it and start a new checkout?",
+      "bodyDifferent": "You already have a pending order for <strong>{{existing}}</strong>. Cancel it to continue with <strong>{{incoming}}</strong>?",
+      "cancel": "Keep pending order",
+      "confirm": "Cancel & continue"
     }
   },
   "settings": {
@@ -759,12 +768,6 @@
   "reservation": {
     "header": {
       "release_confirm": "Release reservation on {{title}}?"
-    },
-    "swap": {
-      "title": "Reservation conflict",
-      "body": "You already have <strong>{{existing}}</strong> reserved. Release it and reserve <strong>{{incoming}}</strong> instead?",
-      "cancel": "Cancel",
-      "confirm": "Release & Continue"
     }
   }
 }

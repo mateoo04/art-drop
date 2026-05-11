@@ -13,15 +13,20 @@ import hr.tvz.artdrop.artdropapp.model.ShippingAddress;
 import hr.tvz.artdrop.artdropapp.model.User;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.OrderRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     private final OrderRepository orderRepository;
     private final ArtworkJpaRepository artworkRepository;
@@ -161,9 +166,16 @@ public class OrderServiceImpl implements OrderService {
         if (!order.getBuyerUserId().equals(buyerUserId)) {
             throw new IllegalOrderStateException("order does not belong to caller");
         }
+
+        if (order.getStatus() == OrderStatus.PENDING_PAYMENT) {
+            deletePendingOrder(order);
+            return order;
+        }
+
         if (order.getStatus() != OrderStatus.PAID) {
             throw new IllegalOrderStateException(
-                    "cannot cancel from " + order.getStatus() + "; only PAID is cancellable by buyer");
+                    "cannot cancel from " + order.getStatus()
+                            + "; only PENDING_PAYMENT or PAID is cancellable by buyer");
         }
         if (order.getStripePaymentIntentId() == null) {
             throw new IllegalOrderStateException("missing payment intent on PAID order");
@@ -196,6 +208,48 @@ public class OrderServiceImpl implements OrderService {
             artworkRepository.save(artwork);
         }
         return orderRepository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public void deletePendingForBuyerAndArtwork(Long buyerUserId, Long artworkId) {
+        orderRepository.findFirstByBuyerUserIdAndArtworkIdAndStatus(
+                        buyerUserId, artworkId, OrderStatus.PENDING_PAYMENT)
+                .ifPresent(this::deletePendingOrder);
+    }
+
+    @Override
+    @Transactional
+    public int deleteAbandonedPendingOrders(int graceMinutes) {
+        LocalDateTime cutoff = LocalDateTime.now(clock).minusMinutes(graceMinutes);
+        List<Order> abandoned = orderRepository.findByStatusAndCreatedAtBefore(
+                OrderStatus.PENDING_PAYMENT, cutoff);
+        for (Order o : abandoned) {
+            deletePendingOrder(o);
+        }
+        return abandoned.size();
+    }
+
+    private void deletePendingOrder(Order order) {
+        if (order.getStripeCheckoutSessionId() != null) {
+            try {
+                stripeGateway.expireSession(order.getStripeCheckoutSessionId());
+            } catch (StripeException e) {
+                log.warn("Failed to expire Stripe session {} for order {}: {}",
+                        order.getStripeCheckoutSessionId(), order.getId(), e.getMessage());
+            }
+        }
+        Artwork artwork = artworkRepository.findByIdForUpdate(order.getArtworkId()).orElse(null);
+        if (artwork != null
+                && artwork.getSaleType() == SaleType.ORIGINAL
+                && artwork.getSaleState() == SaleState.RESERVED
+                && order.getBuyerUserId().equals(artwork.getReservedByUserId())) {
+            artwork.setSaleState(SaleState.AVAILABLE);
+            artwork.setReservedByUserId(null);
+            artwork.setReservedUntil(null);
+            artworkRepository.save(artwork);
+        }
+        orderRepository.delete(order);
     }
 
     @Override

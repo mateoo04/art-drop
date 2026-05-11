@@ -256,9 +256,79 @@ class OrderServiceStateMachineTest {
     }
 
     @Test
-    void cancelByBuyerRejectsFromPendingPayment() {
+    void cancelByBuyerOnPendingDeletesRowAndReleasesReservation() throws StripeException {
+        order.setStripeCheckoutSessionId("cs_test_pending");
+        Mockito.doNothing().when(stripeGateway).expireSession("cs_test_pending");
+
+        svc.cancelByBuyer(1L, buyer.getId(), null);
+
+        Mockito.verify(stripeGateway).expireSession("cs_test_pending");
+        Mockito.verify(orderRepo).delete(order);
+        assertThat(artwork.getSaleState()).isEqualTo(SaleState.AVAILABLE);
+        assertThat(artwork.getReservedByUserId()).isNull();
+    }
+
+    @Test
+    void cancelByBuyerOnPendingDeletesEvenIfStripeExpireFails() throws StripeException {
+        order.setStripeCheckoutSessionId("cs_test_pending");
+        Mockito.doThrow(new StripeException("boom", null, null, 500) {})
+                .when(stripeGateway).expireSession("cs_test_pending");
+
+        svc.cancelByBuyer(1L, buyer.getId(), null);
+
+        Mockito.verify(orderRepo).delete(order);
+    }
+
+    @Test
+    void cancelByBuyerRejectsFromCancelled() {
+        order.setStatus(OrderStatus.CANCELLED);
         assertThatThrownBy(() -> svc.cancelByBuyer(1L, buyer.getId(), null))
                 .isInstanceOf(IllegalOrderStateException.class);
+    }
+
+    // ---------- pending order cleanup ----------
+
+    @Test
+    void deletePendingForBuyerAndArtworkRemovesMatchingRow() throws StripeException {
+        order.setStripeCheckoutSessionId("cs_test_pending");
+        Mockito.when(orderRepo.findFirstByBuyerUserIdAndArtworkIdAndStatus(
+                        buyer.getId(), artwork.getId(), OrderStatus.PENDING_PAYMENT))
+                .thenReturn(Optional.of(order));
+
+        svc.deletePendingForBuyerAndArtwork(buyer.getId(), artwork.getId());
+
+        Mockito.verify(stripeGateway).expireSession("cs_test_pending");
+        Mockito.verify(orderRepo).delete(order);
+        assertThat(artwork.getSaleState()).isEqualTo(SaleState.AVAILABLE);
+    }
+
+    @Test
+    void deletePendingForBuyerAndArtworkIsNoOpWhenNoMatch() {
+        Mockito.when(orderRepo.findFirstByBuyerUserIdAndArtworkIdAndStatus(
+                        Mockito.anyLong(), Mockito.anyLong(), Mockito.any()))
+                .thenReturn(Optional.empty());
+
+        svc.deletePendingForBuyerAndArtwork(buyer.getId(), 999L);
+
+        Mockito.verify(orderRepo, Mockito.never()).delete(Mockito.any());
+    }
+
+    @Test
+    void deleteAbandonedPendingOrdersDeletesByCutoff() throws StripeException {
+        order.setStripeCheckoutSessionId("cs_test_old");
+        Mockito.when(orderRepo.findByStatusAndCreatedAtBefore(
+                        Mockito.eq(OrderStatus.PENDING_PAYMENT), Mockito.any()))
+                .thenReturn(java.util.List.of(order));
+
+        int n = svc.deleteAbandonedPendingOrders(30);
+
+        assertThat(n).isEqualTo(1);
+        Mockito.verify(stripeGateway).expireSession("cs_test_old");
+        Mockito.verify(orderRepo).delete(order);
+        ArgumentCaptor<LocalDateTime> cutoff = ArgumentCaptor.forClass(LocalDateTime.class);
+        Mockito.verify(orderRepo).findByStatusAndCreatedAtBefore(
+                Mockito.eq(OrderStatus.PENDING_PAYMENT), cutoff.capture());
+        assertThat(cutoff.getValue()).isEqualTo(LocalDateTime.now(fixed).minusMinutes(30));
     }
 
     // ---------- webhook handlers ----------

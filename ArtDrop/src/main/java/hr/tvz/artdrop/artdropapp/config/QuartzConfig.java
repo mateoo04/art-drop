@@ -1,6 +1,7 @@
 package hr.tvz.artdrop.artdropapp.config;
 
 import hr.tvz.artdrop.artdropapp.job.FeaturedChallengeRotationJob;
+import hr.tvz.artdrop.artdropapp.job.PendingOrderCleanupJob;
 import hr.tvz.artdrop.artdropapp.job.ReservationExpiryJob;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
@@ -62,16 +63,37 @@ public class QuartzConfig {
     }
 
     @Bean
+    public JobDetail pendingOrderCleanupJobDetail() {
+        return JobBuilder.newJob(PendingOrderCleanupJob.class)
+                .withIdentity("pendingordercleanupjob")
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger pendingOrderCleanupTrigger(
+            JobDetail pendingOrderCleanupJobDetail,
+            @Value("${commerce.pending-order-cleanup-cron:0 */1 * * * ?}") String cron) {
+        return TriggerBuilder.newTrigger()
+                .forJob(pendingOrderCleanupJobDetail)
+                .withIdentity("pendingordercleanuptrigger")
+                .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                .build();
+    }
+
+    @Bean
     public SchedulerFactoryBean schedulerFactoryBean(
             AutowiringSpringBeanJobFactory jobFactory,
             JobDetail featuredRotationJobDetail,
             Trigger featuredRotationTrigger,
             JobDetail reservationExpiryJobDetail,
-            Trigger reservationExpiryTrigger) {
+            Trigger reservationExpiryTrigger,
+            JobDetail pendingOrderCleanupJobDetail,
+            Trigger pendingOrderCleanupTrigger) {
         SchedulerFactoryBean s = new SchedulerFactoryBean();
         s.setJobFactory(jobFactory);
-        s.setJobDetails(featuredRotationJobDetail, reservationExpiryJobDetail);
-        s.setTriggers(featuredRotationTrigger, reservationExpiryTrigger);
+        s.setJobDetails(featuredRotationJobDetail, reservationExpiryJobDetail, pendingOrderCleanupJobDetail);
+        s.setTriggers(featuredRotationTrigger, reservationExpiryTrigger, pendingOrderCleanupTrigger);
         return s;
     }
 }

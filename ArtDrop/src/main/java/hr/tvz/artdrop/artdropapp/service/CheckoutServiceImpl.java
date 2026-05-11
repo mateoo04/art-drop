@@ -5,9 +5,11 @@ import hr.tvz.artdrop.artdropapp.dto.CheckoutSessionResponse;
 import hr.tvz.artdrop.artdropapp.dto.CreateCheckoutSessionCommand;
 import hr.tvz.artdrop.artdropapp.dto.Pricing;
 import hr.tvz.artdrop.artdropapp.exception.InventoryUnavailableException;
+import hr.tvz.artdrop.artdropapp.exception.PendingOrderConflictException;
 import hr.tvz.artdrop.artdropapp.exception.SelfPurchaseException;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.Order;
+import hr.tvz.artdrop.artdropapp.model.OrderStatus;
 import hr.tvz.artdrop.artdropapp.model.SaleState;
 import hr.tvz.artdrop.artdropapp.model.SaleType;
 import hr.tvz.artdrop.artdropapp.model.ShippingAddress;
@@ -69,6 +71,16 @@ public class CheckoutServiceImpl implements CheckoutService {
     public CheckoutSessionResponse createSession(CreateCheckoutSessionCommand cmd, String currentUsername) {
         User buyer = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new IllegalArgumentException("buyer not found"));
+
+        orderRepository.findFirstByBuyerUserIdAndStatus(buyer.getId(), OrderStatus.PENDING_PAYMENT)
+                .ifPresent(existing -> {
+                    String title = artworkRepository.findById(existing.getArtworkId())
+                            .map(Artwork::getTitle)
+                            .orElse(null);
+                    throw new PendingOrderConflictException(
+                            existing.getId(), existing.getArtworkId(), title);
+                });
+
         Artwork artwork = artworkRepository.findById(cmd.artworkId())
                 .orElseThrow(() -> new IllegalArgumentException("artwork not found: " + cmd.artworkId()));
 
@@ -91,12 +103,6 @@ public class CheckoutServiceImpl implements CheckoutService {
         }
 
         ShippingAddress address = addressService.resolveForOrder(buyer.getId(), cmd.addressId(), cmd.inlineAddress());
-
-        if (Boolean.TRUE.equals(cmd.replaceExistingReservation())) {
-            reservationService.findActiveReservation(buyer.getId())
-                    .filter(existing -> !existing.getId().equals(artwork.getId()))
-                    .ifPresent(existing -> reservationService.release(existing.getId()));
-        }
 
         reservationService.reserve(artwork, buyer);
 

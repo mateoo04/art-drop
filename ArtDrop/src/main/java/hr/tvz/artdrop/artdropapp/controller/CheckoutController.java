@@ -3,6 +3,7 @@ package hr.tvz.artdrop.artdropapp.controller;
 import hr.tvz.artdrop.artdropapp.dto.CheckoutSessionResponse;
 import hr.tvz.artdrop.artdropapp.dto.CreateCheckoutSessionCommand;
 import hr.tvz.artdrop.artdropapp.exception.InventoryUnavailableException;
+import hr.tvz.artdrop.artdropapp.exception.PendingOrderConflictException;
 import hr.tvz.artdrop.artdropapp.exception.ReservationConflictException;
 import hr.tvz.artdrop.artdropapp.exception.SelfPurchaseException;
 import hr.tvz.artdrop.artdropapp.service.CheckoutService;
@@ -78,6 +79,18 @@ public class CheckoutController {
                         "id", e.getExistingArtworkId(),
                         "title", e.getExistingArtworkTitle()
                 )
+        ));
+    }
+
+    @ExceptionHandler(PendingOrderConflictException.class)
+    public ResponseEntity<Map<String, Object>> handlePendingOrderConflict(PendingOrderConflictException e) {
+        Map<String, Object> existingOrder = new java.util.HashMap<>();
+        existingOrder.put("id", e.getExistingOrderId());
+        existingOrder.put("artworkId", e.getExistingArtworkId());
+        existingOrder.put("artworkTitle", e.getExistingArtworkTitle());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                "error", "PENDING_ORDER_EXISTS",
+                "existingOrder", existingOrder
         ));
     }
 

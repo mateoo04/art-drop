@@ -23,6 +23,7 @@ public class FakeStripeGateway implements StripeGateway {
     private final AtomicLong refundSeq = new AtomicLong(2000);
     public final Map<String, CheckoutSessionRequest> sessionsBySessionId = new HashMap<>();
     public final Map<String, String> paymentIntentBySessionId = new HashMap<>();
+    public final java.util.Set<String> expiredSessionIds = new java.util.HashSet<>();
     public volatile boolean rejectSignature = false;
     public volatile Event nextEvent;
     public volatile int refundCount = 0;
@@ -41,6 +42,11 @@ public class FakeStripeGateway implements StripeGateway {
         Session s = new Session();
         s.setId(sessionId);
         return s;
+    }
+
+    @Override
+    public void expireSession(String sessionId) {
+        expiredSessionIds.add(sessionId);
     }
 
     @Override
@@ -65,6 +71,7 @@ public class FakeStripeGateway implements StripeGateway {
     public void reset() {
         sessionsBySessionId.clear();
         paymentIntentBySessionId.clear();
+        expiredSessionIds.clear();
         rejectSignature = false;
         nextEvent = null;
         refundCount = 0;

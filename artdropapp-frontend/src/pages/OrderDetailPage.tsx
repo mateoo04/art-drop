@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { cancelOrder, fetchOrder } from '../api/ordersApi'
 import type { Order, OrderStatus } from '../types/order'
 import { Spinner } from '../components/ui/Spinner'
 import { cloudinaryUrl } from '../lib/cloudinary'
+import { MY_RESERVATION_KEY } from '../hooks/useMyReservation'
 
 const POLL_INTERVAL_MS = 1500
 const POLL_MAX_ATTEMPTS = 5
@@ -40,6 +42,8 @@ export function OrderDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [cancelling, setCancelling] = useState(false)
   const [polling, setPolling] = useState(false)
+  const navigate = useNavigate()
+  const qc = useQueryClient()
 
   const reload = useCallback(async (): Promise<Order | null> => {
     if (!Number.isFinite(id)) return null
@@ -89,10 +93,16 @@ export function OrderDetailPage() {
 
   async function handleCancel() {
     if (order == null) return
+    const wasPending = order.status === 'PENDING_PAYMENT'
     setCancelling(true)
     try {
       const updated = await cancelOrder(order.id, null)
-      setOrder(updated)
+      if (wasPending) {
+        qc.invalidateQueries({ queryKey: MY_RESERVATION_KEY })
+        navigate('/orders')
+      } else {
+        setOrder(updated)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Cancel failed')
     } finally {
@@ -195,14 +205,18 @@ export function OrderDetailPage() {
         </section>
       ) : null}
 
-      {order.status === 'PAID' ? (
+      {order.status === 'PAID' || order.status === 'PENDING_PAYMENT' ? (
         <button
           type="button"
           disabled={cancelling}
           onClick={() => void handleCancel()}
           className="bg-error text-on-error px-6 py-3 font-label text-xs uppercase tracking-widest disabled:opacity-60"
         >
-          {cancelling ? t('orders.detail.cancelling') : t('orders.detail.cancel_button')}
+          {cancelling
+            ? t('orders.detail.cancelling')
+            : t(order.status === 'PENDING_PAYMENT'
+                ? 'orders.detail.cancel_button_pending'
+                : 'orders.detail.cancel_button')}
         </button>
       ) : null}
     </main>

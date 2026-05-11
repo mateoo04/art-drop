@@ -3,6 +3,7 @@ package hr.tvz.artdrop.artdropapp.controller;
 import hr.tvz.artdrop.artdropapp.dto.MyReservationDTO;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
+import hr.tvz.artdrop.artdropapp.service.OrderService;
 import hr.tvz.artdrop.artdropapp.service.ReservationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,10 +19,14 @@ import java.util.Optional;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final OrderService orderService;
     private final UserJpaRepository userRepository;
 
-    public ReservationController(ReservationService reservationService, UserJpaRepository userRepository) {
+    public ReservationController(ReservationService reservationService,
+                                 OrderService orderService,
+                                 UserJpaRepository userRepository) {
         this.reservationService = reservationService;
+        this.orderService = orderService;
         this.userRepository = userRepository;
     }
 
@@ -45,7 +50,10 @@ public class ReservationController {
                 .orElseThrow(() -> new IllegalArgumentException("user not found"))
                 .getId();
         reservationService.findActiveReservation(userId)
-                .ifPresent(a -> reservationService.release(a.getId()));
+                .ifPresent(a -> {
+                    orderService.deletePendingForBuyerAndArtwork(userId, a.getId());
+                    reservationService.release(a.getId());
+                });
         return ResponseEntity.noContent().build();
     }
 }

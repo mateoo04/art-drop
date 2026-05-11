@@ -61,8 +61,12 @@ class CheckoutFlowIntegrationTest extends AbstractPostgresIntegrationTest {
                 .build();
         fakeStripe.reset();
 
-        // Clear any leftover active reservations for the test buyer so tests start clean.
+        // Clear any leftover active reservations + pending orders for the test buyer so tests start clean.
         Long buyerId = userRepository.findByUsername("user").orElseThrow().getId();
+        orderRepository.findByBuyerUserIdOrderByCreatedAtDesc(buyerId,
+                        org.springframework.data.domain.PageRequest.of(0, 200)).stream()
+                .filter(o -> o.getStatus() == OrderStatus.PENDING_PAYMENT)
+                .forEach(orderRepository::delete);
         artworkRepository.findAll().stream()
                 .filter(a -> buyerId.equals(a.getReservedByUserId()) && a.getSaleState() == SaleState.RESERVED)
                 .forEach(a -> {
@@ -120,8 +124,7 @@ class CheckoutFlowIntegrationTest extends AbstractPostgresIntegrationTest {
     void happyPathCheckoutPaidShipDelivered() throws Exception {
         CreateCheckoutSessionCommand cmd = new CreateCheckoutSessionCommand(
                 sellerArtworkId, 1, null,
-                new ShippingAddressCommand("Mateo Buyer", "Ilica 1", null, "Zagreb", "10000", "HR", null),
-                null);
+                new ShippingAddressCommand("Mateo Buyer", "Ilica 1", null, "Zagreb", "10000", "HR", null));
 
         String response = mockMvc.perform(post("/api/checkout/session")
                         .contentType("application/json")
@@ -173,8 +176,7 @@ class CheckoutFlowIntegrationTest extends AbstractPostgresIntegrationTest {
         if (buyerArtworkId == null) return; // buyer has no artworks; skip silently
         CreateCheckoutSessionCommand cmd = new CreateCheckoutSessionCommand(
                 buyerArtworkId, 1, null,
-                new ShippingAddressCommand("Buyer", "L1", null, "Zagreb", "10000", "HR", null),
-                null);
+                new ShippingAddressCommand("Buyer", "L1", null, "Zagreb", "10000", "HR", null));
 
         mockMvc.perform(post("/api/checkout/session")
                         .contentType("application/json")
@@ -188,8 +190,7 @@ class CheckoutFlowIntegrationTest extends AbstractPostgresIntegrationTest {
     void buyerCancelTriggersRefundAndRestoresInventory() throws Exception {
         CreateCheckoutSessionCommand cmd = new CreateCheckoutSessionCommand(
                 sellerArtworkId, 1, null,
-                new ShippingAddressCommand("Buyer", "L1", null, "Zagreb", "10000", "HR", null),
-                null);
+                new ShippingAddressCommand("Buyer", "L1", null, "Zagreb", "10000", "HR", null));
         String response = mockMvc.perform(post("/api/checkout/session")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(cmd)))
@@ -216,8 +217,7 @@ class CheckoutFlowIntegrationTest extends AbstractPostgresIntegrationTest {
         // Create an order owned by `user`.
         CreateCheckoutSessionCommand cmd = new CreateCheckoutSessionCommand(
                 sellerArtworkId, 1, null,
-                new ShippingAddressCommand("Buyer", "L1", null, "Zagreb", "10000", "HR", null),
-                null);
+                new ShippingAddressCommand("Buyer", "L1", null, "Zagreb", "10000", "HR", null));
         String response = mockMvc.perform(post("/api/checkout/session")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(cmd)))
@@ -244,15 +244,16 @@ class CheckoutFlowIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
-    void returnsConflictWhenUserHasDifferentActiveReservation() throws Exception {
+    void secondCheckoutBlockedByPendingOrderConflict() throws Exception {
         CreateCheckoutSessionCommand cmdA = new CreateCheckoutSessionCommand(
                 sellerArtworkId, 1, null,
-                new ShippingAddressCommand("Mateo Buyer", "Ilica 1", null, "Zagreb", "10000", "HR", null),
-                null);
-        mockMvc.perform(post("/api/checkout/session")
+                new ShippingAddressCommand("Mateo Buyer", "Ilica 1", null, "Zagreb", "10000", "HR", null));
+        String responseA = mockMvc.perform(post("/api/checkout/session")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(cmdA)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        Long firstOrderId = objectMapper.readTree(responseA).get("orderId").asLong();
 
         User seller = userRepository.findByUsername("mateo").orElseThrow();
         Artwork second = artworkRepository.findByAuthor_IdOrderByPublishedAtDesc(seller.getId()).stream()
@@ -268,27 +269,41 @@ class CheckoutFlowIntegrationTest extends AbstractPostgresIntegrationTest {
 
         CreateCheckoutSessionCommand cmdB = new CreateCheckoutSessionCommand(
                 second.getId(), 1, null,
-                new ShippingAddressCommand("Mateo Buyer", "Ilica 1", null, "Zagreb", "10000", "HR", null),
-                null);
+                new ShippingAddressCommand("Mateo Buyer", "Ilica 1", null, "Zagreb", "10000", "HR", null));
         mockMvc.perform(post("/api/checkout/session")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(cmdB)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("RESERVATION_CONFLICT"))
-                .andExpect(jsonPath("$.existingArtwork.id").value(sellerArtworkId.intValue()));
+                .andExpect(jsonPath("$.error").value("PENDING_ORDER_EXISTS"))
+                .andExpect(jsonPath("$.existingOrder.id").value(firstOrderId.intValue()))
+                .andExpect(jsonPath("$.existingOrder.artworkId").value(sellerArtworkId.intValue()));
     }
 
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
-    void releasesPreviousAndReservesNewWhenReplaceFlagSet() throws Exception {
+    void cancelingPendingOrderUnblocksNewCheckout() throws Exception {
         CreateCheckoutSessionCommand cmdA = new CreateCheckoutSessionCommand(
                 sellerArtworkId, 1, null,
-                new ShippingAddressCommand("Mateo Buyer", "Ilica 1", null, "Zagreb", "10000", "HR", null),
-                null);
-        mockMvc.perform(post("/api/checkout/session")
+                new ShippingAddressCommand("Mateo Buyer", "Ilica 1", null, "Zagreb", "10000", "HR", null));
+        String responseA = mockMvc.perform(post("/api/checkout/session")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(cmdA)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        Long firstOrderId = objectMapper.readTree(responseA).get("orderId").asLong();
+        String firstSessionId = orderRepository.findById(firstOrderId).orElseThrow()
+                .getStripeCheckoutSessionId();
+
+        mockMvc.perform(post("/api/orders/" + firstOrderId + "/cancel")
+                        .contentType("application/json")
+                        .content("{}"))
                 .andExpect(status().isOk());
+
+        assertThat(orderRepository.findById(firstOrderId)).isEmpty();
+        assertThat(fakeStripe.expiredSessionIds).contains(firstSessionId);
+        Artwork releasedFirst = artworkRepository.findById(sellerArtworkId).orElseThrow();
+        assertThat(releasedFirst.getSaleState()).isEqualTo(SaleState.AVAILABLE);
+        assertThat(releasedFirst.getReservedByUserId()).isNull();
 
         User seller = userRepository.findByUsername("mateo").orElseThrow();
         Artwork second = artworkRepository.findByAuthor_IdOrderByPublishedAtDesc(seller.getId()).stream()
@@ -304,16 +319,13 @@ class CheckoutFlowIntegrationTest extends AbstractPostgresIntegrationTest {
 
         CreateCheckoutSessionCommand cmdB = new CreateCheckoutSessionCommand(
                 second.getId(), 1, null,
-                new ShippingAddressCommand("Mateo Buyer", "Ilica 1", null, "Zagreb", "10000", "HR", null),
-                true);
+                new ShippingAddressCommand("Mateo Buyer", "Ilica 1", null, "Zagreb", "10000", "HR", null));
         mockMvc.perform(post("/api/checkout/session")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(cmdB)))
                 .andExpect(status().isOk());
 
-        Artwork aAfter = artworkRepository.findById(sellerArtworkId).orElseThrow();
         Artwork bAfter = artworkRepository.findById(second.getId()).orElseThrow();
-        assertThat(aAfter.getSaleState()).isEqualTo(SaleState.AVAILABLE);
         assertThat(bAfter.getSaleState()).isEqualTo(SaleState.RESERVED);
     }
 }

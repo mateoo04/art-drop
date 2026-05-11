@@ -63,6 +63,11 @@ public class StripeGatewayImpl implements StripeGateway {
     }
 
     @Override
+    public void expireSession(String sessionId) throws StripeException {
+        Session.retrieve(sessionId).expire();
+    }
+
+    @Override
     public String createRefund(String paymentIntentId) throws StripeException {
         Refund refund = Refund.create(RefundCreateParams.builder()
                 .setPaymentIntent(paymentIntentId)

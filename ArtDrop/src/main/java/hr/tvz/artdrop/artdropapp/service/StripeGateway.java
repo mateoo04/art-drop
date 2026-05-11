@@ -29,6 +29,8 @@ public interface StripeGateway {
 
     Session retrieveSession(String sessionId) throws StripeException;
 
+    void expireSession(String sessionId) throws StripeException;
+
     String createRefund(String paymentIntentId) throws StripeException;
 
     Event verifyAndParseEvent(String rawPayload, String signatureHeader) throws SignatureVerificationException;

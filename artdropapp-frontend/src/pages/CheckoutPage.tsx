@@ -4,10 +4,11 @@ import { useTranslation } from 'react-i18next'
 import { ChevronDown } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { MY_RESERVATION_KEY } from '../hooks/useMyReservation'
-import { ReservationSwapModal } from '../components/checkout/ReservationSwapModal'
+import { PendingOrderConflictModal } from '../components/checkout/PendingOrderConflictModal'
 import { fetchArtworkById } from '../api/artworksApi'
 import { fetchMyAddresses } from '../api/addressesApi'
-import { CheckoutError, createCheckoutSession } from '../api/checkoutApi'
+import { CheckoutError, createCheckoutSession, type PendingOrderConflict } from '../api/checkoutApi'
+import { cancelOrder } from '../api/ordersApi'
 import type { Artwork } from '../types/artwork'
 import type { ShippingAddress } from '../types/address'
 import { Spinner } from '../components/ui/Spinner'
@@ -59,8 +60,8 @@ export function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const qc = useQueryClient()
-  const [swap, setSwap] = useState<{ existingTitle: string; incomingTitle: string } | null>(null)
-  const [swapPending, setSwapPending] = useState(false)
+  const [pendingConflict, setPendingConflict] = useState<PendingOrderConflict | null>(null)
+  const [conflictResolving, setConflictResolving] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -99,10 +100,10 @@ export function CheckoutPage() {
         return
       }
     }
-    await runCheckout(false)
+    await runCheckout()
   }
 
-  async function runCheckout(replace: boolean) {
+  async function runCheckout() {
     if (artwork == null) return
     const useExisting = selectedAddressId !== 'new'
     try {
@@ -121,17 +122,13 @@ export function CheckoutPage() {
               country: form.country,
               phone: form.phone.trim() || null,
             },
-        replaceExistingReservation: replace ? true : undefined,
       })
       qc.invalidateQueries({ queryKey: MY_RESERVATION_KEY })
       window.location.assign(checkoutUrl)
     } catch (err) {
       if (err instanceof CheckoutError) {
-        if (err.kind === 'RESERVATION_CONFLICT' && err.existingArtwork) {
-          setSwap({
-            existingTitle: err.existingArtwork.title,
-            incomingTitle: artwork.title,
-          })
+        if (err.kind === 'PENDING_ORDER_EXISTS' && err.existingOrder) {
+          setPendingConflict(err.existingOrder)
           setSubmitting(false)
           return
         }
@@ -308,20 +305,27 @@ export function CheckoutPage() {
           </dl>
         </aside>
       </div>
-      {swap ? (
-        <ReservationSwapModal
-          existingTitle={swap.existingTitle}
-          incomingTitle={swap.incomingTitle}
-          isPending={swapPending}
-          onCancel={() => setSwap(null)}
+      {pendingConflict ? (
+        <PendingOrderConflictModal
+          existingTitle={pendingConflict.artworkTitle}
+          incomingTitle={artwork.title}
+          sameArtwork={pendingConflict.artworkId === artwork.id}
+          isPending={conflictResolving}
+          onCancel={() => setPendingConflict(null)}
           onConfirm={async () => {
-            setSwapPending(true)
+            setConflictResolving(true)
             setSubmitting(true)
             try {
-              await runCheckout(true)
+              await cancelOrder(pendingConflict.id, null)
+              qc.invalidateQueries({ queryKey: MY_RESERVATION_KEY })
+              setPendingConflict(null)
+              await runCheckout()
+            } catch (err) {
+              setError(err instanceof Error ? err.message : 'Checkout failed')
+              setSubmitting(false)
+              setPendingConflict(null)
             } finally {
-              setSwapPending(false)
-              setSwap(null)
+              setConflictResolving(false)
             }
           }}
         />
