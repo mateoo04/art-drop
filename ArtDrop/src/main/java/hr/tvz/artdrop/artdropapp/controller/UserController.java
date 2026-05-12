@@ -9,8 +9,11 @@ import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
 import hr.tvz.artdrop.artdropapp.service.ArtworkService;
 import hr.tvz.artdrop.artdropapp.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,6 +28,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@Validated
 public class UserController {
 
     private final UserService userService;
@@ -39,7 +43,7 @@ public class UserController {
 
     @GetMapping("/search")
     public ResponseEntity<List<ArtistSummaryDTO>> searchUsers(
-            @RequestParam String q,
+            @RequestParam @NotBlank @Size(max = 200) String q,
             @RequestParam(defaultValue = "20") int limit,
             @RequestParam(defaultValue = "0") int offset
     ) {

@@ -7,15 +7,19 @@ import hr.tvz.artdrop.artdropapp.dto.ChallengeDTO;
 import hr.tvz.artdrop.artdropapp.service.ArtworkService;
 import hr.tvz.artdrop.artdropapp.service.ChallengeService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/artworks")
+@Validated
 public class ArtworkController {
 
     private final ArtworkService artworkService;
@@ -42,7 +46,7 @@ public class ArtworkController {
 
     @GetMapping("/search")
     public ResponseEntity<List<ArtworkDTO>> searchArtworks(
-            @RequestParam String q,
+            @RequestParam @NotBlank @Size(max = 200) String q,
             @RequestParam(defaultValue = "20") int limit,
             @RequestParam(defaultValue = "0") int offset,
             Authentication authentication

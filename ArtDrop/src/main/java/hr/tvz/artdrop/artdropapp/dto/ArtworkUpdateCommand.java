@@ -9,7 +9,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record ArtworkUpdateCommand(
+        @Size(max = 200)
         String title,
+        @Size(max = 100)
         String medium,
         @Size(max = 2000)
         String description,

@@ -4,6 +4,8 @@ import hr.tvz.artdrop.artdropapp.dto.ArtworkDTO;
 import hr.tvz.artdrop.artdropapp.dto.ChallengeDTO;
 import hr.tvz.artdrop.artdropapp.dto.SubmissionThumbnailDTO;
 import hr.tvz.artdrop.artdropapp.service.ChallengeService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -64,18 +66,15 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeService.findSubmissions(id, limit, offset, sort));
     }
 
-    public record SubmitArtworkRequest(Long artworkId) {}
+    public record SubmitArtworkRequest(@NotNull Long artworkId) {}
 
     @PostMapping("/{id}/submissions")
     public ResponseEntity<?> submitArtwork(
             @PathVariable Long id,
-            @RequestBody SubmitArtworkRequest body,
+            @Valid @RequestBody SubmitArtworkRequest body,
             Authentication authentication
     ) {
         if (authentication == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        if (body == null || body.artworkId() == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "MISSING_ARTWORK_ID"));
-        }
         ChallengeService.SubmitResult result = challengeService.submitArtwork(
                 id, body.artworkId(), authentication.getName());
         return switch (result.outcome()) {
