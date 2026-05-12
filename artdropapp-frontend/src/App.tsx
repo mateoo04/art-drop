@@ -12,6 +12,7 @@ import { ChallengesPage } from './pages/ChallengesPage'
 import { CollectionsPage } from './pages/CollectionsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
+import { NotFoundPage } from './pages/NotFoundPage'
 import { CheckoutPage } from './pages/CheckoutPage'
 import { OrdersPage } from './pages/OrdersPage'
 import { OrderDetailPage } from './pages/OrderDetailPage'
@@ -101,6 +102,7 @@ function App() {
           <Route path="challenges/new" element={<AdminChallengeFormPage />} />
           <Route path="challenges/:id/edit" element={<AdminChallengeFormPage />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   )

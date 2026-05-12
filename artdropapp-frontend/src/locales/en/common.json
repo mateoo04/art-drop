@@ -11,6 +11,19 @@
     "artworkDetails": "Selected artwork details",
     "details": "Details"
   },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you’re looking for doesn’t exist or has moved.",
+    "backHome": "Back to home"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Try reloading the page.",
+    "reload": "Reload"
+  },
+  "toast": {
+    "genericError": "Something went wrong. Please try again."
+  },
   "orders": {
     "title": "My orders",
     "empty": "You haven't placed any orders yet.",
