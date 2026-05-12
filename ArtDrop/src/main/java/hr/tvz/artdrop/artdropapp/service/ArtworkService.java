@@ -23,6 +23,8 @@ public interface ArtworkService {
 
     List<ArtworkDTO> findByAuthorId(Long authorId, String viewerUsername);
 
+    List<ArtworkDTO> findByAuthorId(Long authorId, String viewerUsername, int limit, int offset);
+
     List<ArtworkDTO> findCircleFeed(Long viewerId, int limit, int offset);
 
     List<ArtworkDTO> findByIdsOrdered(List<Long> ids, String viewerUsername);

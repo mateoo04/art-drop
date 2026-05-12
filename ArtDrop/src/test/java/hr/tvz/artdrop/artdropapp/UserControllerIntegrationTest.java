@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -100,6 +101,31 @@ class UserControllerIntegrationTest extends AbstractPostgresIntegrationTest {
         mockMvc.perform(get("/api/users/julian-vane/artworks"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getArtworksBySlugRespectsLimit() throws Exception {
+        mockMvc.perform(get("/api/users/julian-vane/artworks")
+                        .param("limit", "2")
+                        .param("offset", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(lessThanOrEqualTo(2)));
+    }
+
+    @Test
+    void getArtworksBySlugAdvancesByOffset() throws Exception {
+        String firstPage = mockMvc.perform(get("/api/users/julian-vane/artworks")
+                        .param("limit", "2")
+                        .param("offset", "0"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String secondPage = mockMvc.perform(get("/api/users/julian-vane/artworks")
+                        .param("limit", "2")
+                        .param("offset", "2"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        org.junit.jupiter.api.Assertions.assertNotEquals(firstPage, secondPage);
     }
 
     @Test

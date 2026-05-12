@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { homeFeedItemsFromArtworks } from '../api/artworksApi'
@@ -7,14 +8,38 @@ import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
 import { useAuthPrompt } from '../contexts/AuthPromptContext'
 import { useProfile } from '../hooks/useProfile'
+import { useProfileArtworks } from '../hooks/useProfileArtworks'
 import { getToken } from '../lib/auth'
 
 export function ProfilePage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const { profile, artworks, inCircle, loading, error, toggleCircle } = useProfile(slug)
+  const { profile, inCircle, loading, error, toggleCircle } = useProfile(slug)
+  const {
+    items: artworks,
+    isLoading: artworksLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useProfileArtworks(slug)
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
   const { promptToAuth } = useAuthPrompt()
   const { t } = useTranslation()
+
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el || !hasNextPage) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting) && !isFetchingNextPage) {
+          void fetchNextPage()
+        }
+      },
+      { rootMargin: '400px 0px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   if (loading) {
     return (
@@ -91,8 +116,20 @@ export function ProfilePage() {
 
       <section className="pt-12">
         <h2 className="font-headline text-2xl text-on-surface mb-8">{t('profile.drops')}</h2>
-        {artworks && artworks.length > 0 ? (
-          <MasonryFeed items={homeFeedItemsFromArtworks(artworks)} />
+        {artworksLoading ? (
+          <div className="py-12 flex justify-center">
+            <Spinner label={t('profile.loadingProfile')} />
+          </div>
+        ) : artworks.length > 0 ? (
+          <>
+            <MasonryFeed items={homeFeedItemsFromArtworks(artworks)} />
+            <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+            {isFetchingNextPage && (
+              <div className="py-8 flex justify-center">
+                <Spinner label={t('profile.loadingProfile')} />
+              </div>
+            )}
+          </>
         ) : (
           <p className="py-12 text-center text-on-surface-variant italic">
             {t('profile.noDrops')}

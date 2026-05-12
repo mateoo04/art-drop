@@ -85,8 +85,17 @@ export async function fetchProfileBySlug(slug: string): Promise<UserProfile> {
   return mapUserProfile(json)
 }
 
-export async function fetchProfileArtworks(slug: string): Promise<Artwork[]> {
-  const res = await authFetch(`/api/users/${encodeURIComponent(slug)}/artworks`)
+export async function fetchProfileArtworks(
+  slug: string,
+  limit = 20,
+  offset = 0,
+): Promise<Artwork[]> {
+  const params = new URLSearchParams()
+  params.set('limit', String(limit))
+  params.set('offset', String(offset))
+  const res = await authFetch(
+    `/api/users/${encodeURIComponent(slug)}/artworks?${params.toString()}`,
+  )
   if (!res.ok) {
     throw new Error(`Failed to load artworks (${res.status})`)
   }

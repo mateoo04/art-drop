@@ -28,6 +28,8 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
 
     List<Artwork> findByAuthor_IdOrderByPublishedAtDesc(Long authorId);
 
+    List<Artwork> findByAuthor_IdOrderByPublishedAtDesc(Long authorId, Pageable pageable);
+
     long countByAuthor_Id(Long authorId);
 
     @Query("SELECT a FROM Artwork a WHERE a.author.id IN " +

@@ -89,10 +89,15 @@ public class UserController {
     }
 
     @GetMapping("/{slug}/artworks")
-    public ResponseEntity<List<ArtworkDTO>> getArtworksBySlug(@PathVariable String slug, Authentication authentication) {
+    public ResponseEntity<List<ArtworkDTO>> getArtworksBySlug(
+            @PathVariable String slug,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset,
+            Authentication authentication
+    ) {
         String viewer = authentication == null ? null : authentication.getName();
         return userRepository.findBySlug(slug)
-                .map(user -> ResponseEntity.ok(artworkService.findByAuthorId(user.getId(), viewer)))
+                .map(user -> ResponseEntity.ok(artworkService.findByAuthorId(user.getId(), viewer, limit, offset)))
                 .orElse(ResponseEntity.notFound().build());
     }
 

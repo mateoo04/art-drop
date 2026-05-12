@@ -1,18 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   fetchCircleStatus,
-  fetchProfileArtworks,
   fetchProfileBySlug,
   joinCircle as apiJoinCircle,
   leaveCircle as apiLeaveCircle,
 } from '../api/usersApi'
 import { getToken } from '../lib/auth'
-import type { Artwork } from '../types/artwork'
 import type { UserProfile } from '../types/user'
 
 type State = {
   profile: UserProfile | null
-  artworks: Artwork[] | null
   inCircle: boolean | null
   loading: boolean
   error: string | null
@@ -21,7 +18,6 @@ type State = {
 export function useProfile(slug: string | undefined) {
   const [state, setState] = useState<State>({
     profile: null,
-    artworks: null,
     inCircle: null,
     loading: true,
     error: null,
@@ -31,10 +27,7 @@ export function useProfile(slug: string | undefined) {
     if (!slug) return
     setState((s) => ({ ...s, loading: true, error: null }))
     try {
-      const [profile, artworks] = await Promise.all([
-        fetchProfileBySlug(slug),
-        fetchProfileArtworks(slug),
-      ])
+      const profile = await fetchProfileBySlug(slug)
       let inCircle: boolean | null = null
       if (getToken() && !profile.isSelf) {
         try {
@@ -43,11 +36,10 @@ export function useProfile(slug: string | undefined) {
           inCircle = null
         }
       }
-      setState({ profile, artworks, inCircle, loading: false, error: null })
+      setState({ profile, inCircle, loading: false, error: null })
     } catch (e) {
       setState({
         profile: null,
-        artworks: null,
         inCircle: null,
         loading: false,
         error: e instanceof Error ? e.message : 'Unknown error',

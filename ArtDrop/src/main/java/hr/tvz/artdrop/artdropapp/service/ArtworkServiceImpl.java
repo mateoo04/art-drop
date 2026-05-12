@@ -148,6 +148,14 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
+    public List<ArtworkDTO> findByAuthorId(Long authorId, String viewerUsername, int limit, int offset) {
+        return mapMany(
+                artworkRepository.findByAuthor_IdOrderByPublishedAtDesc(authorId, paged(limit, offset)),
+                viewerUsername
+        );
+    }
+
+    @Override
     public List<ArtworkDTO> findCircleFeed(Long viewerId, int limit, int offset) {
         List<Artwork> rows = artworkRepository.findCircleFeed(viewerId, paged(limit, offset));
         Set<Long> likedSet = rows.isEmpty() ? Set.of() : new HashSet<>(

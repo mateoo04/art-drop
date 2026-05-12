@@ -183,7 +183,18 @@ INSERT INTO artwork (id, author_id, title, medium, description, width_value, hei
 (71, 3, 'Salon Diptych', 'Painting', 'Two selected Salon Portraits plates.', 60.00, 80.00, NULL, 'CM', 1100.00, 'FINISHED', 'ORIGINAL', 'AVAILABLE', NULL, (CURRENT_TIMESTAMP + -49 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (72, 4, 'Pink Trio', 'Acrylic', 'Three Pink Velocity panels chosen for chromatic arc.', 100.00, 120.00, NULL, 'CM', 990.00, 'FINISHED', 'EDITION', 'AVAILABLE', 10, (CURRENT_TIMESTAMP + -50 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (73, 5, 'Poppy Pair', 'Photography', 'Two exposures from Field of Poppies as a matched pair.', 50.00, 75.00, NULL, 'CM', 520.00, 'FINISHED', 'EDITION', 'AVAILABLE', 10, (CURRENT_TIMESTAMP + -51 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(74, 6, 'Pawel Pair', 'Mixed Media', 'Two diary spreads from Studio Pawel.', 50.00, 65.00, NULL, 'CM', 580.00, 'FINISHED', 'EDITION', 'AVAILABLE', 10, (CURRENT_TIMESTAMP + -52 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+(74, 6, 'Pawel Pair', 'Mixed Media', 'Two diary spreads from Studio Pawel.', 50.00, 65.00, NULL, 'CM', 580.00, 'FINISHED', 'EDITION', 'AVAILABLE', 10, (CURRENT_TIMESTAMP + -52 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(75, 6, 'Stair Light I',        'Photography', 'Single silver-gelatin print. Concrete stairwell at first light.',                              40.00, 50.00, NULL, 'CM',  380.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -53 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(76, 6, 'Stair Light II',       'Photography', 'Companion plate to Stair Light I. Tighter crop, deeper shadow.',                                40.00, 50.00, NULL, 'CM',  380.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -54 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(77, 6, 'Foyer Mass',           'Photography', 'Brutalist foyer interior - single exposure at mid-morning.',                                    50.00, 70.00, NULL, 'CM',  640.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -55 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(78, 6, 'Stone Wall Pair',      'Photography', 'Two studies of the same limestone face at sunrise and sundown.',                                40.00, 50.00, NULL, 'CM',  520.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -56 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(79, 6, 'Concourse',            'Photography', 'Wide-angle station concourse, late evening - single print.',                                    60.00, 80.00, NULL, 'CM',  720.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -57 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(80, 6, 'Gallery Bench',        'Photography', 'Museum interior - empty bench under a single skylight.',                                        40.00, 55.00, NULL, 'CM',  460.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -58 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(81, 6, 'Harbour Wall',         'Photography', 'Two coastal exposures of a granite breakwater at low tide.',                                    50.00, 75.00, NULL, 'CM',  580.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -59 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(82, 6, 'Vaulted Hall',         'Photography', 'Single architectural exposure of a vaulted reading hall.',                                       50.00, 70.00, NULL, 'CM',  690.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -60 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(83, 6, 'Window Grid',          'Photography', 'Repeating modernist window grid - one frame, archival print.',                                  40.00, 60.00, NULL, 'CM',  420.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -61 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(84, 6, 'Plaza Edition',        'Photography', 'Three-print edition from an empty plaza at first light.',                                       50.00, 70.00, NULL, 'CM',  780.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -62 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(85, 6, 'Rooftop Geometry',     'Photography', 'Rooftop angles in mid-afternoon shadow - single edition print.',                                40.00, 50.00, NULL, 'CM',  440.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -63 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO artwork_tags (artwork_id, tag) VALUES
@@ -515,7 +526,40 @@ INSERT INTO artwork_image (id, artwork_id, public_id, sort_order, is_cover, capt
 (229, 73, 'enrico-poppies-photo-2_vzfitc', 0, TRUE, NULL, CURRENT_TIMESTAMP),
 (230, 73, 'enrico-poppies-photo-4_i1swcf', 1, FALSE, NULL, CURRENT_TIMESTAMP),
 (231, 74, 'pawel-2_yd59ej', 0, TRUE, NULL, CURRENT_TIMESTAMP),
-(232, 74, 'pawel-4_wn0kbb', 1, FALSE, NULL, CURRENT_TIMESTAMP)
+(232, 74, 'pawel-4_wn0kbb', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+-- Artworks 75-85 (Thomas extra photography): reuse existing image families intact, sort_order/cover reordered only
+(233, 75, 'henrik-donnestad-HO1Evlp1p1o-unsplash_prnzfj', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(234, 75, 'henrik-donnestad-Lkpax1rj1No-unsplash_s3uv9w', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(235, 75, 'henrik-donnestad-t2Sai-AqIpI-unsplash_ccvtol', 2, FALSE, NULL, CURRENT_TIMESTAMP),
+(236, 76, 'henrik-donnestad-t2Sai-AqIpI-unsplash_ccvtol', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(237, 76, 'henrik-donnestad-Lkpax1rj1No-unsplash_s3uv9w', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(238, 76, 'henrik-donnestad-HO1Evlp1p1o-unsplash_prnzfj', 2, FALSE, NULL, CURRENT_TIMESTAMP),
+(239, 77, 'museum-of-new-zealand-te-papa-tongarewa-1_vswaeq',                  0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(240, 77, 'museum-of-new-zealand-te-papa-tongarewa-BDIFEWEqcKU-unsplash_kqcnq3', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(241, 77, 'museum-of-new-zealand-te-papa-tongarewa-2_ezdiox',                  2, FALSE, NULL, CURRENT_TIMESTAMP),
+(242, 78, 'dubrovnik-photography-1_zaxe7l', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(243, 78, 'dubrovnik-photography-2_hpjesr', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(244, 79, 'museum-of-new-zealand-te-papa-tongarewa-2_ezdiox',                  0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(245, 79, 'museum-of-new-zealand-te-papa-tongarewa-BDIFEWEqcKU-unsplash_kqcnq3', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(246, 79, 'museum-of-new-zealand-te-papa-tongarewa-1_vswaeq',                  2, FALSE, NULL, CURRENT_TIMESTAMP),
+(247, 80, 'museum-of-new-zealand-te-papa-tongarewa-BDIFEWEqcKU-unsplash_kqcnq3', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(248, 80, 'museum-of-new-zealand-te-papa-tongarewa-1_vswaeq',                  1, FALSE, NULL, CURRENT_TIMESTAMP),
+(249, 80, 'museum-of-new-zealand-te-papa-tongarewa-2_ezdiox',                  2, FALSE, NULL, CURRENT_TIMESTAMP),
+(250, 81, 'shifaaz-beack-3_qxyxlj', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(251, 81, 'shifaaz-beack-1_v4pgz0', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(252, 81, 'shifaaz-beack-2_jrskjd', 2, FALSE, NULL, CURRENT_TIMESTAMP),
+(253, 82, 'museum-of-new-zealand-te-papa-tongarewa-BDIFEWEqcKU-unsplash_kqcnq3', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(254, 82, 'museum-of-new-zealand-te-papa-tongarewa-2_ezdiox',                  1, FALSE, NULL, CURRENT_TIMESTAMP),
+(255, 82, 'museum-of-new-zealand-te-papa-tongarewa-1_vswaeq',                  2, FALSE, NULL, CURRENT_TIMESTAMP),
+(256, 83, 'henrik-donnestad-Lkpax1rj1No-unsplash_s3uv9w', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(257, 83, 'henrik-donnestad-t2Sai-AqIpI-unsplash_ccvtol', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(258, 83, 'henrik-donnestad-HO1Evlp1p1o-unsplash_prnzfj', 2, FALSE, NULL, CURRENT_TIMESTAMP),
+(259, 84, 'henrik-donnestad-HO1Evlp1p1o-unsplash_prnzfj', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(260, 84, 'henrik-donnestad-t2Sai-AqIpI-unsplash_ccvtol', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(261, 84, 'henrik-donnestad-Lkpax1rj1No-unsplash_s3uv9w', 2, FALSE, NULL, CURRENT_TIMESTAMP),
+(262, 85, 'henrik-donnestad-t2Sai-AqIpI-unsplash_ccvtol', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(263, 85, 'henrik-donnestad-HO1Evlp1p1o-unsplash_prnzfj', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(264, 85, 'henrik-donnestad-Lkpax1rj1No-unsplash_s3uv9w', 2, FALSE, NULL, CURRENT_TIMESTAMP)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO comment (id, artwork_id, author_id, text, parent_comment_id, created_at, updated_at, is_deleted) VALUES
