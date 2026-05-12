@@ -1,6 +1,8 @@
 package hr.tvz.artdrop.artdropapp.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import hr.tvz.artdrop.artdropapp.dto.ErrorResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,8 +14,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -27,7 +29,10 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
     private static final int MAX_ATTEMPTS = 5;
     private static final long WINDOW_MILLIS = 60_000L;
 
-    private final ConcurrentHashMap<String, Window> windows = new ConcurrentHashMap<>();
+    private final Cache<String, Window> windows = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(2))
+            .maximumSize(10_000)
+            .build();
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Override
@@ -42,7 +47,7 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
         String key = clientIp(request);
         long now = System.currentTimeMillis();
 
-        Window window = windows.compute(key, (k, existing) -> {
+        Window window = windows.asMap().compute(key, (k, existing) -> {
             if (existing == null || now - existing.start >= WINDOW_MILLIS) {
                 return new Window(now);
             }
