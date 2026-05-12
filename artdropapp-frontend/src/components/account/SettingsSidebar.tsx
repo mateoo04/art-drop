@@ -1,6 +1,8 @@
-import { X } from 'lucide-react'
-import { useEffect } from 'react'
+import { LogOut, X } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import { clearToken } from '../../lib/auth'
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../lib/i18n'
 
 type SettingsSidebarProps = {
@@ -10,15 +12,27 @@ type SettingsSidebarProps = {
 
 export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
+  const [confirmingLogout, setConfirmingLogout] = useState(false)
+
+  const handleClose = useCallback(() => {
+    setConfirmingLogout(false)
+    onClose()
+  }, [onClose])
 
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') handleClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  }, [open, handleClose])
+
+  const handleLogout = () => {
+    clearToken()
+    void navigate('/login', { replace: true })
+  }
 
   const currentLang = (
     SUPPORTED_LANGUAGES.includes(i18n.resolvedLanguage as SupportedLanguage)
@@ -39,7 +53,7 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
         className={`absolute inset-0 bg-on-surface/30 transition-opacity duration-300 ${
           open ? 'opacity-100' : 'opacity-0'
         }`}
-        onClick={onClose}
+        onClick={handleClose}
       />
       <aside
         role="dialog"
@@ -54,7 +68,7 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
           <button
             type="button"
             aria-label={t('settings.close')}
-            onClick={onClose}
+            onClick={handleClose}
             className="text-on-surface-variant hover:text-on-surface"
           >
             <X size={20} />
@@ -82,6 +96,35 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
               ))}
             </select>
           </div>
+
+          {confirmingLogout ? (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex-1 flex items-center justify-center gap-2 p-4 font-label text-sm uppercase tracking-[0.15em] bg-error text-on-error hover:bg-error/90"
+              >
+                <LogOut size={16} />
+                {t('settings.logoutConfirm')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingLogout(false)}
+                className="p-4 font-label text-sm uppercase tracking-[0.15em] text-on-surface-variant hover:text-on-surface"
+              >
+                {t('settings.logoutCancel')}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmingLogout(true)}
+              className="w-full flex items-center justify-center gap-2 p-4 font-label text-sm uppercase tracking-[0.15em] text-on-surface-variant hover:text-on-surface border border-outline-variant/15"
+            >
+              <LogOut size={16} />
+              {t('settings.logout')}
+            </button>
+          )}
         </div>
       </aside>
     </div>

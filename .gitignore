@@ -66,4 +66,3 @@ artdropapp-frontend/.env
 # --- Legacy local H2 file DB (no longer used; safe to delete) ---
 ArtDrop/data/
 ArtDrop/.env
-ArtDrop/.env

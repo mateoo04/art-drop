@@ -93,7 +93,10 @@
       "hr": "hrvatski"
     },
     "open": "Open settings",
-    "close": "Close settings"
+    "close": "Close settings",
+    "logout": "Log out",
+    "logoutConfirm": "Confirm log out",
+    "logoutCancel": "Cancel"
   },
   "account": {
     "editProfile": "Edit profile",

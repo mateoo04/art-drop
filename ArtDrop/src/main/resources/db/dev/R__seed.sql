@@ -94,7 +94,19 @@ INSERT INTO user_authority (user_id, authority_id) VALUES
 (37, 2),
 (38, 2),
 (39, 2),
-(40, 2)
+(40, 2),
+(1, 3),
+(2, 3),
+(3, 3),
+(4, 3),
+(5, 3),
+(6, 3),
+(7, 3),
+(8, 3),
+(9, 3),
+(10, 3),
+(11, 3),
+(12, 3)
 ON CONFLICT (user_id, authority_id) DO NOTHING;
 
 INSERT INTO artwork (id, author_id, title, medium, description, width_value, height_value, depth_value, dimension_unit, price, progress_status, sale_type, sale_state, edition_size, published_at, created_at, updated_at) VALUES
