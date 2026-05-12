@@ -123,6 +123,7 @@ export function mapApiArtwork(raw: Record<string, unknown>): Artwork {
     likeCount: Number(raw.likeCount ?? 0),
     commentCount: Number(raw.commentCount ?? 0),
     likedByMe: Boolean(raw.likedByMe),
+    authorInCircle: Boolean(raw.authorInCircle),
     currentSubmission:
       raw.currentSubmission != null && typeof raw.currentSubmission === 'object'
         ? {

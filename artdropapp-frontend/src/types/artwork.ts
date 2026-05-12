@@ -51,5 +51,6 @@ export interface Artwork {
   likeCount: number
   commentCount: number
   likedByMe: boolean
+  authorInCircle: boolean
   currentSubmission: CurrentChallengeSubmission | null
 }

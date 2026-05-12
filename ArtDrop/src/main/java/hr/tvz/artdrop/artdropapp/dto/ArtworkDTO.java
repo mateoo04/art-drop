@@ -33,6 +33,7 @@ public record ArtworkDTO(
         Integer likeCount,
         Integer commentCount,
         boolean likedByMe,
+        boolean authorInCircle,
         CurrentSubmissionDTO currentSubmission
 ) {
     public record CurrentSubmissionDTO(Long challengeId, String challengeTitle) {}

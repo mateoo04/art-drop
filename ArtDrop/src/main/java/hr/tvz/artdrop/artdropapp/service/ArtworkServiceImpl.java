@@ -21,6 +21,7 @@ import hr.tvz.artdrop.artdropapp.repository.ArtworkLikeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeSubmissionJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.CommentJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.UserFollowJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +47,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     private final CommentJpaRepository commentRepository;
     private final ChallengeJpaRepository challengeRepository;
     private final ChallengeSubmissionJpaRepository submissionRepository;
+    private final UserFollowJpaRepository followRepository;
 
     public ArtworkServiceImpl(
             ArtworkJpaRepository artworkRepository,
@@ -53,7 +55,8 @@ public class ArtworkServiceImpl implements ArtworkService {
             UserJpaRepository userRepository,
             CommentJpaRepository commentRepository,
             ChallengeJpaRepository challengeRepository,
-            ChallengeSubmissionJpaRepository submissionRepository
+            ChallengeSubmissionJpaRepository submissionRepository,
+            UserFollowJpaRepository followRepository
     ) {
         this.artworkRepository = artworkRepository;
         this.likeRepository = likeRepository;
@@ -61,6 +64,7 @@ public class ArtworkServiceImpl implements ArtworkService {
         this.commentRepository = commentRepository;
         this.challengeRepository = challengeRepository;
         this.submissionRepository = submissionRepository;
+        this.followRepository = followRepository;
     }
 
     @Override
@@ -86,6 +90,7 @@ public class ArtworkServiceImpl implements ArtworkService {
                 .map(a -> mapToDTO(
                         a,
                         likedSetFor(viewerUsername, List.of(a)),
+                        followedAuthorsFor(viewerUsername, List.of(a)),
                         commentCountsFor(List.of(a)),
                         activeSubmissionsFor(List.of(a))
                 ));
@@ -161,8 +166,14 @@ public class ArtworkServiceImpl implements ArtworkService {
         Set<Long> likedSet = rows.isEmpty() ? Set.of() : new HashSet<>(
                 likeRepository.findArtworkIdsLikedByUser(viewerId, rows.stream().map(Artwork::getId).toList())
         );
+        Set<Long> followedAuthors = rows.stream()
+                .map(Artwork::getAuthor)
+                .filter(java.util.Objects::nonNull)
+                .map(User::getId)
+                .filter(java.util.Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
         Map<Long, Integer> commentCounts = commentCountsFor(rows);
-        return rows.stream().map(a -> mapToDTO(a, likedSet, commentCounts)).toList();
+        return rows.stream().map(a -> mapToDTO(a, likedSet, followedAuthors, commentCounts)).toList();
     }
 
     @Override
@@ -269,7 +280,7 @@ public class ArtworkServiceImpl implements ArtworkService {
             activeSubmission = Map.of(saved.getId(), submission);
         }
 
-        return new CreateResult(CreateOutcome.CREATED, mapToDTO(saved, Set.of(), Map.of(), activeSubmission));
+        return new CreateResult(CreateOutcome.CREATED, mapToDTO(saved, Set.of(), Set.of(), Map.of(), activeSubmission));
     }
 
     @Override
@@ -403,8 +414,9 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     private List<ArtworkDTO> mapMany(List<Artwork> rows, String viewerUsername) {
         Set<Long> likedSet = likedSetFor(viewerUsername, rows);
+        Set<Long> followedAuthors = followedAuthorsFor(viewerUsername, rows);
         Map<Long, Integer> commentCounts = commentCountsFor(rows);
-        return rows.stream().map(a -> mapToDTO(a, likedSet, commentCounts)).toList();
+        return rows.stream().map(a -> mapToDTO(a, likedSet, followedAuthors, commentCounts)).toList();
     }
 
     private Set<Long> likedSetFor(String viewerUsername, List<Artwork> rows) {
@@ -413,6 +425,21 @@ public class ArtworkServiceImpl implements ArtworkService {
         if (viewer.isEmpty()) return Set.of();
         List<Long> ids = rows.stream().map(Artwork::getId).toList();
         return new HashSet<>(likeRepository.findArtworkIdsLikedByUser(viewer.get().getId(), ids));
+    }
+
+    private Set<Long> followedAuthorsFor(String viewerUsername, List<Artwork> rows) {
+        if (viewerUsername == null || rows.isEmpty()) return Set.of();
+        Optional<User> viewer = userRepository.findByUsername(viewerUsername);
+        if (viewer.isEmpty()) return Set.of();
+        Long viewerId = viewer.get().getId();
+        Set<Long> authorIds = rows.stream()
+                .map(Artwork::getAuthor)
+                .filter(java.util.Objects::nonNull)
+                .map(User::getId)
+                .filter(id -> id != null && !id.equals(viewerId))
+                .collect(java.util.stream.Collectors.toSet());
+        if (authorIds.isEmpty()) return Set.of();
+        return new HashSet<>(followRepository.findFolloweeIdsByFollowerIdAndFolloweeIdIn(viewerId, authorIds));
     }
 
     private Map<Long, ChallengeSubmission> activeSubmissionsFor(List<Artwork> rows) {
@@ -439,12 +466,22 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     private ArtworkDTO mapToDTO(Artwork artwork, Set<Long> likedByViewer, Map<Long, Integer> commentCounts) {
-        return mapToDTO(artwork, likedByViewer, commentCounts, Map.of());
+        return mapToDTO(artwork, likedByViewer, Set.of(), commentCounts, Map.of());
     }
 
     private ArtworkDTO mapToDTO(
             Artwork artwork,
             Set<Long> likedByViewer,
+            Set<Long> followedAuthorIds,
+            Map<Long, Integer> commentCounts
+    ) {
+        return mapToDTO(artwork, likedByViewer, followedAuthorIds, commentCounts, Map.of());
+    }
+
+    private ArtworkDTO mapToDTO(
+            Artwork artwork,
+            Set<Long> likedByViewer,
+            Set<Long> followedAuthorIds,
             Map<Long, Integer> commentCounts,
             Map<Long, ChallengeSubmission> activeSubmissionByArtworkId
     ) {
@@ -495,6 +532,7 @@ public class ArtworkServiceImpl implements ArtworkService {
                 artwork.getLikeCount() == null ? 0 : artwork.getLikeCount(),
                 commentCounts.getOrDefault(artwork.getId(), 0),
                 likedByViewer.contains(artwork.getId()),
+                author != null && author.getId() != null && followedAuthorIds.contains(author.getId()),
                 currentSubmission
         );
     }

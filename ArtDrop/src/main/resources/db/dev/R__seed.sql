@@ -43,7 +43,8 @@ INSERT INTO app_user (id, username, email, password_hash, display_name, slug, bi
 (37, 'june', 'june@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'June Park', 'june-park', 'Seed user for admin pagination.', 'https://i.pravatar.cc/160?img=30', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE),
 (38, 'tim', 'tim@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Tim Walsh', 'tim-walsh', 'Seed user for admin pagination.', 'https://i.pravatar.cc/160?img=31', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE),
 (39, 'sue', 'sue@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Sue Meyer', 'sue-meyer', 'Seed user for admin pagination.', 'https://i.pravatar.cc/160?img=33', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE),
-(40, 'pat', 'pat@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Pat O''Neil', 'pat-oneil', 'Seed user for admin pagination.', 'https://i.pravatar.cc/160?img=34', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE)
+(40, 'pat', 'pat@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Pat O''Neil', 'pat-oneil', 'Seed user for admin pagination.', 'https://i.pravatar.cc/160?img=34', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE),
+(41, 'nova', 'nova@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Nova Bell', 'nova-bell', 'Lurker. Just here to follow other artists.', 'https://i.pravatar.cc/160?img=46', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE)
 ON CONFLICT (id) DO NOTHING;
 -- all seeded users have password: admin6060
 
@@ -106,7 +107,8 @@ INSERT INTO user_authority (user_id, authority_id) VALUES
 (9, 3),
 (10, 3),
 (11, 3),
-(12, 3)
+(12, 3),
+(41, 2)
 ON CONFLICT (user_id, authority_id) DO NOTHING;
 
 INSERT INTO artwork (id, author_id, title, medium, description, width_value, height_value, depth_value, dimension_unit, price, progress_status, sale_type, sale_state, edition_size, published_at, created_at, updated_at) VALUES
@@ -898,6 +900,14 @@ INSERT INTO challenge_submission (id, challenge_id, artwork_id, submitted_by, su
 (14, 3, 12, 4, (CURRENT_TIMESTAMP + -16 * INTERVAL '1 hour')),  -- Marc
 (15, 3, 17, 6, (CURRENT_TIMESTAMP + -28 * INTERVAL '1 hour'));  -- Thomas
 
+INSERT INTO user_follow (id, follower_id, followee_id, created_at) VALUES
+(1, 1,  41, CURRENT_TIMESTAMP),  -- mateo  follows Nova
+(2, 3,  41, CURRENT_TIMESTAMP),  -- sarah  follows Nova
+(3, 6,  41, CURRENT_TIMESTAMP),  -- thomas follows Nova
+(4, 7,  41, CURRENT_TIMESTAMP),  -- elena  follows Nova
+(5, 11, 41, CURRENT_TIMESTAMP)   -- iris   follows Nova
+ON CONFLICT (follower_id, followee_id) DO NOTHING;
+
 ALTER TABLE app_user             ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE authority            ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE seller_application   ALTER COLUMN id RESTART WITH 1000;
@@ -908,3 +918,4 @@ ALTER TABLE artwork_like         ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE collection           ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE challenge            ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE challenge_submission ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE user_follow          ALTER COLUMN id RESTART WITH 1000;
