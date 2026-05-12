@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchSearchArtworks } from '../api/artworksApi'
+import { qk } from '../lib/queryKeys'
 import type { Artwork } from '../types/artwork'
 
 export const SEARCH_PAGE_SIZE = 20
@@ -7,7 +8,7 @@ export const SEARCH_PAGE_SIZE = 20
 export function useSearchArtworks(query: string) {
   const trimmed = query.trim()
   const result = useInfiniteQuery<Artwork[], Error>({
-    queryKey: ['search', 'artworks', trimmed],
+    queryKey: qk.artworks.search(trimmed),
     initialPageParam: 0,
     queryFn: ({ pageParam }) =>
       fetchSearchArtworks(trimmed, SEARCH_PAGE_SIZE, pageParam as number),

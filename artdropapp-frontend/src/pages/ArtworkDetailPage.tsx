@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { fetchArtworkById } from '../api/artworksApi'
 import { ArtworkDetailComponent } from '../components/ArtworkDetailComponent'
+import { qk } from '../lib/queryKeys'
 import type { Artwork } from '../types/artwork'
 
 export function ArtworkDetailPage() {
@@ -14,7 +15,7 @@ export function ArtworkDetailPage() {
   const enabled = Number.isFinite(id)
 
   const { data, isLoading, error } = useQuery<Artwork, Error>({
-    queryKey: ['artworks', 'detail', id],
+    queryKey: qk.artworks.detail(id),
     queryFn: () => fetchArtworkById(id),
     enabled,
   })

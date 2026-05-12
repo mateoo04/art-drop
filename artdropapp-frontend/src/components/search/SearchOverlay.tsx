@@ -10,6 +10,7 @@ import 'swiper/css/free-mode'
 
 import { fetchSearchArtworks } from '../../api/artworksApi'
 import { cloudinaryUrl } from '../../lib/cloudinary'
+import { qk } from '../../lib/queryKeys'
 import { useChallenges } from '../../hooks/useChallenges'
 import type { Artist, Artwork } from '../../types/artwork'
 import type { Challenge } from '../../types/challenge'
@@ -85,7 +86,7 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
   const searchEnabled = effectiveQuery.length >= MIN_QUERY_LEN
 
   const { data, isLoading, isFetching, error } = useQuery({
-    queryKey: ['artworks', 'search', effectiveQuery],
+    queryKey: qk.artworks.searchPreview(effectiveQuery),
     queryFn: () => fetchSearchArtworks(effectiveQuery, SEARCH_LIMIT),
     enabled: searchEnabled,
     staleTime: 30_000,

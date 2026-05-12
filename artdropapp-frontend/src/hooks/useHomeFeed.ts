@@ -1,11 +1,12 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchHomeFeed, type HomeFeedPage } from '../api/artworksApi'
+import { qk } from '../lib/queryKeys'
 
 export const HOME_FEED_PAGE_SIZE = 20
 
 export function useHomeFeed(medium: string | null) {
   const query = useInfiniteQuery<HomeFeedPage, Error>({
-    queryKey: ['feed', 'home', medium ?? 'All'],
+    queryKey: qk.feed.home(medium),
     initialPageParam: null as string | null,
     queryFn: ({ pageParam }) =>
       fetchHomeFeed({

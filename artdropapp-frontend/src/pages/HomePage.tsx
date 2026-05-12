@@ -10,13 +10,14 @@ import { MediumFilterBar } from '../components/home/MediumFilterBar'
 import { useChallenges } from '../hooks/useChallenges'
 import { useHomeFeed } from '../hooks/useHomeFeed'
 import { useSeenReporter } from '../hooks/useSeenReporter'
+import { qk } from '../lib/queryKeys'
 
 export function HomePage() {
   const { t } = useTranslation()
   const { data: challenges, loading: challengesLoading, error: challengesError } = useChallenges()
   const [activeMedium, setActiveMedium] = useState<string>('All')
   const { data: mediums = [] } = useQuery<string[], Error>({
-    queryKey: ['artworks', 'mediums'],
+    queryKey: qk.artworks.mediums(),
     queryFn: fetchMediums,
     staleTime: 5 * 60 * 1000,
   })

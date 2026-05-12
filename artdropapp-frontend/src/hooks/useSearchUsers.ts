@@ -1,12 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchSearchUsers } from '../api/usersApi'
+import { qk } from '../lib/queryKeys'
 import type { Artist } from '../types/artwork'
 import { SEARCH_PAGE_SIZE } from './useSearchArtworks'
 
 export function useSearchUsers(query: string) {
   const trimmed = query.trim()
   const result = useInfiniteQuery<Artist[], Error>({
-    queryKey: ['search', 'users', trimmed],
+    queryKey: qk.users.search(trimmed),
     initialPageParam: 0,
     queryFn: ({ pageParam }) =>
       fetchSearchUsers(trimmed, SEARCH_PAGE_SIZE, pageParam as number),

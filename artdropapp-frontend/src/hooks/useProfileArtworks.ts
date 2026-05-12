@@ -1,12 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchProfileArtworks } from '../api/usersApi'
+import { qk } from '../lib/queryKeys'
 import type { Artwork } from '../types/artwork'
 
 export const PROFILE_PAGE_SIZE = 20
 
 export function useProfileArtworks(slug: string | undefined) {
   const result = useInfiniteQuery<Artwork[], Error>({
-    queryKey: ['profile', 'artworks', slug ?? ''],
+    queryKey: qk.profile.artworks(slug ?? ''),
     initialPageParam: 0,
     queryFn: ({ pageParam }) =>
       fetchProfileArtworks(slug ?? '', PROFILE_PAGE_SIZE, pageParam as number),

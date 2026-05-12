@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchChallengeSubmissions, type SubmissionSort } from '../api/challengesApi'
+import { qk } from '../lib/queryKeys'
 import type { SubmissionThumbnail } from '../types/challenge'
 
 export const SUBMISSIONS_PAGE_SIZE = 24
@@ -10,7 +11,7 @@ export function useChallengeSubmissions(
 ) {
   const enabled = challengeId != null
   const query = useInfiniteQuery<SubmissionThumbnail[], Error>({
-    queryKey: ['challenge-submissions', challengeId, sort],
+    queryKey: qk.challenges.submissions(challengeId ?? 0, sort),
     enabled,
     initialPageParam: 0,
     queryFn: ({ pageParam }) =>

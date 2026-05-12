@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { submitArtworkToChallenge } from '../api/challengesApi'
+import { qk } from '../lib/queryKeys'
 
 export function useSubmitArtworkToChallenge() {
   const queryClient = useQueryClient()
@@ -9,14 +10,14 @@ export function useSubmitArtworkToChallenge() {
       submitArtworkToChallenge(challengeId, artworkId),
 
     onSuccess: (_data, { challengeId, artworkId }) => {
-      void queryClient.invalidateQueries({ queryKey: ['artworks', 'detail', artworkId] })
-      void queryClient.invalidateQueries({ queryKey: ['challenges', 'detail', challengeId] })
-      void queryClient.invalidateQueries({ queryKey: ['challenge-submissions', challengeId] })
+      void queryClient.invalidateQueries({ queryKey: qk.artworks.detail(artworkId) })
+      void queryClient.invalidateQueries({ queryKey: qk.challenges.detail(challengeId) })
+      void queryClient.invalidateQueries({ queryKey: qk.challenges.submissions(challengeId) })
       void queryClient.invalidateQueries({
-        queryKey: ['challenges', 'eligible-artworks', challengeId],
+        queryKey: qk.challenges.eligibleArtworks(challengeId),
       })
       void queryClient.invalidateQueries({
-        queryKey: ['artworks', 'eligible-challenges', artworkId],
+        queryKey: qk.artworks.eligibleChallenges(artworkId),
       })
     },
   })

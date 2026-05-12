@@ -6,7 +6,7 @@ import { cancelOrder, fetchOrder } from '../api/ordersApi'
 import type { Order, OrderStatus } from '../types/order'
 import { Spinner } from '../components/ui/Spinner'
 import { cloudinaryUrl } from '../lib/cloudinary'
-import { MY_RESERVATION_KEY } from '../hooks/useMyReservation'
+import { qk } from '../lib/queryKeys'
 
 const POLL_INTERVAL_MS = 1500
 const POLL_MAX_ATTEMPTS = 5
@@ -98,7 +98,7 @@ export function OrderDetailPage() {
     try {
       const updated = await cancelOrder(order.id, null)
       if (wasPending) {
-        qc.invalidateQueries({ queryKey: MY_RESERVATION_KEY })
+        qc.invalidateQueries({ queryKey: qk.reservations.mine })
         navigate('/orders')
       } else {
         setOrder(updated)

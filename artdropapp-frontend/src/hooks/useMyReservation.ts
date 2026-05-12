@@ -1,12 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchMyReservation, releaseMyReservation } from '../api/reservationsApi'
 import { getToken } from '../lib/auth'
-
-export const MY_RESERVATION_KEY = ['my-reservation'] as const
+import { qk } from '../lib/queryKeys'
 
 export function useMyReservation() {
   return useQuery({
-    queryKey: MY_RESERVATION_KEY,
+    queryKey: qk.reservations.mine,
     queryFn: fetchMyReservation,
     enabled: !!getToken(),
     staleTime: 30_000,
@@ -19,7 +18,7 @@ export function useReleaseMyReservation() {
   return useMutation({
     mutationFn: releaseMyReservation,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: MY_RESERVATION_KEY })
+      qc.invalidateQueries({ queryKey: qk.reservations.mine })
     },
   })
 }

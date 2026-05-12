@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query'
 import { likeArtwork, unlikeArtwork } from '../api/artworksApi'
+import { qk } from '../lib/queryKeys'
 import type { Artwork } from '../types/artwork'
 
 type LikeVars = { artworkId: number; like: boolean }
@@ -40,9 +41,9 @@ export function useLikeArtwork() {
             }
           : a
 
-      const snapshots = queryClient.getQueriesData<unknown>({ queryKey: ['artworks'] })
+      const snapshots = queryClient.getQueriesData<unknown>({ queryKey: qk.artworks.all })
 
-      queryClient.setQueriesData<unknown>({ queryKey: ['artworks'] }, (old: unknown) => {
+      queryClient.setQueriesData<unknown>({ queryKey: qk.artworks.all }, (old: unknown) => {
         if (old == null) return old
         if (isInfiniteArtworkData(old)) {
           return { ...old, pages: old.pages.map((page) => page.map(apply)) }

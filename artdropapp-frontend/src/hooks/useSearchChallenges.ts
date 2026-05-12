@@ -1,12 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchSearchChallenges } from '../api/challengesApi'
+import { qk } from '../lib/queryKeys'
 import type { Challenge } from '../types/challenge'
 import { SEARCH_PAGE_SIZE } from './useSearchArtworks'
 
 export function useSearchChallenges(query: string) {
   const trimmed = query.trim()
   const result = useInfiniteQuery<Challenge[], Error>({
-    queryKey: ['search', 'challenges', trimmed],
+    queryKey: qk.challenges.search(trimmed),
     initialPageParam: 0,
     queryFn: ({ pageParam }) =>
       fetchSearchChallenges(trimmed, SEARCH_PAGE_SIZE, pageParam as number),

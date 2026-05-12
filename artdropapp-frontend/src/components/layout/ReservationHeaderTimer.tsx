@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { cloudinaryUrl } from '../../lib/cloudinary'
-import { MY_RESERVATION_KEY, useMyReservation, useReleaseMyReservation } from '../../hooks/useMyReservation'
+import { qk } from '../../lib/queryKeys'
+import { useMyReservation, useReleaseMyReservation } from '../../hooks/useMyReservation'
 
 function formatRemaining(msLeft: number): { minutes: string; seconds: string } {
   const total = Math.max(0, Math.floor(msLeft / 1000))
@@ -34,7 +35,7 @@ export function ReservationHeaderTimer() {
   const reservedUntilMs = new Date(data.reservedUntil).getTime()
   const msLeft = reservedUntilMs - now
   if (msLeft <= 0) {
-    qc.invalidateQueries({ queryKey: MY_RESERVATION_KEY })
+    qc.invalidateQueries({ queryKey: qk.reservations.mine })
     return null
   }
   const { minutes, seconds } = formatRemaining(msLeft)

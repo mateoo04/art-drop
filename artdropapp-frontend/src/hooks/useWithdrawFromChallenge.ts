@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { withdrawArtworkFromChallenge } from '../api/challengesApi'
+import { qk } from '../lib/queryKeys'
 import type { Artwork } from '../types/artwork'
 
 export function useWithdrawFromChallenge() {
@@ -15,7 +16,7 @@ export function useWithdrawFromChallenge() {
       withdrawArtworkFromChallenge(challengeId, artworkId),
 
     onMutate: async ({ artworkId }) => {
-      const key = ['artworks', 'detail', artworkId] as const
+      const key = qk.artworks.detail(artworkId)
       await queryClient.cancelQueries({ queryKey: key })
       const previous = queryClient.getQueryData<Artwork>(key)
       if (previous) {
@@ -26,19 +27,19 @@ export function useWithdrawFromChallenge() {
 
     onError: (_err, { artworkId }, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['artworks', 'detail', artworkId], context.previous)
+        queryClient.setQueryData(qk.artworks.detail(artworkId), context.previous)
       }
     },
 
     onSettled: (_data, _err, { artworkId, challengeId }) => {
-      void queryClient.invalidateQueries({ queryKey: ['artworks', 'detail', artworkId] })
-      void queryClient.invalidateQueries({ queryKey: ['challenges', 'detail', challengeId] })
-      void queryClient.invalidateQueries({ queryKey: ['challenge-submissions', challengeId] })
+      void queryClient.invalidateQueries({ queryKey: qk.artworks.detail(artworkId) })
+      void queryClient.invalidateQueries({ queryKey: qk.challenges.detail(challengeId) })
+      void queryClient.invalidateQueries({ queryKey: qk.challenges.submissions(challengeId) })
       void queryClient.invalidateQueries({
-        queryKey: ['challenges', 'eligible-artworks', challengeId],
+        queryKey: qk.challenges.eligibleArtworks(challengeId),
       })
       void queryClient.invalidateQueries({
-        queryKey: ['artworks', 'eligible-challenges', artworkId],
+        queryKey: qk.artworks.eligibleChallenges(artworkId),
       })
     },
   })

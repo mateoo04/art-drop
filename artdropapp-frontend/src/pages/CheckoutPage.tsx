@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
-import { MY_RESERVATION_KEY } from '../hooks/useMyReservation'
+import { qk } from '../lib/queryKeys'
 import { PendingOrderConflictModal } from '../components/checkout/PendingOrderConflictModal'
 import { fetchArtworkById } from '../api/artworksApi'
 import { fetchMyAddresses } from '../api/addressesApi'
@@ -123,7 +123,7 @@ export function CheckoutPage() {
               phone: form.phone.trim() || null,
             },
       })
-      qc.invalidateQueries({ queryKey: MY_RESERVATION_KEY })
+      qc.invalidateQueries({ queryKey: qk.reservations.mine })
       window.location.assign(checkoutUrl)
     } catch (err) {
       if (err instanceof CheckoutError) {
@@ -317,7 +317,7 @@ export function CheckoutPage() {
             setSubmitting(true)
             try {
               await cancelOrder(pendingConflict.id, null)
-              qc.invalidateQueries({ queryKey: MY_RESERVATION_KEY })
+              qc.invalidateQueries({ queryKey: qk.reservations.mine })
               setPendingConflict(null)
               await runCheckout()
             } catch (err) {
