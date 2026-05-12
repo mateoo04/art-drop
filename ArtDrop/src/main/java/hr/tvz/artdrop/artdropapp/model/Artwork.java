@@ -19,6 +19,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Formula;
 
 import java.math.BigDecimal;
@@ -37,7 +38,7 @@ public class Artwork {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private User author;
 
@@ -74,13 +75,15 @@ public class Artwork {
     @Column(name = "reserved_by_user_id")
     private Long reservedByUserId;
 
-    @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("sortOrder ASC")
+    @BatchSize(size = 100)
     private List<ArtworkImage> images = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "artwork_tags", joinColumns = @JoinColumn(name = "artwork_id"))
     @Column(name = "tag")
+    @BatchSize(size = 100)
     private List<String> tags;
 
     @Column(name = "width_value", precision = 10, scale = 2)
@@ -109,6 +112,7 @@ public class Artwork {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 100)
     private List<Comment> comments = new ArrayList<>();
 
     public String getCoverPublicId() {

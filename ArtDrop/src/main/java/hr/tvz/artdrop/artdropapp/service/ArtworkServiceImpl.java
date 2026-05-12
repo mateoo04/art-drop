@@ -86,7 +86,7 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     @Override
     public Optional<ArtworkDTO> findById(Long id, String viewerUsername) {
-        return artworkRepository.findById(id)
+        return artworkRepository.findDetailById(id)
                 .map(a -> mapToDTO(
                         a,
                         likedSetFor(viewerUsername, List.of(a)),

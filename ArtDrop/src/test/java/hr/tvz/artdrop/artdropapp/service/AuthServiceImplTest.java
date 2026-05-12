@@ -3,6 +3,7 @@ package hr.tvz.artdrop.artdropapp.service;
 import hr.tvz.artdrop.artdropapp.dto.JwtResponse;
 import hr.tvz.artdrop.artdropapp.dto.LoginRequest;
 import hr.tvz.artdrop.artdropapp.dto.RegisterRequest;
+import hr.tvz.artdrop.artdropapp.exception.DuplicateEmailException;
 import hr.tvz.artdrop.artdropapp.model.Authority;
 import hr.tvz.artdrop.artdropapp.model.User;
 import hr.tvz.artdrop.artdropapp.repository.AuthorityJpaRepository;
@@ -53,8 +54,8 @@ class AuthServiceImplTest {
         when(userRepo.existsByEmail("joe@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> svc.signup(new RegisterRequest("joe", "joe@example.com", "password1", "Joe")))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Email already exists");
+                .isInstanceOf(DuplicateEmailException.class)
+                .hasMessageContaining("email already exists");
     }
 
     @Test

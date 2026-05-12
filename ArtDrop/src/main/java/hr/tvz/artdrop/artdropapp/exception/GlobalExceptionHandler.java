@@ -73,6 +73,15 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of("EMAIL_TAKEN", e.getMessage(), 409, req.getRequestURI()));
     }
 
+    @ExceptionHandler(StripeIntegrationException.class)
+    public ResponseEntity<ErrorResponse> handleStripe(StripeIntegrationException e,
+                                                      HttpServletRequest req) {
+        log.error("Stripe integration error at {}: {}", req.getRequestURI(), e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(ErrorResponse.of("STRIPE_ERROR", "payment provider unavailable",
+                        502, req.getRequestURI()));
+    }
+
     // --- Standard handlers using ErrorResponse ---
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
