@@ -3,6 +3,7 @@ package hr.tvz.artdrop.artdropapp.service;
 import hr.tvz.artdrop.artdropapp.dto.JwtResponse;
 import hr.tvz.artdrop.artdropapp.dto.LoginRequest;
 import hr.tvz.artdrop.artdropapp.dto.RegisterRequest;
+import hr.tvz.artdrop.artdropapp.exception.DuplicateEmailException;
 import hr.tvz.artdrop.artdropapp.model.Authority;
 import hr.tvz.artdrop.artdropapp.model.User;
 import hr.tvz.artdrop.artdropapp.repository.AuthorityJpaRepository;
@@ -51,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public JwtResponse signup(RegisterRequest registerRequest) {
         if (userJpaRepository.existsByEmail(registerRequest.email())) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new DuplicateEmailException("email already exists");
         }
 
         Authority roleUser = authorityJpaRepository.findByName("ROLE_USER")

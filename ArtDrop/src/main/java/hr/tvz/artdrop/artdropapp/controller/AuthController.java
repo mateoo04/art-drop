@@ -7,7 +7,6 @@ import hr.tvz.artdrop.artdropapp.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,20 +23,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        try {
-            return ResponseEntity.ok(authService.login(loginRequest));
-        } catch (BadCredentialsException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        return ResponseEntity.ok(authService.login(loginRequest));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<JwtResponse> signup(@Valid @RequestBody RegisterRequest registerRequest) {
-        try {
-            JwtResponse jwtResponse = authService.signup(registerRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(jwtResponse);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.signup(registerRequest));
     }
 }

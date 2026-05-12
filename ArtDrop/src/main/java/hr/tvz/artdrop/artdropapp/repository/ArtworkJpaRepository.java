@@ -3,6 +3,7 @@ package hr.tvz.artdrop.artdropapp.repository;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -16,8 +17,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
+    @EntityGraph(attributePaths = {"author"})
     List<Artwork> findByMediumContainingIgnoreCase(String medium);
 
+    @EntityGraph(attributePaths = {"author"})
     List<Artwork> findByMediumContainingIgnoreCase(String medium, Pageable pageable);
 
     Optional<Artwork> findByTitleIgnoreCase(String title);
@@ -26,17 +29,21 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
 
     long deleteByTitleIgnoreCase(String title);
 
+    @EntityGraph(attributePaths = {"author"})
     List<Artwork> findByAuthor_IdOrderByPublishedAtDesc(Long authorId);
 
+    @EntityGraph(attributePaths = {"author"})
     List<Artwork> findByAuthor_IdOrderByPublishedAtDesc(Long authorId, Pageable pageable);
 
     long countByAuthor_Id(Long authorId);
 
+    @EntityGraph(attributePaths = {"author"})
     @Query("SELECT a FROM Artwork a WHERE a.author.id IN " +
             "(SELECT f.followeeId FROM UserFollow f WHERE f.followerId = :viewerId) " +
             "ORDER BY a.publishedAt DESC")
     List<Artwork> findCircleFeed(@Param("viewerId") Long viewerId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"author"})
     @Query("SELECT a FROM Artwork a " +
             "WHERE a.author.id <> :viewerId " +
             "AND (a.publishedAt >= :recentSince " +
@@ -51,19 +58,26 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
             @Param("medium") String medium,
             Pageable pageable);
 
+    @EntityGraph(attributePaths = {"author"})
     List<Artwork> findByIdIn(Collection<Long> ids);
 
     @Query("SELECT DISTINCT a.medium FROM Artwork a WHERE a.medium IS NOT NULL ORDER BY a.medium")
     List<String> findDistinctMediums();
 
+    @EntityGraph(attributePaths = {"author"})
     @Query("SELECT a FROM Artwork a WHERE a.author.id <> :viewerId ORDER BY a.publishedAt DESC")
     List<Artwork> findAllExcludingAuthor(@Param("viewerId") Long viewerId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"author"})
     @Query("SELECT a FROM Artwork a WHERE a.author.id <> :viewerId AND LOWER(a.medium) LIKE LOWER(CONCAT('%', :medium, '%')) ORDER BY a.publishedAt DESC")
     List<Artwork> findByMediumExcludingAuthor(
             @Param("medium") String medium,
             @Param("viewerId") Long viewerId,
             Pageable pageable);
+
+    @EntityGraph(attributePaths = {"author", "images"})
+    @Query("SELECT a FROM Artwork a WHERE a.id = :id")
+    Optional<Artwork> findDetailById(@Param("id") Long id);
 
     @Query("SELECT COUNT(a) FROM Artwork a WHERE a.author.id = :authorId " +
             "AND a.saleState IN (hr.tvz.artdrop.artdropapp.model.SaleState.AVAILABLE, hr.tvz.artdrop.artdropapp.model.SaleState.RESERVED)")

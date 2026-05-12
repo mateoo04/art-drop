@@ -3,7 +3,6 @@ package hr.tvz.artdrop.artdropapp.controller;
 import hr.tvz.artdrop.artdropapp.dto.CancelOrderCommand;
 import hr.tvz.artdrop.artdropapp.dto.OrderDTO;
 import hr.tvz.artdrop.artdropapp.dto.ShipOrderCommand;
-import hr.tvz.artdrop.artdropapp.exception.IllegalOrderStateException;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
 import hr.tvz.artdrop.artdropapp.model.Order;
 import hr.tvz.artdrop.artdropapp.repository.ArtworkJpaRepository;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -107,12 +104,6 @@ public class OrderController {
         }
         Order updated = orderService.markDelivered(id, uid);
         return ResponseEntity.ok(toDTO(updated));
-    }
-
-    @ExceptionHandler(IllegalOrderStateException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalState(IllegalOrderStateException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", "ILLEGAL_ORDER_STATE", "message", e.getMessage()));
     }
 
     private Long requireUserId(Authentication auth) {

@@ -2,10 +2,6 @@ package hr.tvz.artdrop.artdropapp.controller;
 
 import hr.tvz.artdrop.artdropapp.dto.CheckoutSessionResponse;
 import hr.tvz.artdrop.artdropapp.dto.CreateCheckoutSessionCommand;
-import hr.tvz.artdrop.artdropapp.exception.InventoryUnavailableException;
-import hr.tvz.artdrop.artdropapp.exception.PendingOrderConflictException;
-import hr.tvz.artdrop.artdropapp.exception.ReservationConflictException;
-import hr.tvz.artdrop.artdropapp.exception.SelfPurchaseException;
 import hr.tvz.artdrop.artdropapp.service.CheckoutService;
 import hr.tvz.artdrop.artdropapp.service.StripeWebhookService;
 import jakarta.validation.Valid;
@@ -14,14 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/checkout")
@@ -60,43 +53,4 @@ public class CheckoutController {
         }
     }
 
-    @ExceptionHandler(SelfPurchaseException.class)
-    public ResponseEntity<Map<String, String>> handleSelfPurchase(SelfPurchaseException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "SELF_PURCHASE"));
-    }
-
-    @ExceptionHandler(InventoryUnavailableException.class)
-    public ResponseEntity<Map<String, String>> handleInventory(InventoryUnavailableException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", "INVENTORY_UNAVAILABLE", "message", e.getMessage()));
-    }
-
-    @ExceptionHandler(ReservationConflictException.class)
-    public ResponseEntity<Map<String, Object>> handleReservationConflict(ReservationConflictException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
-                "error", "RESERVATION_CONFLICT",
-                "existingArtwork", Map.of(
-                        "id", e.getExistingArtworkId(),
-                        "title", e.getExistingArtworkTitle()
-                )
-        ));
-    }
-
-    @ExceptionHandler(PendingOrderConflictException.class)
-    public ResponseEntity<Map<String, Object>> handlePendingOrderConflict(PendingOrderConflictException e) {
-        Map<String, Object> existingOrder = new java.util.HashMap<>();
-        existingOrder.put("id", e.getExistingOrderId());
-        existingOrder.put("artworkId", e.getExistingArtworkId());
-        existingOrder.put("artworkTitle", e.getExistingArtworkTitle());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
-                "error", "PENDING_ORDER_EXISTS",
-                "existingOrder", existingOrder
-        ));
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArg(IllegalArgumentException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "BAD_REQUEST", "message", e.getMessage()));
-    }
 }
