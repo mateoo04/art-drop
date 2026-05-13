@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { AppFooter } from './AppFooter'
 import { AppHeader } from './AppHeader'
 import { NewDropFab } from './NewDropFab'
-import { AuthPromptProvider } from '../../contexts/AuthPromptContext'
+import { AuthPromptProvider } from '../../contexts/AuthPromptProvider'
 import { SearchOverlayProvider } from '../../contexts/SearchOverlayContext'
 
 export function MainLayout() {

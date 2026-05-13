@@ -1,5 +1,7 @@
 # ArtDrop (In Progress)
 
+[![CI](https://github.com/mateoo04/art-drop/actions/workflows/ci.yml/badge.svg)](https://github.com/mateoo04/art-drop/actions/workflows/ci.yml)
+
 ArtDrop is my full-stack project for practicing real backend work with Java and Spring Boot, together with a React frontend.
 I built it to get better at API design, authentication, data modeling, and shipping features end to end.
 

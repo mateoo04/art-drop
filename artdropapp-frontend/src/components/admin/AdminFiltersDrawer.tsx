@@ -24,9 +24,13 @@ export function AdminFiltersDrawer({ open, onClose, filters, onApply }: Props) {
     { value: 'most_artworks', label: t('admin.filters.sorts.mostArtworks') },
   ]
 
-  useEffect(() => {
-    if (open) setDraft(filters)
-  }, [open, filters])
+  const [wasOpen, setWasOpen] = useState(false)
+  if (open && !wasOpen) {
+    setWasOpen(true)
+    setDraft(filters)
+  } else if (!open && wasOpen) {
+    setWasOpen(false)
+  }
 
   useEffect(() => {
     if (!open) return

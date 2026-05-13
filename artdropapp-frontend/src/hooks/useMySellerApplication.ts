@@ -31,7 +31,10 @@ export function useMySellerApplication() {
   }, [])
 
   useEffect(() => {
-    void load()
+    const id = requestAnimationFrame(() => {
+      void load()
+    })
+    return () => cancelAnimationFrame(id)
   }, [load])
 
   return { ...state, refetch: load }

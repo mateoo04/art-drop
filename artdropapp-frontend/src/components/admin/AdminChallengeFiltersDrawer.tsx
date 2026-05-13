@@ -15,10 +15,13 @@ const STATUSES: NonNullable<AdminChallengeFilters['status']>[] = ['UPCOMING', 'A
 export function AdminChallengeFiltersDrawer({ open, onClose, filters, onApply }: Props) {
   const { t } = useTranslation()
   const [draft, setDraft] = useState<AdminChallengeFilters>(filters)
-
-  useEffect(() => {
-    if (open) setDraft(filters)
-  }, [open, filters])
+  const [wasOpen, setWasOpen] = useState(false)
+  if (open && !wasOpen) {
+    setWasOpen(true)
+    setDraft(filters)
+  } else if (!open && wasOpen) {
+    setWasOpen(false)
+  }
 
   useEffect(() => {
     if (!open) return

@@ -54,17 +54,23 @@ export function ChallengeHeroBanner({
 
   const heroSubmission = useMemo(
     () => pickHeroSubmission(challenge.submissions),
-    [challenge.id, challenge.submissions],
+    [challenge.submissions],
   )
 
-  const [remaining, setRemaining] = useState(() => getChallengeRemaining(challenge.endsAt))
+  const endsAt = challenge.endsAt
+  const [remaining, setRemaining] = useState(() => getChallengeRemaining(endsAt))
+  const [syncedEndsAt, setSyncedEndsAt] = useState(endsAt)
+  if (syncedEndsAt !== endsAt) {
+    setSyncedEndsAt(endsAt)
+    setRemaining(getChallengeRemaining(endsAt))
+  }
+
   useEffect(() => {
-    setRemaining(getChallengeRemaining(challenge.endsAt))
     const id = window.setInterval(() => {
-      setRemaining(getChallengeRemaining(challenge.endsAt))
+      setRemaining(getChallengeRemaining(endsAt))
     }, 60_000)
     return () => window.clearInterval(id)
-  }, [challenge.endsAt])
+  }, [endsAt])
 
   return (
     <section className="w-full relative h-[600px] md:h-[800px] flex items-end overflow-hidden">

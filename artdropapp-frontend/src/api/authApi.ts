@@ -109,6 +109,7 @@ export async function logout(): Promise<void> {
       headers: csrfHeader(),
     })
   } catch {
+    void 0 // best-effort logout; ignore network failures
   }
 }
 

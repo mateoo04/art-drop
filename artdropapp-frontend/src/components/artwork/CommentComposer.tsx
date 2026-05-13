@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getToken } from '../../lib/auth'
-import { useAuthPrompt } from '../../contexts/AuthPromptContext'
+import { useAuthPrompt } from '../../contexts/useAuthPrompt'
 import { Button } from '../ui/Button'
 
 type CommentComposerProps = {
