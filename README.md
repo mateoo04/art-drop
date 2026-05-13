@@ -1,4 +1,4 @@
-# ArtDrop (In Progress)
+# ArtDrop — Full-Stack Portfolio Project
 
 [![CI](https://github.com/mateoo04/art-drop/actions/workflows/ci.yml/badge.svg)](https://github.com/mateoo04/art-drop/actions/workflows/ci.yml)
 
@@ -39,6 +39,22 @@ npm run dev
 
 Migrations live in `ArtDrop/src/main/resources/db/migration/` (versioned `V1__`, `V2__`, …) and Flyway applies them on startup. The dev seed is `ArtDrop/src/main/resources/db/dev/R__seed.sql` and runs only under the `dev` profile.
 
+## Deployment Notes
+
+Backend environment variables:
+- `PORT` — hosting provider port; defaults to `8089` locally
+- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
+- `JWT_BASE64_SECRET` — generate with `openssl rand -base64 64 | tr -d '\n'`
+- `APP_BASE_URL` — frontend public URL, used for checkout redirects
+- `APP_CORS_ALLOWED_ORIGIN` — frontend public URL, used by CORS
+- `AUTH_COOKIE_SECURE=true` and `AUTH_COOKIE_SAME_SITE=None` when frontend and backend are on different HTTPS domains
+- `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` only if checkout is enabled
+- `SPRING_PROFILES_ACTIVE=demo` for a seeded job-fair/demo database; omit it for a clean production database
+
+Frontend environment variables:
+- `VITE_API_BASE_URL` — backend public URL when there is no `/api` proxy
+- `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET`
+
 ### Tests
 
 Integration tests use [Testcontainers](https://www.testcontainers.org/) to spin up a throwaway Postgres for each test run. On macOS with Docker Desktop, the JVM may not auto-detect the daemon socket — set `DOCKER_HOST` first:
@@ -71,4 +87,4 @@ cd ArtDrop && ./mvnw test
 - Integrate Stripe for checkout and payment confirmation
 
 ## Status
-Development in progress. The core is already there, and I am now improving the UX, adding order logic, and integrating Stripe.
+Portfolio-ready MVP. The core product is implemented, and active work is focused on UX polish, checkout hardening, and broader automated test coverage.

@@ -15,8 +15,8 @@ public class AuthCookieService {
 
     public AuthCookieService(
             @Value("${jwt.token-validity-seconds}") long tokenValiditySeconds,
-            @Value("${auth.cookie.secure:false}") boolean secure,
-            @Value("${auth.cookie.same-site:Lax}") String sameSite) {
+            @Value("${AUTH_COOKIE_SECURE:${auth.cookie.secure:false}}") boolean secure,
+            @Value("${AUTH_COOKIE_SAME_SITE:${auth.cookie.same-site:Lax}}") String sameSite) {
         this.tokenValiditySeconds = tokenValiditySeconds;
         this.secure = secure;
         this.sameSite = sameSite;

@@ -1,4 +1,5 @@
 import type { CollectionDTO } from '../types/collection'
+import { apiPath } from '../lib/apiBase'
 
 function normalizeCreatedAt(value: unknown): string {
   if (typeof value === 'string') return value
@@ -22,7 +23,7 @@ function mapApiCollection(raw: Record<string, unknown>): CollectionDTO {
 }
 
 export async function fetchCollections(): Promise<CollectionDTO[]> {
-  const res = await fetch(`/api/collections`)
+  const res = await fetch(apiPath('/api/collections'))
   if (!res.ok) {
     throw new Error(`Failed to load collections (${res.status})`)
   }

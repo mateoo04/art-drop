@@ -1,4 +1,6 @@
 
+import { apiPath } from '../lib/apiBase'
+
 export type RegisterRequest = {
   username: string
   email: string
@@ -18,7 +20,7 @@ export type SignupError =
 export async function signup(request: RegisterRequest): Promise<AuthSessionResponse> {
   let res: Response
   try {
-    res = await fetch(`/api/auth/signup`, {
+    res = await fetch(apiPath('/api/auth/signup'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -66,7 +68,7 @@ export type LoginError =
 export async function login(request: LoginRequest): Promise<AuthSessionResponse> {
   let res: Response
   try {
-    res = await fetch(`/api/auth/login`, {
+    res = await fetch(apiPath('/api/auth/login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -103,7 +105,7 @@ export function isLoginError(value: unknown): value is LoginError {
 
 export async function logout(): Promise<void> {
   try {
-    await fetch(`/api/auth/logout`, {
+    await fetch(apiPath('/api/auth/logout'), {
       method: 'POST',
       credentials: 'include',
       headers: csrfHeader(),

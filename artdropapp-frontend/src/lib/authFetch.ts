@@ -1,4 +1,5 @@
 import { clearToken } from './auth'
+import { apiPath } from './apiBase'
 
 export class UnauthorizedError extends Error {
   constructor() {
@@ -29,7 +30,8 @@ export async function authFetch(input: string, init: RequestInit = {}): Promise<
     if (csrf) headers.set('X-XSRF-TOKEN', csrf)
   }
 
-  const res = await fetch(input, { ...init, headers, credentials: 'include' })
+  const requestInput = typeof input === 'string' && input.startsWith('/api') ? apiPath(input) : input
+  const res = await fetch(requestInput, { ...init, headers, credentials: 'include' })
 
   if (res.status === 401) {
     clearToken()
