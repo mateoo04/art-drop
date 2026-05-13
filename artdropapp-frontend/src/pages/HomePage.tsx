@@ -33,7 +33,7 @@ export function HomePage() {
 
   return (
     <main className="max-w-[1440px] mx-auto px-8 pt-4 pb-24">
-      <div className="-mx-8 border-b border-outline-variant/15 px-8 pb-6 md:mx-0 md:px-0">
+      <div className="-mx-8 border-b border-outline-variant/15 pb-6">
         <HomeActiveChallengesSection
           challenges={challenges}
           loading={challengesLoading}

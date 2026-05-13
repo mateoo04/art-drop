@@ -50,7 +50,7 @@ function cardVisual(challenge: Challenge): { src: string; alt: string } | null {
 function ChallengeRowSkeleton() {
   return (
     <div
-      className="-mx-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-8 pb-1 md:mx-0 md:px-0"
+      className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-8 pb-1"
       aria-hidden
     >
       {[0, 1, 2].map((i) => (
@@ -96,7 +96,7 @@ export function HomeActiveChallengesSection({
       aria-labelledby="home-active-challenges-heading"
       aria-busy={loading}
     >
-      <h2 id="home-active-challenges-heading" className="mb-4 w-fit max-w-full">
+      <h2 id="home-active-challenges-heading" className="mb-4 w-fit max-w-full px-8">
         <Link
           to="/challenges"
           className="group inline-flex items-center gap-1 rounded-sm font-body text-xs font-normal uppercase tracking-widest text-on-surface outline-none ring-offset-2 ring-offset-surface transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-primary"
@@ -132,14 +132,11 @@ export function HomeActiveChallengesSection({
           spaceBetween={16}
           slidesOffsetBefore={32}
           slidesOffsetAfter={32}
-          breakpoints={{
-            768: { slidesOffsetBefore: 0, slidesOffsetAfter: 0 },
-          }}
           freeMode
           mousewheel={{ forceToAxis: true }}
           keyboard={{ enabled: true }}
           a11y={{ enabled: true }}
-          className="-mx-8 pb-1 md:mx-0"
+          className="w-full pb-1"
         >
           {active.map((challenge) => {
             const visual = cardVisual(challenge)
