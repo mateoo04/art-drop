@@ -1,6 +1,7 @@
 import { Pencil, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AvatarUploadPrompt } from '../components/account/AvatarUploadPrompt'
 import { SellerSection } from '../components/account/SellerSection'
 import { SettingsSidebar } from '../components/account/SettingsSidebar'
 import { homeFeedItemsFromArtworks } from '../api/artworksApi'
@@ -15,7 +16,17 @@ export function AccountPage() {
   const { user, loading, error, setUser } = useCurrentUser()
   const artworks = useMyArtworks(user != null)
   const [editOpen, setEditOpen] = useState(false)
+  const [editFocusAvatar, setEditFocusAvatar] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+
+  const openEdit = (focusAvatar = false) => {
+    setEditFocusAvatar(focusAvatar)
+    setEditOpen(true)
+  }
+  const closeEdit = () => {
+    setEditOpen(false)
+    setEditFocusAvatar(false)
+  }
   const { t } = useTranslation()
 
   if (loading && !user) {
@@ -46,6 +57,9 @@ export function AccountPage() {
   return (
     <>
       <main className="max-w-[1440px] mx-auto px-8 pt-4 pb-24">
+        {user.avatarUrl == null ? (
+          <AvatarUploadPrompt onUpload={() => openEdit(true)} />
+        ) : null}
         <ProfileHeader
           user={user}
           action={
@@ -61,7 +75,7 @@ export function AccountPage() {
               <button
                 type="button"
                 aria-label={t('account.editProfile')}
-                onClick={() => setEditOpen(true)}
+                onClick={() => openEdit(false)}
                 className="text-on-surface-variant hover:text-on-surface p-2"
               >
                 <Pencil size={20} />
@@ -99,7 +113,8 @@ export function AccountPage() {
       <ProfileEditSidebar
         open={editOpen}
         user={user}
-        onClose={() => setEditOpen(false)}
+        focusAvatar={editFocusAvatar}
+        onClose={closeEdit}
         onSaved={(updated) => setUser(updated)}
       />
     </>

@@ -1,1 +1,807 @@
-{}
+{
+  "common": {
+    "save": "Spremi",
+    "cancel": "Odustani",
+    "close": "Zatvori",
+    "loading": "Učitavanje…",
+    "error": "Nešto je pošlo po zlu",
+    "confirm": "Potvrdi",
+    "pleaseWait": "Molimo pričekajte…",
+    "replies": "Odgovori",
+    "artworkDetails": "Detalji odabranog rada",
+    "details": "Detalji"
+  },
+  "notFound": {
+    "title": "Stranica nije pronađena",
+    "description": "Stranica koju tražite ne postoji ili je premještena.",
+    "backHome": "Natrag na početnu"
+  },
+  "errorBoundary": {
+    "title": "Nešto je pošlo po zlu",
+    "description": "Dogodila se neočekivana pogreška. Pokušajte ponovno učitati stranicu.",
+    "reload": "Ponovno učitaj"
+  },
+  "toast": {
+    "genericError": "Nešto je pošlo po zlu. Pokušajte ponovno."
+  },
+  "orders": {
+    "title": "Moje narudžbe",
+    "empty": "Još niste napravili nijednu narudžbu.",
+    "status": {
+      "PENDING_PAYMENT": "Čeka plaćanje",
+      "PAID": "Plaćeno",
+      "SHIPPED": "Poslano",
+      "DELIVERED": "Dostavljeno",
+      "CANCELLED": "Otkazano",
+      "REFUNDED": "Refundirano"
+    },
+    "detail": {
+      "order_id": "Narudžba #{{id}}",
+      "view_artwork": "Pogledaj detalje rada",
+      "not_found": "Narudžba nije pronađena.",
+      "shipping_to": "Dostava na",
+      "tracking": "Praćenje",
+      "subtotal": "Međuzbroj",
+      "shipping": "Dostava",
+      "total": "Ukupno",
+      "cancel_button": "Otkaži i refundiraj",
+      "cancel_button_pending": "Otkaži narudžbu",
+      "cancelling": "Otkazivanje…",
+      "confirming": "Potvrđujemo vašu uplatu…",
+      "cancelled_at_stripe": "Plaćanje je otkazano. Možete pokušati ponovno sa stranice rada."
+    }
+  },
+  "sales": {
+    "title": "Prodaje",
+    "empty": "Još nema prodaja.",
+    "order_id": "Narudžba #{{id}}",
+    "buyer": "Kupac #{{uid}}",
+    "tracking_number": "Broj za praćenje",
+    "carrier": "Dostavna služba",
+    "mark_shipped": "Označi kao poslano",
+    "mark_delivered": "Označi kao dostavljeno"
+  },
+  "checkout": {
+    "title": "Naplata",
+    "shipping_address": "Adresa dostave",
+    "use_new_address": "Koristi novu adresu",
+    "quantity": "Količina",
+    "continue": "Nastavi na plaćanje",
+    "redirecting": "Preusmjeravanje na Stripe…",
+    "fields": {
+      "recipient_name": "Ime i prezime",
+      "line1": "Adresa, redak 1",
+      "line2": "Adresa, redak 2 (opcionalno)",
+      "city": "Grad",
+      "postal_code": "Poštanski broj",
+      "country": "Država",
+      "country_placeholder": "Odaberite državu…",
+      "phone": "Telefon (opcionalno)"
+    },
+    "summary": {
+      "subtotal": "Međuzbroj × {{qty}}",
+      "shipping": "Dostava (fiksno)",
+      "total": "Ukupno"
+    },
+    "errors": {
+      "artwork_not_found": "Rad nije pronađen.",
+      "self_purchase": "Ne možete kupiti vlastiti rad.",
+      "unavailable": "Ovaj rad više nije dostupan.",
+      "address_incomplete": "Molimo ispunite obavezna polja adrese."
+    },
+    "pendingConflict": {
+      "title": "Već imate narudžbu koja čeka plaćanje",
+      "fallbackTitle": "drugi rad",
+      "bodySame": "Već imate narudžbu koja čeka plaćanje za <strong>{{existing}}</strong>. Želite li je otkazati i započeti novu naplatu?",
+      "bodyDifferent": "Već imate narudžbu koja čeka plaćanje za <strong>{{existing}}</strong>. Otkažite je kako biste nastavili s <strong>{{incoming}}</strong>?",
+      "cancel": "Zadrži postojeću narudžbu",
+      "confirm": "Otkaži i nastavi"
+    }
+  },
+  "settings": {
+    "title": "Postavke",
+    "language": "Jezik",
+    "languageOptions": {
+      "en": "English",
+      "hr": "hrvatski"
+    },
+    "open": "Otvori postavke",
+    "close": "Zatvori postavke",
+    "logout": "Odjavi se",
+    "logoutConfirm": "Potvrdi odjavu",
+    "logoutCancel": "Odustani"
+  },
+  "account": {
+    "editProfile": "Uredi profil",
+    "avatarPrompt": {
+      "title": "Dodajte profilnu sliku",
+      "body": "Profilna slika pomaže drugima da prepoznaju vaš rad na ArtDropu.",
+      "cta": "Učitaj sliku"
+    },
+    "yourDrops": "Vaši radovi",
+    "noDrops": "Još niste objavili nijedan rad.",
+    "loadingDrops": "Učitavanje vaših radova",
+    "loadingProfile": "Učitavanje vašeg profila",
+    "becomeSeller": "Postani prodavač",
+    "seller": {
+      "title": "Status prodavača",
+      "applyCta": "Prijavi se za status prodavača",
+      "applyAgain": "Prijavi se ponovno",
+      "pending": "Vaša je prijava na pregledu. Poslana {{date}}.",
+      "approved": "Vi ste verificirani prodavač, odobreno {{date}}.",
+      "revoked": "Vaš status prodavača opozvan je {{date}}.",
+      "rejected": "Vaša prijava nije odobrena {{date}}.",
+      "cooldown": "Možete se ponovno prijaviti {{date}}.",
+      "becomeSeller": "Postanite verificirani prodavač kako biste svoje radove mogli ponuditi na prodaju.",
+      "modal": {
+        "title": "Prijava za status prodavača",
+        "body": "Recite nam zašto želite prodavati na ArtDropu. ({{min}}–{{max}} znakova)",
+        "placeholder": "Zašto želite prodavati na ArtDropu?",
+        "submit": "Pošalji prijavu",
+        "closeLabel": "Zatvori",
+        "errorCooldown": "Još se ne možete ponovno prijaviti.",
+        "errorAlreadyPending": "Već imate prijavu na čekanju.",
+        "errorAlreadySeller": "Već ste verificirani prodavač.",
+        "errorFallback": "Slanje prijave nije uspjelo.",
+        "cooldownSuffix": "Možete se ponovno prijaviti {{date}}."
+      },
+      "status": {
+        "none": "Nije prodavač",
+        "pending": "Na čekanju",
+        "approved": "Verificirani prodavač",
+        "rejected": "Odbijeno",
+        "revoked": "Opozvano"
+      }
+    }
+  },
+  "profile": {
+    "drops": "Radovi",
+    "drop": "rad",
+    "noDrops": "Još nema radova.",
+    "notFound": "Nismo mogli pronaći tog umjetnika.",
+    "loadingProfile": "Učitavanje profila",
+    "followAction": "prati {{name}}",
+    "joinCircle": "Pridruži se krugu",
+    "inCircle": "U vašem krugu",
+    "addBio": "Dodajte biografiju kako biste predstavili svoj rad.",
+    "circleSize": "u vašem krugu",
+    "circleSizeLabel": "U vašem krugu",
+    "followingCount": "Krugovi kojima pripadate",
+    "followingCountLabel": "Krugovi kojima pripadate",
+    "dropSingular": "rad",
+    "dropPlural": "radova",
+    "joinedPrefix": "Pridružio se",
+    "validation": {
+      "displayName": {
+        "tooShort": "Prikazno ime mora imati najmanje 2 znaka",
+        "tooLong": "Prikazno ime može imati najviše 100 znakova"
+      },
+      "bio": {
+        "tooLong": "Biografija može imati najviše 1000 znakova"
+      }
+    },
+    "editProfile": {
+      "title": "Uredi profil",
+      "closeLabel": "Zatvori uređivanje profila",
+      "displayName": "Prikazno ime",
+      "avatar": "Profilna slika",
+      "changePhoto": "Promijeni sliku",
+      "removePhoto": "Ukloni sliku",
+      "uploadError": "Učitavanje nije uspjelo",
+      "bio": "Biografija",
+      "ariaLabel": "Uredi profil"
+    }
+  },
+  "nav": {
+    "discover": "Istraži",
+    "circle": "Krug",
+    "challenges": "Izazovi",
+    "mainNavLabel": "Glavna navigacija",
+    "search": "Pretraži",
+    "bag": "Narudžbe",
+    "sales": "Prodaje",
+    "admin": "Admin",
+    "account": "Račun",
+    "newDrop": "Novi rad",
+    "newDropLabel": "Novi rad"
+  },
+  "search": {
+    "overlayTitle": "Pretraži radove",
+    "placeholder": "Pretraži radove, umjetnike, medije…",
+    "placeholderShort": "Pretraži radove, umjetnike, izazove",
+    "closeAria": "Zatvori pretragu",
+    "clearAria": "Očisti pretragu",
+    "empty": "Nijedan rad ne odgovara vašoj pretrazi.",
+    "error": "Pretraga se nije mogla učitati. Pokušajte ponovno.",
+    "viewDetails": "Pogledaj rad",
+    "sectionArtworks": "RADOVI",
+    "sectionArtists": "UMJETNICI",
+    "sectionChallenges": "IZAZOVI",
+    "byArtist": "od {{name}}",
+    "seeAll": "Prikaži sve",
+    "allResults": "SVI REZULTATI",
+    "challengeEnded": "Završeno",
+    "oneDayLeft": "Preostao je 1 dan",
+    "daysLeft": "Preostalo dana: {{count}}",
+    "page": {
+      "title": "Rezultati pretrage",
+      "titleEmpty": "Pretraga",
+      "noQuery": "Upišite pojam za pretragu u polje iznad.",
+      "empty": "Nema rezultata za '{{query}}'.",
+      "tab": {
+        "artworks": "Radovi",
+        "artists": "Umjetnici",
+        "challenges": "Izazovi"
+      }
+    }
+  },
+  "footer": {
+    "copyright": "© {{year}} ArtDrop Digital Gallery. Sva prava pridržana.",
+    "privacyPolicy": "Pravila privatnosti",
+    "termsOfService": "Uvjeti korištenja",
+    "contact": "Kontakt"
+  },
+  "home": {
+    "loading": "Učitavanje radova",
+    "loadingMore": "Učitavanje još radova",
+    "empty": "Još nema radova u ovom mediju.",
+    "activeChallenges": {
+      "allChallenges": "Izazovi",
+      "loadingAria": "Učitavanje izazova",
+      "loadError": "Izazovi se nisu mogli učitati.",
+      "empty": "Trenutačno nema otvorenih izazova.",
+      "emptyLink": "Pregledaj sve izazove",
+      "timeLeft": {
+        "ended": "Završeno",
+        "openEnded": "Otvoreno",
+        "hours_one": "Preostao je {{count}} sat",
+        "hours_other": "Preostalo je {{count}} sati",
+        "days_one": "Preostao je {{count}} dan",
+        "days_other": "Preostalo je {{count}} dana",
+        "weeks_one": "Preostao je {{count}} tjedan",
+        "weeks_other": "Preostalo je {{count}} tjedana"
+      }
+    },
+    "filters": {
+      "all": "Sve"
+    },
+    "challengePromo": {
+      "joinTitle": "Pridruži se: {{title}}",
+      "joinChallengeCta": "Pridruži se izazovu",
+      "noDeadline": "Otvoreno sada",
+      "submissionsCount_zero": "Nema prijava",
+      "submissionsCount_one": "{{count}} prijava",
+      "submissionsCount_other": "{{count}} prijava"
+    },
+    "card": {
+      "by": "od",
+      "likeArtwork": "Označi rad sa sviđa mi se",
+      "unlikeArtwork": "Ukloni sviđa mi se s rada",
+      "openComments": "Otvori komentare",
+      "bookmark": "Spremi",
+      "progress": {
+        "wip": "U izradi",
+        "finished": "Završeno"
+      },
+      "sale": {
+        "available": "Dostupno",
+        "original": "Original",
+        "edition": "Edicija",
+        "sold": "Prodano",
+        "reserved_by_other": "Rezervirano"
+      }
+    }
+  },
+  "artwork": {
+    "detail": {
+      "notFound": "Rad nije pronađen.",
+      "invalidId": "Nevažeći ID",
+      "studioNote": "Bilješka iz studija",
+      "discussion": "Rasprava",
+      "price": "Cijena",
+      "priceWithQuantity": "Cijena × {{quantity}}",
+      "quantity": "Količina",
+      "medium": "Medij",
+      "dimensions": "Dimenzije",
+      "status": "Status",
+      "progressWip": "Rad u izradi",
+      "progressFinished": "Završeno",
+      "like": "Sviđa mi se",
+      "liked": "Sviđa vam se",
+      "loadMore": "Učitaj još komentara",
+      "gallery": {
+        "prevImage": "Prethodna slika",
+        "nextImage": "Sljedeća slika",
+        "imageNav": "Navigacija slikama"
+      },
+      "sale": {
+        "originalAvailable": "Original dostupan",
+        "editionAvailable": "Edicija dostupna",
+        "available": "Dostupno",
+        "sold": "Prodano",
+        "reserved": "U naplati",
+        "reservedHint": "Trenutačno je u naplati kod drugog kupca, pokušajte ponovno za nekoliko minuta.",
+        "purchaseOriginal": "Kupi original",
+        "purchaseEdition": "Kupi ediciju",
+        "purchase": "Kupi"
+      },
+      "editionRemaining": "Preostalo ispisa: {{remaining}} od {{total}}",
+      "quantity_selector": {
+        "label": "Odabir količine",
+        "decrease": "Smanji količinu",
+        "increase": "Povećaj količinu"
+      },
+      "challenge": {
+        "inChallengeLabel": "Trenutačno u izazovu",
+        "submitCta": "Prijavi na izazov",
+        "withdraw": "Povuci prijavu",
+        "withdrawing": "Povlačenje prijave…",
+        "confirmWithdrawTitle": "Povući rad iz izazova?",
+        "confirmWithdrawMessage": "Ovo će ukloniti vaš rad iz izazova “{{title}}”. Možete ga ponovno prijaviti kasnije dok je izazov još aktivan.",
+        "errorEnded": "Ovaj je izazov završio, više ne možete povući prijavu.",
+        "errorNotOwner": "Samo umjetnik može povući ovaj rad.",
+        "errorFallback": "Povlačenje nije uspjelo. Pokušajte ponovno."
+      },
+      "submitToChallenge": {
+        "title": "Prijavi na izazov",
+        "subtitle": "Odaberite aktivan izazov za koji ovaj rad ispunjava uvjete.",
+        "loading": "Učitavanje izazova",
+        "noEligible": "Nema aktivnih izazova za koje ovaj rad ispunjava uvjete.",
+        "submitting": "Slanje prijave…",
+        "errorLoad": "Izazovi se nisu mogli učitati."
+      }
+    },
+    "drop": {
+      "title": "Objavi novi rad",
+      "subtitle": "Podijelite rad sa svojim krugom. Prodavači ga mogu ponuditi i na prodaju.",
+      "cancelLabel": "Otkaži objavu rada",
+      "cancel": "Odustani",
+      "submit": "Objavi rad",
+      "submitting": "Objavljivanje…",
+      "fields": {
+        "media": "Mediji rada",
+        "imagesCount": "{{count}} slika",
+        "imagesCount_other": "{{count}} slika",
+        "imagesCoverMarked": "· označena naslovna slika",
+        "title": "Naslov",
+        "titlePlaceholder": "Dajte radu naziv",
+        "medium": "Medij",
+        "mediumPlaceholder": "Odaberite medij",
+        "status": "Status",
+        "statusFinished": "Završeno",
+        "statusWip": "U izradi",
+        "description": "Opis",
+        "descriptionPlaceholder": "Koja je priča iza ovog rada?",
+        "tags": "Oznake",
+        "tagsPlaceholder": "Dodajte oznake (pritisnite Enter)",
+        "dimensions": "Dodaj dimenzije",
+        "dimensionsOptional": "(opcionalno)",
+        "dimensionWidth": "Širina",
+        "dimensionHeight": "Visina",
+        "dimensionDepth": "Dubina",
+        "listing": "Ponudi na prodaju",
+        "listingSubtitle": "Omogućite kupnju ovog rada izravno s vašeg profila.",
+        "enableListing": "Omogući objavu na tržištu",
+        "price": "Cijena",
+        "saleType": "Vrsta prodaje",
+        "editionSize": "Veličina edicije",
+        "editionSizePlaceholder": "npr. 10",
+        "removeTag": "Ukloni {{tag}}"
+      },
+      "upload": {
+        "clickToUpload": "Kliknite za prijenos slika",
+        "opening": "Otvaranje prijenosa…",
+        "fileTypes": "JPG, PNG ili WebP · do 10 datoteka",
+        "uploading": "Prijenos…",
+        "addMore": "Dodaj još",
+        "setCover": "Postavi kao naslovnu",
+        "remove": "Ukloni",
+        "removeLabel": "Ukloni sliku",
+        "cover": "Naslovna",
+        "failed": "Prijenos nije uspio"
+      },
+      "edition": {
+        "original": "Original (1/1)",
+        "limited": "Ograničena edicija",
+        "open": "Otvorena edicija"
+      },
+      "seller": {
+        "verified": "Verificirani prodavač",
+        "required": "Potreban je status prodavača",
+        "pending": "Vaša prijava za prodavača je na pregledu.",
+        "requiresStatus": "Za prodaju radova potreban je status verificiranog prodavača.",
+        "applyNow": "Prijavi se sada",
+        "canReapply": "Možete se ponovno prijaviti {{date}}.",
+        "requiresStatusFallback": "Za prodaju radova potreban je status verificiranog prodavača."
+      },
+      "error": {
+        "noImages": "Prenesite barem jednu sliku.",
+        "noTitle": "Dodajte naslov rada.",
+        "noMedium": "Odaberite medij.",
+        "invalidPrice": "Unesite valjanu cijenu kako biste rad ponudili na prodaju.",
+        "invalidEditionSize": "Unesite valjanu veličinu edicije, 1 ili više.",
+        "titleTaken": "Taj je naslov već zauzet, pokušajte s drugim.",
+        "forbiddenSale": "Za objavu rada na prodaju potreban je status verificiranog prodavača.",
+        "unauthenticated": "Prijavite se kako biste objavili rad.",
+        "fallback": "Nešto je pošlo po zlu."
+      },
+      "challengeContext": {
+        "label": "Prijava na izazov",
+        "notActive": "Ovaj izazov trenutačno nije aktivan.",
+        "notFound": "Taj izazov nije pronađen.",
+        "alreadyEntered": "Već imate prijavu u ovom izazovu. Najprije je povucite kako biste prijavili drugi rad."
+      }
+    },
+    "edit": {
+      "title": "Uredi rad",
+      "loadingLabel": "Učitavanje rada",
+      "save": "Spremi",
+      "saving": "Spremanje…",
+      "fields": {
+        "title": "Naslov",
+        "medium": "Medij",
+        "description": "Opis",
+        "imageUrl": "URL slike (https://…)",
+        "imageUrlPlaceholder": "https://example.com/image.jpg",
+        "listing": "Objava na prodaju",
+        "price": "Cijena",
+        "pricePlaceholder": "npr. 250.00",
+        "saleType": "Vrsta prodaje",
+        "saleTypeOptions": {
+          "notListed": "Nije na prodaju",
+          "original": "Original",
+          "edition": "Edicija"
+        },
+        "editionSize": "Veličina edicije",
+        "editionSizePlaceholder": "npr. 10"
+      },
+      "seller": {
+        "pending": "Vaša prijava za prodavača je na pregledu.",
+        "requiresStatus": "Za prodaju radova potreban je status verificiranog prodavača.",
+        "applyNow": "Prijavi se sada",
+        "canReapply": "Možete se ponovno prijaviti {{date}}.",
+        "requiresStatusFallback": "Za prodaju radova potreban je status verificiranog prodavača."
+      },
+      "error": {
+        "invalidId": "Nevažeći ID",
+        "notFound": "Rad nije pronađen.",
+        "loadFailed": "Učitavanje rada nije uspjelo",
+        "forbiddenSale": "Za prodaju radova potreban je status verificiranog prodavača.",
+        "saveFailed": "Spremanje nije uspjelo"
+      }
+    }
+  },
+  "comments": {
+    "empty": "Još nema komentara.",
+    "loadingComments": "Učitavanje komentara",
+    "loadingMoreComments": "Učitavanje još komentara",
+    "loadingReplies": "Učitavanje odgovora",
+    "delete": "Obriši",
+    "reply": "Odgovori",
+    "deleteModal": {
+      "title": "Obrisati komentar?",
+      "message": "Ovo će ukloniti vaš komentar iz rasprave. Ovu radnju nije moguće poništiti.",
+      "confirm": "Obriši"
+    },
+    "composer": {
+      "post": "Objavi",
+      "cancel": "Odustani",
+      "failedToPost": "Objava nije uspjela",
+      "defaultAuthReason": "ostavili komentar",
+      "placeholder": "Podijelite nešto promišljeno…",
+      "placeholderSignedOut": "Prijavite se kako biste {{reason}}…",
+      "replyPlaceholder": "Odgovorite korisniku {{name}}…"
+    },
+    "viewMoreReplies": "Prikaži još {{count}} odgovor",
+    "viewMoreReplies_other": "Prikaži još {{count}} odgovora"
+  },
+  "challenges": {
+    "loading": "Učitavanje izazova",
+    "empty": "Još nema izazova, navratite uskoro.",
+    "learnMore": "Saznaj više",
+    "active": {
+      "viewAll": "Prikaži sve",
+      "awaitingSubmissions": "Čekaju se prijave"
+    },
+    "detail": {
+      "loading": "Učitavanje izazova",
+      "notFound": "Izazov nije pronađen.",
+      "loadingSubmissions": "Učitavanje prijava",
+      "loadingMoreSubmissions": "Učitavanje još prijava",
+      "noSubmissions": "Još nema prijava."
+    },
+    "hero": {
+      "status": {
+        "past": "Prošli izazov",
+        "featured": "Istaknuti izazov",
+        "upcoming": "Nadolazeći izazov",
+        "active": "Aktivni izazov"
+      },
+      "backLabel": "Natrag",
+      "joinChallenge": "Pridruži se izazovu",
+      "viewYourEntry": "Pogledaj svoju prijavu",
+      "timeClosed": "Izazov zatvoren",
+      "timeRemaining": "Preostalo vrijeme",
+      "timeFormat": "{{days}} dana : {{hours}} sati : {{minutes}} min"
+    },
+    "join": {
+      "title": "Pridruži se izazovu {{title}}",
+      "subtitle": "Izradite potpuno novi rad za ovaj izazov ili prijavite postojeći.",
+      "createNewLabel": "Izradite nešto novo",
+      "createNewCta": "Izradi novi rad",
+      "existingLabel": "Ili prijavite postojeći rad",
+      "loading": "Učitavanje vaših prihvatljivih radova",
+      "noEligible": "Nema postojećih radova koji ispunjavaju uvjete. Novi radovi izrađeni za ovaj izazov bit će prihvaćeni.",
+      "submitting": "Slanje prijave…",
+      "alreadyEnteredBody": "Već ste se prijavili na ovaj izazov. Najprije povucite trenutačnu prijavu ako želite poslati drugi rad.",
+      "viewYourEntry": "Pogledaj svoju prijavu",
+      "errorLoad": "Radovi koji ispunjavaju uvjete nisu se mogli učitati.",
+      "errorNotActive": "Ovaj izazov trenutačno nije aktivan.",
+      "errorTooOld": "Ovaj je rad objavljen prije početka izazova.",
+      "errorAlreadySubmitted": "Ovaj je rad već prijavljen na ovaj izazov.",
+      "errorInOther": "Ovaj je rad trenutačno prijavljen na drugi izazov, najprije ga povucite.",
+      "errorAlreadyEntered": "Već imate prijavu u ovom izazovu. Najprije je povucite kako biste prijavili drugi rad.",
+      "errorNotOwner": "Samo umjetnik može prijaviti ovaj rad.",
+      "errorUnauthenticated": "Prijavite se kako biste poslali prijavu.",
+      "errorFallback": "Slanje prijave nije uspjelo. Pokušajte ponovno."
+    },
+    "sort": {
+      "label": "Poredaj prijave",
+      "top": "Najbolje",
+      "recent": "Najnovije"
+    }
+  },
+  "circle": {
+    "title": "Vaš krug",
+    "subtitle": "Najnoviji radovi umjetnika čiji rad pratite.",
+    "loading": "Učitavanje vašeg kruga",
+    "empty": "Vaš je krug zasad tih. Pratite umjetnike čiji rad želite češće vidjeti, njihovi će se radovi ovdje prikazivati od najnovijih.",
+    "discoverArtists": "Otkrij umjetnike"
+  },
+  "collections": {
+    "title": "Kolekcije",
+    "loading": "Učitavanje kolekcija…",
+    "artworkId": "ID rada",
+    "created": "Izrađeno",
+    "visibility": "Vidljivost",
+    "public": "Javno",
+    "private": "Privatno"
+  },
+  "admin": {
+    "layout": {
+      "title": "Admin",
+      "userDirectory": "Imenik korisnika",
+      "challenges": "Izazovi"
+    },
+    "users": {
+      "noUsers": "Nema pronađenih korisnika.",
+      "search": "Pretraži po korisničkom imenu, imenu ili emailu…",
+      "filters": "Filtri",
+      "filtersWithCount": "Filtri ({{count}})",
+      "submitted": "Poslano {{date}}",
+      "reject": "Odbij",
+      "approve": "Odobri",
+      "page": "Stranica {{current}} od {{total}}",
+      "previous": "Prethodno",
+      "next": "Sljedeće",
+      "toastApproved": "Prijava je odobrena.",
+      "toastRejected": "Prijava je odbijena.",
+      "manage": "Upravljaj",
+      "promoteAdmin": "Promoviraj u administratora",
+      "grantSeller": "Dodijeli status prodavača",
+      "grantSellerConfirmTitle": "Dodijeliti pristup prodavača?",
+      "grantSellerConfirmBody": "{{name}} će moći ponuditi radove na prodaju na tržištu.",
+      "promoteAdminConfirmTitle": "Promovirati u administratora?",
+      "promoteAdminConfirmBody": "{{name}} će imati puni administratorski pristup ovoj nadzornoj ploči, uključujući upravljanje korisnicima i izazovima.",
+      "deactivate": "Deaktiviraj korisnika",
+      "reactivate": "Ponovno aktiviraj korisnika",
+      "actionFailed": "Radnja nije uspjela.",
+      "selfDeactivate": "Ne možete deaktivirati vlastiti račun.",
+      "toastPromoted": "Korisnik je promoviran u administratora.",
+      "toastGrantSeller": "Pristup prodavača je dodijeljen.",
+      "toastDeactivated": "Korisnik je deaktiviran.",
+      "toastReactivated": "Korisnik je ponovno aktiviran.",
+      "deactivateConfirmTitle": "Deaktivirati korisnika?",
+      "deactivateConfirmBody": "Ovo će korisniku {{name}} onemogućiti prijavu.",
+      "expand": {
+        "actions": "Radnje",
+        "pendingSellerTitle": "Prijava za status prodavača na čekanju",
+        "pendingBadge": "Zahtjev za prodavača",
+        "close": "Zatvori",
+        "toggleExpand": "Prikaži detalje",
+        "toggleCollapse": "Sakrij detalje"
+      }
+    },
+    "userDetail": {
+      "backToUsers": "← Natrag na korisnike",
+      "revokeSellerStatus": "Opozovi status prodavača",
+      "sellerHistory": "Povijest statusa prodavača",
+      "noApplications": "Još nema prijava.",
+      "submitted": "Poslano {{date}}",
+      "decided": "Odlučeno {{date}}",
+      "revoked": "Opozvano {{date}}",
+      "revokedSuffix": "· opozvano",
+      "toastRevoked": "Status prodavača je opozvan. {{count}} rad uklonjen je iz prodaje.",
+      "toastRevoked_other": "Status prodavača je opozvan. {{count}} radova uklonjeno je iz prodaje."
+    },
+    "filters": {
+      "title": "Filtri",
+      "sellerStatus": "Status prodavača",
+      "role": "Uloga",
+      "sort": "Poredaj",
+      "reset": "Poništi",
+      "cancel": "Odustani",
+      "apply": "Primijeni",
+      "closeLabel": "Zatvori filtre",
+      "roles": {
+        "user": "Korisnik",
+        "admin": "Administrator"
+      },
+      "sorts": {
+        "newest": "Najnovije pridruženi",
+        "oldestPending": "Najstarije prijave na čekanju",
+        "username": "Korisničko ime A–Z",
+        "mostArtworks": "Najviše radova"
+      }
+    },
+    "decision": {
+      "titleApprove": "Odobri prijavu za prodavača",
+      "titleReject": "Odbij prijavu za prodavača",
+      "applicant": "Podnositelj prijave",
+      "reasonLabel": "Razlog",
+      "reasonRequired": "(obavezno)",
+      "reasonOptional": "(opcionalno)",
+      "cancel": "Odustani",
+      "approve": "Odobri",
+      "reject": "Odbij",
+      "failed": "Nije uspjelo"
+    },
+    "revokeSeller": {
+      "title": "Opozovi status prodavača",
+      "bodyPrefix": "Upravo ćete opozvati",
+      "bodySellerStatusSuffix": " status prodavača.",
+      "loadingCount": "Učitavanje broja radova u prodaji",
+      "noArtworks": "Trenutačno nema radova u prodaji.",
+      "willUnlist": "Ovo će ukloniti {{count}} rad iz prodaje.",
+      "willUnlist_other": "Ovo će ukloniti {{count}} radova iz prodaje.",
+      "reasonLabel": "Razlog (obavezno)",
+      "cancel": "Odustani",
+      "confirm": "Opozovi status prodavača",
+      "failed": "Opoziv nije uspio"
+    },
+    "accessDenied": "Pristup odbijen.",
+    "challenges": {
+      "search": "Pretraži izazove…",
+      "create": "Izradi izazov",
+      "none": "Nijedan izazov ne odgovara pretrazi.",
+      "submissionCount": "{{count}} prijava",
+      "manage": "Upravljaj",
+      "edit": "Uredi",
+      "activate": "Aktiviraj",
+      "deactivate": "Deaktiviraj",
+      "delete": "Obriši",
+      "actionFailed": "Nešto je pošlo po zlu.",
+      "toastActivated": "Izazov je aktiviran.",
+      "toastDeactivated": "Izazov je deaktiviran.",
+      "toastDeleted": "Izazov je obrisan.",
+      "deleteConfirmTitle": "Obrisati izazov?",
+      "deleteConfirmBody": "Trajno obrisati “{{title}}” i njegove prijave? Ovu radnju nije moguće poništiti.",
+      "backToList": "← Natrag na izazove",
+      "newTitle": "Novi izazov",
+      "editTitle": "Uredi izazov",
+      "fieldTitle": "Naslov",
+      "fieldDescription": "Opis",
+      "fieldQuote": "Citat",
+      "fieldKind": "Vrsta",
+      "fieldStatus": "Status",
+      "fieldTheme": "Tema",
+      "fieldCoverUrl": "URL naslovne slike",
+      "fieldStarts": "Počinje",
+      "fieldEnds": "Završava",
+      "save": "Spremi",
+      "filters": {
+        "title": "Filtri izazova",
+        "status": "Status",
+        "all": "Sve",
+        "sortStarts": "Datum početka (najnovije)",
+        "sortTitle": "Naslov A–Z"
+      },
+      "statusLabel": {
+        "UPCOMING": "Nadolazeći",
+        "ACTIVE": "Aktivan",
+        "ENDED": "Završen"
+      },
+      "expand": {
+        "details": "Detalji",
+        "schedule": "Raspored",
+        "actions": "Radnje",
+        "close": "Zatvori",
+        "toggleExpand": "Prikaži detalje",
+        "toggleCollapse": "Sakrij detalje"
+      }
+    },
+    "featuredSchedule": {
+      "title": "Zakaži zamjenu istaknutog",
+      "nextChallenge": "Sljedeći izazov",
+      "pickOne": "— odaberite —",
+      "whenToSwap": "Kada zamijeniti",
+      "atSpecificTime": "U određeno vrijeme",
+      "whenCurrentEnds": "Kad istekne trenutni istaknuti",
+      "requiresEndDate": "Zahtijeva trenutni istaknuti izazov s datumom završetka",
+      "errorPickChallenge": "Odaberite izazov",
+      "errorPickTime": "Odaberite vrijeme",
+      "schedule": "Zakaži",
+      "closeLabel": "Zatvori"
+    }
+  },
+  "auth": {
+    "login": {
+      "heroAlt": "Apstraktna minimalistička digitalna slika u prigušenim ugljenim tonovima",
+      "heading": "Dobrodošli natrag.",
+      "subheading": "Nastavite svoje putovanje kroz svijet digitalne umjetnosti.",
+      "email": "Email adresa",
+      "emailPlaceholder": "ime@kustos.com",
+      "password": "Lozinka",
+      "forgotPassword": "Zaboravili ste lozinku?",
+      "submit": "Prijavi se na svoj profil",
+      "noAccount": "Nemate račun?",
+      "signUpLink": "Registrirajte se",
+      "errorBadCredentials": "Neispravna email adresa ili lozinka.",
+      "errorInvalid": "Provjerite podatke i pokušajte ponovno.",
+      "errorNetwork": "Nešto je pošlo po zlu. Pokušajte ponovno."
+    },
+    "signup": {
+      "heroAlt": "Apstraktna minimalistička slika u prigušenim zemljanim tonovima",
+      "heading": "Započnite svoju kolekciju.",
+      "subheading": "Pridružite se našoj zajednici digitalnih kustosa i otkrijte iznimna umjetnička djela.",
+      "firstName": "Ime",
+      "firstNamePlaceholder": "Npr. Elena",
+      "lastName": "Prezime",
+      "lastNamePlaceholder": "Npr. Rossi",
+      "email": "Email adresa",
+      "password": "Lozinka",
+      "confirmPassword": "Potvrdite lozinku",
+      "submit": "Izradi profil",
+      "hasAccount": "Već imate račun?",
+      "signInLink": "Prijavite se",
+      "signInInstead": "Umjesto toga se prijaviti?",
+      "errorEmailTaken": "Račun s ovom email adresom već postoji.",
+      "errorInvalid": "Provjerite podatke i pokušajte ponovno.",
+      "errorNetwork": "Nešto je pošlo po zlu. Pokušajte ponovno."
+    },
+    "validation": {
+      "email": {
+        "required": "Email adresa je obavezna",
+        "invalid": "Unesite valjanu email adresu"
+      },
+      "password": {
+        "required": "Lozinka je obavezna",
+        "tooShort": "Lozinka mora imati najmanje 8 znakova"
+      },
+      "firstName": {
+        "required": "Ime je obavezno",
+        "tooLong": "Ime može imati najviše 50 znakova"
+      },
+      "lastName": {
+        "required": "Prezime je obavezno",
+        "tooLong": "Prezime može imati najviše 50 znakova"
+      },
+      "confirmPassword": {
+        "required": "Potvrdite lozinku",
+        "mismatch": "Lozinke se ne podudaraju"
+      }
+    },
+    "prompt": {
+      "closeModal": "Zatvori prozor",
+      "title": "Pridružite se zajednici",
+      "body": "Registrirajte se ili prijavite kako biste mogli označavati radove sa sviđa mi se, pratiti umjetnike i sudjelovati u izazovima.",
+      "signup": "Registriraj se",
+      "login": "Prijavi se"
+    }
+  },
+  "reservation": {
+    "header": {
+      "release_confirm": "Osloboditi rezervaciju za {{title}}?"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { FeaturedTriggerType } from '../../api/featuredChallengeApi'
 import { Button } from '../ui/Button'
 
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function FeaturedScheduleDialog({ challenges, currentId, currentEndsAt, onSubmit, onCancel }: Props) {
+  const { t } = useTranslation()
   const [nextId, setNextId] = useState<number | ''>('')
   const [triggerType, setTriggerType] = useState<FeaturedTriggerType>('AT_TIME')
   const [triggerAt, setTriggerAt] = useState<string>('')
@@ -39,8 +41,8 @@ export function FeaturedScheduleDialog({ challenges, currentId, currentEndsAt, o
   }, [submitting, onCancel])
 
   const submit = async () => {
-    if (nextId === '') { setError('Pick a challenge'); return }
-    if (triggerType === 'AT_TIME' && !triggerAt) { setError('Pick a time'); return }
+    if (nextId === '') { setError(t('admin.featuredSchedule.errorPickChallenge')); return }
+    if (triggerType === 'AT_TIME' && !triggerAt) { setError(t('admin.featuredSchedule.errorPickTime')); return }
     setSubmitting(true)
     setError(null)
     try {
@@ -65,7 +67,7 @@ export function FeaturedScheduleDialog({ challenges, currentId, currentEndsAt, o
     >
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t('admin.featuredSchedule.closeLabel')}
         tabIndex={-1}
         onClick={() => { if (!submitting) onCancel() }}
         className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm cursor-default"
@@ -75,27 +77,27 @@ export function FeaturedScheduleDialog({ challenges, currentId, currentEndsAt, o
           id="featured-schedule-dialog-title"
           className="font-display text-2xl text-on-surface mb-5"
         >
-          Schedule Featured Replacement
+          {t('admin.featuredSchedule.title')}
         </h2>
 
         <div className="space-y-4">
           <label className="block">
             <span className="font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant">
-              Next challenge
+              {t('admin.featuredSchedule.nextChallenge')}
             </span>
             <select
               className="w-full mt-1 bg-surface-container-lowest border border-outline-variant/15 p-3 font-body text-sm text-on-surface focus:outline-none focus:border-on-surface transition-colors"
               value={nextId}
               onChange={e => setNextId(e.target.value === '' ? '' : Number(e.target.value))}
             >
-              <option value="">— pick one —</option>
+              <option value="">{t('admin.featuredSchedule.pickOne')}</option>
               {eligible.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
             </select>
           </label>
 
           <fieldset>
             <legend className="font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant mb-2">
-              When to swap
+              {t('admin.featuredSchedule.whenToSwap')}
             </legend>
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm text-on-surface cursor-pointer">
@@ -106,7 +108,7 @@ export function FeaturedScheduleDialog({ challenges, currentId, currentEndsAt, o
                   onChange={() => setTriggerType('AT_TIME')}
                   className="accent-on-surface"
                 />
-                At a specific time
+                {t('admin.featuredSchedule.atSpecificTime')}
               </label>
               {triggerType === 'AT_TIME' && (
                 <input
@@ -121,7 +123,7 @@ export function FeaturedScheduleDialog({ challenges, currentId, currentEndsAt, o
                   'flex items-center gap-2 text-sm cursor-pointer',
                   canUseWhenEnds ? 'text-on-surface' : 'text-on-surface-variant opacity-50 cursor-not-allowed',
                 ].join(' ')}
-                title={canUseWhenEnds ? undefined : 'Requires a current featured challenge with an end date'}
+                title={canUseWhenEnds ? undefined : t('admin.featuredSchedule.requiresEndDate')}
               >
                 <input
                   type="radio"
@@ -131,7 +133,7 @@ export function FeaturedScheduleDialog({ challenges, currentId, currentEndsAt, o
                   onChange={() => setTriggerType('WHEN_CURRENT_ENDS')}
                   className="accent-on-surface"
                 />
-                When current featured ends
+                {t('admin.featuredSchedule.whenCurrentEnds')}
               </label>
             </div>
           </fieldset>
@@ -145,10 +147,10 @@ export function FeaturedScheduleDialog({ challenges, currentId, currentEndsAt, o
 
         <div className="flex justify-end gap-3 mt-6">
           <Button variant="secondary" onClick={onCancel} disabled={submitting}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button onClick={() => { void submit() }} loading={submitting} disabled={submitting}>
-            Schedule
+            {t('admin.featuredSchedule.schedule')}
           </Button>
         </div>
       </div>

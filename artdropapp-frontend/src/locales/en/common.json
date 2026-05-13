@@ -113,6 +113,11 @@
   },
   "account": {
     "editProfile": "Edit profile",
+    "avatarPrompt": {
+      "title": "Add a profile picture",
+      "body": "A profile picture helps people recognize your work across ArtDrop.",
+      "cta": "Upload photo"
+    },
     "yourDrops": "Your drops",
     "noDrops": "You haven't dropped anything yet.",
     "loadingDrops": "Loading your drops",
@@ -173,16 +178,16 @@
       },
       "bio": {
         "tooLong": "Bio must be 1000 characters or fewer"
-      },
-      "avatarUrl": {
-        "invalid": "Must be a valid URL"
       }
     },
     "editProfile": {
       "title": "Edit profile",
       "closeLabel": "Close edit profile",
       "displayName": "Display Name",
-      "avatarUrl": "Avatar URL",
+      "avatar": "Profile picture",
+      "changePhoto": "Change photo",
+      "removePhoto": "Remove photo",
+      "uploadError": "Upload failed",
       "bio": "Bio",
       "ariaLabel": "Edit profile"
     }
@@ -714,6 +719,19 @@
         "toggleExpand": "Show details",
         "toggleCollapse": "Hide details"
       }
+    },
+    "featuredSchedule": {
+      "title": "Schedule Featured Replacement",
+      "nextChallenge": "Next challenge",
+      "pickOne": "— pick one —",
+      "whenToSwap": "When to swap",
+      "atSpecificTime": "At a specific time",
+      "whenCurrentEnds": "When current featured ends",
+      "requiresEndDate": "Requires a current featured challenge with an end date",
+      "errorPickChallenge": "Pick a challenge",
+      "errorPickTime": "Pick a time",
+      "schedule": "Schedule",
+      "closeLabel": "Close"
     }
   },
   "auth": {
