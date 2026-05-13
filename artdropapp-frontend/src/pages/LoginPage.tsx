@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
-import { isLoginError, login, type LoginError } from '../api/authApi'
+import { demoLogin, isLoginError, login, type LoginError } from '../api/authApi'
 import { AuthHeader } from '../components/layout/AuthHeader'
 import { Button } from '../components/ui/Button'
 import { FormField } from '../components/ui/FormField'
@@ -34,6 +34,7 @@ export function LoginPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [formError, setFormError] = useState<LoginError | null>(null)
+  const [isDemoSubmitting, setIsDemoSubmitting] = useState(false)
 
   const loginSchema = useMemo(() => makeLoginSchema(t), [t])
 
@@ -78,6 +79,24 @@ export function LoginPage() {
     }
   })
 
+  async function handleDemoLogin() {
+    setFormError(null)
+    setIsDemoSubmitting(true)
+    try {
+      const response = await demoLogin()
+      storeToken(response.username)
+      navigate('/')
+    } catch (error) {
+      if (isLoginError(error)) {
+        setFormError(error)
+      } else {
+        setFormError({ kind: 'network' })
+      }
+    } finally {
+      setIsDemoSubmitting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <AuthHeader />
@@ -106,7 +125,7 @@ export function LoginPage() {
               type="email"
               autoComplete="email"
               placeholder={t('auth.login.emailPlaceholder')}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isDemoSubmitting}
               invalid={!!errors.email}
               {...register('email')}
             />
@@ -118,7 +137,7 @@ export function LoginPage() {
               type="password"
               autoComplete="current-password"
               placeholder="••••••••"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isDemoSubmitting}
               invalid={!!errors.password}
               {...register('password')}
             />
@@ -143,11 +162,33 @@ export function LoginPage() {
           ) : null}
 
           <div className="pt-2">
-            <Button type="submit" variant="primary" fullWidth loading={isSubmitting}>
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              loading={isSubmitting}
+              disabled={isDemoSubmitting}
+            >
               {t('auth.login.submit')}
             </Button>
           </div>
         </form>
+
+        <div className="mt-5 space-y-3">
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            loading={isDemoSubmitting}
+            disabled={isSubmitting}
+            onClick={() => void handleDemoLogin()}
+          >
+            {t('auth.demo.cta')}
+          </Button>
+          <p className="font-body text-xs text-on-surface-variant leading-relaxed text-center">
+            {t('auth.demo.note')}
+          </p>
+        </div>
 
         <footer className="mt-auto pt-16 pb-10 text-center">
           <Link

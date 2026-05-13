@@ -44,9 +44,15 @@ INSERT INTO app_user (id, username, email, password_hash, display_name, slug, bi
 (38, 'tim', 'tim@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Tim Walsh', 'tim-walsh', 'Seed user for admin pagination.', 'https://i.pravatar.cc/160?img=31', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE),
 (39, 'sue', 'sue@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Sue Meyer', 'sue-meyer', 'Seed user for admin pagination.', 'https://i.pravatar.cc/160?img=33', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE),
 (40, 'pat', 'pat@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Pat O''Neil', 'pat-oneil', 'Seed user for admin pagination.', 'https://i.pravatar.cc/160?img=34', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE),
-(41, 'nova', 'nova@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Nova Bell', 'nova-bell', 'Lurker. Just here to follow other artists.', 'https://i.pravatar.cc/160?img=46', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE)
+(41, 'nova', 'nova@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Nova Bell', 'nova-bell', 'Lurker. Just here to follow other artists.', 'https://i.pravatar.cc/160?img=46', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE),
+(42, 'demo', 'demo@artdrop.local', '$2a$12$tH7pooqJ6HwmVbo0zHY/GOb5tt9vc.MllMqVBqiRMdXjCZpN101nK', 'Demo Collector', 'demo-collector', 'Collector account with a full Circle, live orders, sales, collections, likes, and seller access.', 'https://i.pravatar.cc/160?img=57', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE)
 ON CONFLICT (id) DO NOTHING;
 -- all seeded users have password: admin6060
+
+UPDATE app_user
+SET bio = 'Collector account with a full Circle, live orders, sales, collections, likes, and seller access.',
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = 42;
 
 INSERT INTO authority (id, name) VALUES
 (1, 'ROLE_ADMIN'),
@@ -108,8 +114,31 @@ INSERT INTO user_authority (user_id, authority_id) VALUES
 (10, 3),
 (11, 3),
 (12, 3),
-(41, 2)
+(41, 2),
+(42, 2),
+(42, 3)
 ON CONFLICT (user_id, authority_id) DO NOTHING;
+
+INSERT INTO seller_application (
+    id, user_id, message, status, submitted_at, decided_at, decided_by_user_id, decision_reason
+) VALUES
+(901, 42, 'Established account with active listings, fulfilled sales, and current inventory.', 'APPROVED',
+ (CURRENT_TIMESTAMP + -30 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -29 * INTERVAL '1 day'), 1,
+ 'Approved for active selling.')
+ON CONFLICT (id) DO NOTHING;
+
+UPDATE seller_application
+SET user_id = 42,
+    message = 'Established account with active listings, fulfilled sales, and current inventory.',
+    status = 'APPROVED',
+    submitted_at = (CURRENT_TIMESTAMP + -30 * INTERVAL '1 day'),
+    decided_at = (CURRENT_TIMESTAMP + -29 * INTERVAL '1 day'),
+    decided_by_user_id = 1,
+    decision_reason = 'Approved for active selling.',
+    revoked_at = NULL,
+    revoked_by_user_id = NULL,
+    revoke_reason = NULL
+WHERE id = 901;
 
 INSERT INTO artwork (id, author_id, title, medium, description, width_value, height_value, depth_value, dimension_unit, price, progress_status, sale_type, sale_state, edition_size, published_at, created_at, updated_at) VALUES
 (1,  1, 'Recursive Halos',       'Digital',     'Concentric ring composition rendered in four passes - slow caustics over matte plates.',                NULL,  NULL,  NULL, NULL,   580.00, 'FINISHED', 'EDITION', 'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -1 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -196,8 +225,47 @@ INSERT INTO artwork (id, author_id, title, medium, description, width_value, hei
 (82, 6, 'Vaulted Hall',         'Photography', 'Single architectural exposure of a vaulted reading hall.',                                       50.00, 70.00, NULL, 'CM',  690.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -60 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (83, 6, 'Window Grid',          'Photography', 'Repeating modernist window grid - one frame, archival print.',                                  40.00, 60.00, NULL, 'CM',  420.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -61 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (84, 6, 'Plaza Edition',        'Photography', 'Three-print edition from an empty plaza at first light.',                                       50.00, 70.00, NULL, 'CM',  780.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -62 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(85, 6, 'Rooftop Geometry',     'Photography', 'Rooftop angles in mid-afternoon shadow - single edition print.',                                40.00, 50.00, NULL, 'CM',  440.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -63 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+(85, 6, 'Rooftop Geometry',     'Photography', 'Rooftop angles in mid-afternoon shadow - single edition print.',                                40.00, 50.00, NULL, 'CM',  440.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -63 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(86, 42, 'Halo Recast',         'Digital',     'A tighter ring composition built from concentric passes and a cooler matte surface.',            NULL,  NULL, NULL, NULL, 520.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -2  * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(87, 42, 'Velocity Afterimage',  'Digital',     'Warm virtual light study with the middle frames held longer and softened at the edge.',          NULL,  NULL, NULL, NULL, 640.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -3  * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(88, 42, 'Spectrum Fold',        'Digital',     'Gradient triptych variant with the violet pass pulled forward and printed on rag paper.',        NULL,  NULL, NULL, NULL, 480.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -4  * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(89, 42, 'Grasp Study II',       'Sculpture',   'Cast-clay hand forms photographed as a small sequence, focused on tension before contact.',      18.00, 22.00, 14.00, 'CM', 1180.00, 'FINISHED', 'ORIGINAL', 'AVAILABLE', NULL, (CURRENT_TIMESTAMP + -5  * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(90, 42, 'Roman Window Notes',   'Oil',         'Two small oil panels from an afternoon window study, keeping the palette muted and dry.',         50.00, 70.00, NULL, 'CM',  920.00, 'FINISHED', 'ORIGINAL', 'AVAILABLE', NULL, (CURRENT_TIMESTAMP + -6  * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(91, 42, 'Salon Rehearsal',      'Painting',    'Figure studies reworked from loose sketches into a calmer four-panel salon sequence.',           60.00, 80.00, NULL, 'CM', 1680.00, 'FINISHED', 'ORIGINAL', 'AVAILABLE', NULL, (CURRENT_TIMESTAMP + -7  * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(92, 42, 'Pink Current',         'Acrylic',     'Heavy-body acrylic pour study with five related panels and a brighter center movement.',         100.00, 120.00, NULL, 'CM', 1420.00, 'FINISHED', 'ORIGINAL', 'AVAILABLE', NULL, (CURRENT_TIMESTAMP + -8  * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(93, 42, 'Tidal Linen Proof',    'Acrylic',     'Cool-key acrylic diptych on treated linen, balancing rust undertones against blue wash.',        90.00, 110.00, NULL, 'CM',  860.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -9  * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(94, 42, 'Field Proofs',         'Photography', 'Botanical photo proof set arranged from four field exposures across one late afternoon.',        50.00, 75.00, NULL, 'CM',  540.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -10 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(95, 42, 'Concrete Morning',     'Photography', 'Silver-gelatin architectural print from a concrete stairwell before the light flattened.',      40.00, 50.00, NULL, 'CM',  620.00, 'FINISHED', 'EDITION',  'AVAILABLE', 10,   (CURRENT_TIMESTAMP + -11 * INTERVAL '1 day'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (id) DO NOTHING;
+
+UPDATE artwork AS a
+SET author_id = v.author_id,
+    title = v.title,
+    medium = v.medium,
+    description = v.description,
+    width_value = v.width_value,
+    height_value = v.height_value,
+    depth_value = v.depth_value,
+    dimension_unit = v.dimension_unit,
+    price = v.price,
+    progress_status = v.progress_status,
+    sale_type = v.sale_type,
+    sale_state = v.sale_state,
+    edition_size = v.edition_size,
+    updated_at = CURRENT_TIMESTAMP
+FROM (VALUES
+    (86, 42, 'Halo Recast',          'Digital',     'A tighter ring composition built from concentric passes and a cooler matte surface.',       NULL::numeric, NULL::numeric, NULL::numeric, NULL,  520.00::numeric, 'FINISHED', 'EDITION',  'AVAILABLE', 10),
+    (87, 42, 'Velocity Afterimage',  'Digital',     'Warm virtual light study with the middle frames held longer and softened at the edge.',     NULL::numeric, NULL::numeric, NULL::numeric, NULL,  640.00::numeric, 'FINISHED', 'EDITION',  'AVAILABLE', 10),
+    (88, 42, 'Spectrum Fold',        'Digital',     'Gradient triptych variant with the violet pass pulled forward and printed on rag paper.',   NULL::numeric, NULL::numeric, NULL::numeric, NULL,  480.00::numeric, 'FINISHED', 'EDITION',  'AVAILABLE', 10),
+    (89, 42, 'Grasp Study II',       'Sculpture',   'Cast-clay hand forms photographed as a small sequence, focused on tension before contact.', 18.00::numeric, 22.00::numeric, 14.00::numeric, 'CM', 1180.00::numeric, 'FINISHED', 'ORIGINAL', 'AVAILABLE', NULL),
+    (90, 42, 'Roman Window Notes',   'Oil',         'Two small oil panels from an afternoon window study, keeping the palette muted and dry.',    50.00::numeric, 70.00::numeric, NULL::numeric, 'CM',  920.00::numeric, 'FINISHED', 'ORIGINAL', 'AVAILABLE', NULL),
+    (91, 42, 'Salon Rehearsal',      'Painting',    'Figure studies reworked from loose sketches into a calmer four-panel salon sequence.',      60.00::numeric, 80.00::numeric, NULL::numeric, 'CM', 1680.00::numeric, 'FINISHED', 'ORIGINAL', 'AVAILABLE', NULL),
+    (92, 42, 'Pink Current',         'Acrylic',     'Heavy-body acrylic pour study with five related panels and a brighter center movement.',    100.00::numeric, 120.00::numeric, NULL::numeric, 'CM', 1420.00::numeric, 'FINISHED', 'ORIGINAL', 'AVAILABLE', NULL),
+    (93, 42, 'Tidal Linen Proof',    'Acrylic',     'Cool-key acrylic diptych on treated linen, balancing rust undertones against blue wash.',   90.00::numeric, 110.00::numeric, NULL::numeric, 'CM',  860.00::numeric, 'FINISHED', 'EDITION',  'AVAILABLE', 10),
+    (94, 42, 'Field Proofs',         'Photography', 'Botanical photo proof set arranged from four field exposures across one late afternoon.',   50.00::numeric, 75.00::numeric, NULL::numeric, 'CM',  540.00::numeric, 'FINISHED', 'EDITION',  'AVAILABLE', 10),
+    (95, 42, 'Concrete Morning',     'Photography', 'Silver-gelatin architectural print from a concrete stairwell before the light flattened.', 40.00::numeric, 50.00::numeric, NULL::numeric, 'CM',  620.00::numeric, 'FINISHED', 'EDITION',  'AVAILABLE', 10)
+) AS v(id, author_id, title, medium, description, width_value, height_value, depth_value, dimension_unit, price, progress_status, sale_type, sale_state, edition_size)
+WHERE a.id = v.id;
 
 INSERT INTO artwork_tags (artwork_id, tag) VALUES
 (1,  '3d'),            (1,  'rings'),
@@ -273,7 +341,17 @@ INSERT INTO artwork_tags (artwork_id, tag) VALUES
 (71, 'figurative'),    (71, 'salon'),
 (72, 'pour'),          (72, 'fluid'),
 (73, 'botanical'),     (73, 'field'),
-(74, 'collage'),       (74, 'studio')
+(74, 'collage'),       (74, 'studio'),
+(86, '3d'),            (86, 'rings'),
+(87, 'octane'),        (87, 'light'),
+(88, 'gradient'),      (88, 'generative'),
+(89, 'cast'),          (89, 'series'),
+(90, 'rome'),          (90, 'study'),
+(91, 'figurative'),    (91, 'salon'),
+(92, 'pour'),          (92, 'fluid'),
+(93, 'tidal'),         (93, 'color'),
+(94, 'botanical'),     (94, 'field'),
+(95, 'silver-gelatin'),(95, 'architecture')
 ON CONFLICT (artwork_id, tag) DO NOTHING;
 
 INSERT INTO artwork_image (id, artwork_id, public_id, sort_order, is_cover, caption, created_at) VALUES
@@ -561,8 +639,60 @@ INSERT INTO artwork_image (id, artwork_id, public_id, sort_order, is_cover, capt
 (261, 84, 'henrik-donnestad-Lkpax1rj1No-unsplash_s3uv9w', 2, FALSE, NULL, CURRENT_TIMESTAMP),
 (262, 85, 'henrik-donnestad-t2Sai-AqIpI-unsplash_ccvtol', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
 (263, 85, 'henrik-donnestad-HO1Evlp1p1o-unsplash_prnzfj', 1, FALSE, NULL, CURRENT_TIMESTAMP),
-(264, 85, 'henrik-donnestad-Lkpax1rj1No-unsplash_s3uv9w', 2, FALSE, NULL, CURRENT_TIMESTAMP)
+(264, 85, 'henrik-donnestad-Lkpax1rj1No-unsplash_s3uv9w', 2, FALSE, NULL, CURRENT_TIMESTAMP),
+(265, 86, '3d-circle-2_fgglbc', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(266, 86, '3d-circle-4_d7fk5n', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(267, 87, 'max-3d-1_kqqfrn', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(268, 87, 'max-3d-3_f4osqu', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(269, 88, 'premium-digital-1_lxhj03', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(270, 88, 'premium-digital-3_z2npnh', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(271, 89, 'icarius-hand-1_jw03vm', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(272, 89, 'icarius-hand-3_gxo3dt', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(273, 90, 'rome-oil-on-canvas-1_dgkbmr', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(274, 90, 'rome-oil-on-canvas-2_nrmdks', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(275, 91, 'europeana-1_klalak', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(276, 91, 'europeana-4_utzhol', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(277, 92, 'pink-splash-1_yvoo3b', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(278, 92, 'pink-splash-3_roliot', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(279, 92, 'pink-splash-5_g8hjfv', 2, FALSE, NULL, CURRENT_TIMESTAMP),
+(280, 93, 'blue-green-pattern-1_i3ment', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(281, 93, 'blue-green-pattern-2_nrmu3o', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(282, 94, 'enrico-poppies-photo-1_z7vihb', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(283, 94, 'enrico-poppies-photo-4_i1swcf', 1, FALSE, NULL, CURRENT_TIMESTAMP),
+(284, 95, 'henrik-donnestad-Lkpax1rj1No-unsplash_s3uv9w', 0, TRUE,  NULL, CURRENT_TIMESTAMP),
+(285, 95, 'henrik-donnestad-t2Sai-AqIpI-unsplash_ccvtol', 1, FALSE, NULL, CURRENT_TIMESTAMP)
 ON CONFLICT (id) DO NOTHING;
+
+UPDATE artwork_image AS ai
+SET artwork_id = v.artwork_id,
+    public_id = v.public_id,
+    sort_order = v.sort_order,
+    is_cover = v.is_cover,
+    caption = NULL
+FROM (VALUES
+    (265, 86, '3d-circle-2_fgglbc', 0, TRUE),
+    (266, 86, '3d-circle-4_d7fk5n', 1, FALSE),
+    (267, 87, 'max-3d-1_kqqfrn', 0, TRUE),
+    (268, 87, 'max-3d-3_f4osqu', 1, FALSE),
+    (269, 88, 'premium-digital-1_lxhj03', 0, TRUE),
+    (270, 88, 'premium-digital-3_z2npnh', 1, FALSE),
+    (271, 89, 'icarius-hand-1_jw03vm', 0, TRUE),
+    (272, 89, 'icarius-hand-3_gxo3dt', 1, FALSE),
+    (273, 90, 'rome-oil-on-canvas-1_dgkbmr', 0, TRUE),
+    (274, 90, 'rome-oil-on-canvas-2_nrmdks', 1, FALSE),
+    (275, 91, 'europeana-1_klalak', 0, TRUE),
+    (276, 91, 'europeana-4_utzhol', 1, FALSE),
+    (277, 92, 'pink-splash-1_yvoo3b', 0, TRUE),
+    (278, 92, 'pink-splash-3_roliot', 1, FALSE),
+    (279, 92, 'pink-splash-5_g8hjfv', 2, FALSE),
+    (280, 93, 'blue-green-pattern-1_i3ment', 0, TRUE),
+    (281, 93, 'blue-green-pattern-2_nrmu3o', 1, FALSE),
+    (282, 94, 'enrico-poppies-photo-1_z7vihb', 0, TRUE),
+    (283, 94, 'enrico-poppies-photo-4_i1swcf', 1, FALSE),
+    (284, 95, 'henrik-donnestad-Lkpax1rj1No-unsplash_s3uv9w', 0, TRUE),
+    (285, 95, 'henrik-donnestad-t2Sai-AqIpI-unsplash_ccvtol', 1, FALSE)
+) AS v(id, artwork_id, public_id, sort_order, is_cover)
+WHERE ai.id = v.id;
 
 INSERT INTO comment (id, artwork_id, author_id, text, parent_comment_id, created_at, updated_at, is_deleted) VALUES
 -- Artwork 1: Recursive Halos (digital rings) - 8 top-level + 5 replies
@@ -837,21 +967,67 @@ INSERT INTO artwork_like (id, artwork_id, user_id, created_at) VALUES
 (169, 59, 1, CURRENT_TIMESTAMP),
 (170, 59, 3, CURRENT_TIMESTAMP),
 (171, 44, 1, CURRENT_TIMESTAMP),
-(172, 44, 2, CURRENT_TIMESTAMP)
+(172, 44, 2, CURRENT_TIMESTAMP),
+(173, 86, 1, CURRENT_TIMESTAMP),
+(174, 86, 2, CURRENT_TIMESTAMP),
+(175, 86, 3, CURRENT_TIMESTAMP),
+(176, 86, 4, CURRENT_TIMESTAMP),
+(177, 87, 5, CURRENT_TIMESTAMP),
+(178, 87, 6, CURRENT_TIMESTAMP),
+(179, 88, 7, CURRENT_TIMESTAMP),
+(180, 88, 8, CURRENT_TIMESTAMP),
+(181, 1, 42, CURRENT_TIMESTAMP),
+(182, 2, 42, CURRENT_TIMESTAMP),
+(183, 7, 42, CURRENT_TIMESTAMP),
+(184, 15, 42, CURRENT_TIMESTAMP),
+(185, 57, 42, CURRENT_TIMESTAMP),
+(186, 72, 42, CURRENT_TIMESTAMP),
+(187, 89, 1, CURRENT_TIMESTAMP),
+(188, 89, 3, CURRENT_TIMESTAMP),
+(189, 90, 2, CURRENT_TIMESTAMP),
+(190, 90, 5, CURRENT_TIMESTAMP),
+(191, 91, 4, CURRENT_TIMESTAMP),
+(192, 91, 6, CURRENT_TIMESTAMP),
+(193, 92, 7, CURRENT_TIMESTAMP),
+(194, 92, 8, CURRENT_TIMESTAMP),
+(195, 93, 9, CURRENT_TIMESTAMP),
+(196, 94, 10, CURRENT_TIMESTAMP),
+(197, 95, 11, CURRENT_TIMESTAMP),
+(198, 95, 12, CURRENT_TIMESTAMP)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO collection (id, owner_id, name, description, created_at, updated_at, is_public) VALUES
 (1, 1, 'Urban Scenes',   'Street-focused sketches and photo references.',         (CURRENT_TIMESTAMP + -95 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -95 * INTERVAL '1 day'), TRUE),
 (2, 1, 'Sunset Studies', 'Warm color palette experiments for landscape compositions.', (CURRENT_TIMESTAMP + -77 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -77 * INTERVAL '1 day'), FALSE),
-(3, 2, 'Print Drafts',   'Mixed-media drafts prepared for print review.',         (CURRENT_TIMESTAMP + -40 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -40 * INTERVAL '1 day'), TRUE)
+(3, 2, 'Print Drafts',   'Mixed-media drafts prepared for print review.',         (CURRENT_TIMESTAMP + -40 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -40 * INTERVAL '1 day'), TRUE),
+(4, 42, 'Studio Picks', 'Saved pieces and proof sets from the collector shelf.',   (CURRENT_TIMESTAMP + -4 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -4 * INTERVAL '1 day'), TRUE)
 ON CONFLICT (id) DO NOTHING;
+
+UPDATE collection
+SET name = 'Studio Picks',
+    description = 'Saved pieces and proof sets from the collector shelf.',
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = 4;
 
 INSERT INTO collection_artwork (collection_id, artwork_id) VALUES
 (1, 2),
 (1, 3),
 (2, 1),
 (3, 3),
-(3, 1)
+(3, 1),
+(4, 1),
+(4, 7),
+(4, 15),
+(4, 86),
+(4, 87),
+(4, 88),
+(4, 89),
+(4, 90),
+(4, 91),
+(4, 92),
+(4, 93),
+(4, 94),
+(4, 95)
 ON CONFLICT (collection_id, artwork_id) DO NOTHING;
 
 INSERT INTO challenge (id, created_by, title, description, quote, status, theme, cover_image_url, starts_at, ends_at, created_at, updated_at) VALUES
@@ -905,11 +1081,53 @@ INSERT INTO user_follow (id, follower_id, followee_id, created_at) VALUES
 (2, 3,  41, CURRENT_TIMESTAMP),  -- sarah  follows Nova
 (3, 6,  41, CURRENT_TIMESTAMP),  -- thomas follows Nova
 (4, 7,  41, CURRENT_TIMESTAMP),  -- elena  follows Nova
-(5, 11, 41, CURRENT_TIMESTAMP)   -- iris   follows Nova
+(5, 11, 41, CURRENT_TIMESTAMP),  -- iris   follows Nova
+(6, 42, 1, CURRENT_TIMESTAMP),
+(7, 42, 2, CURRENT_TIMESTAMP),
+(8, 42, 3, CURRENT_TIMESTAMP),
+(9, 42, 4, CURRENT_TIMESTAMP),
+(10, 42, 5, CURRENT_TIMESTAMP),
+(11, 42, 6, CURRENT_TIMESTAMP),
+(12, 42, 7, CURRENT_TIMESTAMP),
+(13, 42, 8, CURRENT_TIMESTAMP),
+(14, 42, 9, CURRENT_TIMESTAMP),
+(15, 42, 10, CURRENT_TIMESTAMP),
+(16, 42, 11, CURRENT_TIMESTAMP),
+(17, 42, 12, CURRENT_TIMESTAMP),
+(18, 1, 42, CURRENT_TIMESTAMP),
+(19, 2, 42, CURRENT_TIMESTAMP),
+(20, 3, 42, CURRENT_TIMESTAMP),
+(21, 4, 42, CURRENT_TIMESTAMP),
+(22, 5, 42, CURRENT_TIMESTAMP),
+(23, 6, 42, CURRENT_TIMESTAMP),
+(24, 7, 42, CURRENT_TIMESTAMP),
+(25, 8, 42, CURRENT_TIMESTAMP)
 ON CONFLICT (follower_id, followee_id) DO NOTHING;
+
+INSERT INTO shipping_address (id, user_id, recipient_name, line1, line2, city, postal_code, country, phone, created_at) VALUES
+(901, 42, 'Demo Collector', 'Martim Moniz 12', 'Studio 4', 'Lisbon', '1100-341', 'PT', '+351 210 000 000', CURRENT_TIMESTAMP)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO orders (
+    id, buyer_user_id, artist_user_id, artwork_id, quantity, status,
+    subtotal, shipping_fee, platform_fee, total, currency,
+    stripe_checkout_session_id, stripe_payment_intent_id,
+    ship_recipient_name, ship_line1, ship_line2, ship_city, ship_postal_code, ship_country, ship_phone,
+    tracking_number, shipping_carrier, cancellation_reason,
+    paid_at, shipped_at, delivered_at, cancelled_at, refunded_at, created_at, updated_at
+) VALUES
+(901, 42, 1,  2,  1, 'SHIPPED',   850.00, 10.00, 85.00, 945.00, 'EUR', 'cs_demo_buyer_1', 'pi_demo_buyer_1', 'Demo Collector', 'Martim Moniz 12', 'Studio 4', 'Lisbon', '1100-341', 'PT', '+351 210 000 000', 'AD-4219-PT', 'DHL', NULL, (CURRENT_TIMESTAMP + -4 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -2 * INTERVAL '1 day'), NULL, NULL, NULL, (CURRENT_TIMESTAMP + -4 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -2 * INTERVAL '1 day')),
+(902, 42, 3,  7,  1, 'DELIVERED', 1750.00, 10.00, 175.00, 1935.00, 'EUR', 'cs_demo_buyer_2', 'pi_demo_buyer_2', 'Demo Collector', 'Martim Moniz 12', 'Studio 4', 'Lisbon', '1100-341', 'PT', '+351 210 000 000', 'AD-7780-PT', 'UPS', NULL, (CURRENT_TIMESTAMP + -18 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -15 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -11 * INTERVAL '1 day'), NULL, NULL, (CURRENT_TIMESTAMP + -18 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -11 * INTERVAL '1 day')),
+(903, 42, 6, 75, 2, 'PAID',       760.00, 10.00, 76.00, 846.00, 'EUR', 'cs_demo_buyer_3', 'pi_demo_buyer_3', 'Demo Collector', 'Martim Moniz 12', 'Studio 4', 'Lisbon', '1100-341', 'PT', '+351 210 000 000', NULL, NULL, NULL, (CURRENT_TIMESTAMP + -1 * INTERVAL '1 day'), NULL, NULL, NULL, NULL, (CURRENT_TIMESTAMP + -1 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -1 * INTERVAL '1 day')),
+(904, 2, 42, 86, 1, 'SHIPPED',    520.00, 10.00, 52.00, 582.00, 'EUR', 'cs_demo_sale_1', 'pi_demo_sale_1', 'Julian Vane', 'Prinsengracht 40', NULL, 'Amsterdam', '1015 DX', 'NL', '+31 20 000 0000', 'AD-9001-NL', 'DHL', NULL, (CURRENT_TIMESTAMP + -6 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -3 * INTERVAL '1 day'), NULL, NULL, NULL, (CURRENT_TIMESTAMP + -6 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -3 * INTERVAL '1 day')),
+(905, 5, 42, 87, 1, 'PAID',       640.00, 10.00, 64.00, 714.00, 'EUR', 'cs_demo_sale_2', 'pi_demo_sale_2', 'Claire Durand', 'Rue Oberkampf 88', NULL, 'Paris', '75011', 'FR', '+33 1 00 00 00 00', NULL, NULL, NULL, (CURRENT_TIMESTAMP + -8 * INTERVAL '1 hour'), NULL, NULL, NULL, NULL, (CURRENT_TIMESTAMP + -8 * INTERVAL '1 hour'), (CURRENT_TIMESTAMP + -8 * INTERVAL '1 hour')),
+(906, 8, 42, 88, 1, 'DELIVERED',  780.00, 10.00, 78.00, 868.00, 'EUR', 'cs_demo_sale_3', 'pi_demo_sale_3', 'Niko Petrov', 'Ilica 24', NULL, 'Zagreb', '10000', 'HR', '+385 1 000 0000', 'AD-1204-HR', 'GLS', NULL, (CURRENT_TIMESTAMP + -22 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -19 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -16 * INTERVAL '1 day'), NULL, NULL, (CURRENT_TIMESTAMP + -22 * INTERVAL '1 day'), (CURRENT_TIMESTAMP + -16 * INTERVAL '1 day'))
+ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE app_user             ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE authority            ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE shipping_address     ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE orders               ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE seller_application   ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE artwork              ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE artwork_image        ALTER COLUMN id RESTART WITH 1000;

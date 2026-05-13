@@ -94,6 +94,25 @@ export async function login(request: LoginRequest): Promise<AuthSessionResponse>
   throw err
 }
 
+export async function demoLogin(): Promise<AuthSessionResponse> {
+  let res: Response
+  try {
+    res = await fetch(apiPath('/api/auth/demo-login'), {
+      method: 'POST',
+      credentials: 'include',
+    })
+  } catch {
+    const err: LoginError = { kind: 'network' }
+    throw err
+  }
+
+  if (res.status === 200) {
+    return (await res.json()) as AuthSessionResponse
+  }
+  const err: LoginError = { kind: 'network' }
+  throw err
+}
+
 export function isLoginError(value: unknown): value is LoginError {
   return (
     typeof value === 'object' &&

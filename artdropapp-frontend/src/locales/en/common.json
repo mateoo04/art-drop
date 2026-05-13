@@ -769,6 +769,10 @@
       "errorInvalid": "Please check your details and try again.",
       "errorNetwork": "Something went wrong. Please try again."
     },
+    "demo": {
+      "cta": "Explore Demo Account",
+      "note": "Opens a seeded account with Circle activity, collections, orders, sales, and shipped items."
+    },
     "validation": {
       "email": {
         "required": "Email is required",

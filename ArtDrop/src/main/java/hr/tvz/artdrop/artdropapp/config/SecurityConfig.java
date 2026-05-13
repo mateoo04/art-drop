@@ -49,6 +49,7 @@ public class SecurityConfig {
                     .ignoringRequestMatchers(
                             "/api/auth/login",
                             "/api/auth/signup",
+                            "/api/auth/demo-login",
                             "/api/checkout/webhook"
                     )
             );
@@ -60,7 +61,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/checkout/webhook", "/error").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/auth/demo-login", "/api/checkout/webhook", "/error").permitAll()
                         .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/**").authenticated()

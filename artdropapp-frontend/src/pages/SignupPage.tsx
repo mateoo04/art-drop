@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
-import { signup, isSignupError, type SignupError } from '../api/authApi'
+import { demoLogin, signup, isSignupError, type SignupError } from '../api/authApi'
 import { AuthHeader } from '../components/layout/AuthHeader'
 import { Button } from '../components/ui/Button'
 import { FormField } from '../components/ui/FormField'
@@ -55,6 +55,7 @@ export function SignupPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [formError, setFormError] = useState<SignupError | null>(null)
+  const [isDemoSubmitting, setIsDemoSubmitting] = useState(false)
 
   const signupSchema = useMemo(() => makeSignupSchema(t), [t])
 
@@ -104,6 +105,20 @@ export function SignupPage() {
     }
   })
 
+  async function handleDemoLogin() {
+    setFormError(null)
+    setIsDemoSubmitting(true)
+    try {
+      const response = await demoLogin()
+      storeToken(response.username)
+      navigate('/')
+    } catch {
+      setFormError({ kind: 'network' })
+    } finally {
+      setIsDemoSubmitting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <AuthHeader />
@@ -132,7 +147,7 @@ export function SignupPage() {
               type="text"
               autoComplete="given-name"
               placeholder={t('auth.signup.firstNamePlaceholder')}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isDemoSubmitting}
               invalid={!!errors.firstName}
               {...register('firstName')}
             />
@@ -144,7 +159,7 @@ export function SignupPage() {
               type="text"
               autoComplete="family-name"
               placeholder={t('auth.signup.lastNamePlaceholder')}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isDemoSubmitting}
               invalid={!!errors.lastName}
               {...register('lastName')}
             />
@@ -156,7 +171,7 @@ export function SignupPage() {
               type="email"
               autoComplete="email"
               placeholder={t('auth.login.emailPlaceholder')}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isDemoSubmitting}
               invalid={!!errors.email}
               {...register('email')}
             />
@@ -168,7 +183,7 @@ export function SignupPage() {
               type="password"
               autoComplete="new-password"
               placeholder="••••••••"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isDemoSubmitting}
               invalid={!!errors.password}
               {...register('password')}
             />
@@ -184,7 +199,7 @@ export function SignupPage() {
               type="password"
               autoComplete="new-password"
               placeholder="••••••••"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isDemoSubmitting}
               invalid={!!errors.confirmPassword}
               {...register('confirmPassword')}
             />
@@ -205,11 +220,33 @@ export function SignupPage() {
           ) : null}
 
           <div className="pt-2">
-            <Button type="submit" variant="primary" fullWidth loading={isSubmitting}>
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              loading={isSubmitting}
+              disabled={isDemoSubmitting}
+            >
               {t('auth.signup.submit')}
             </Button>
           </div>
         </form>
+
+        <div className="mt-5 space-y-3">
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            loading={isDemoSubmitting}
+            disabled={isSubmitting}
+            onClick={() => void handleDemoLogin()}
+          >
+            {t('auth.demo.cta')}
+          </Button>
+          <p className="font-body text-xs text-on-surface-variant leading-relaxed text-center">
+            {t('auth.demo.note')}
+          </p>
+        </div>
 
         <footer className="mt-auto pt-16 pb-10 text-center">
           <Link

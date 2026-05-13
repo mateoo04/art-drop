@@ -23,7 +23,8 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
 
     private static final Set<String> RATE_LIMITED_PATHS = Set.of(
             "/api/auth/login",
-            "/api/auth/signup"
+            "/api/auth/signup",
+            "/api/auth/demo-login"
     );
 
     private static final int MAX_ATTEMPTS = 5;

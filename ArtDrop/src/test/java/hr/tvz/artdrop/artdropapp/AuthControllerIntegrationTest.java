@@ -61,6 +61,15 @@ class AuthControllerIntegrationTest extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void demoLoginReturnsSeededSessionAndSetsCookie() throws Exception {
+        mockMvc.perform(post("/api/auth/demo-login"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("demo"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Set-Cookie", org.hamcrest.Matchers.containsString("jwt=")));
+    }
+
+    @Test
     void signupNewUserReturnsCreatedAndSetsCookie() throws Exception {
         String unique = "lab9_" + System.nanoTime();
         RegisterRequest req = new RegisterRequest(unique, unique + "@artdrop.local", "password123", "Lab9 User");

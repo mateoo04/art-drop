@@ -7,6 +7,7 @@ import hr.tvz.artdrop.artdropapp.dto.RegisterRequest;
 import hr.tvz.artdrop.artdropapp.security.AuthCookieService;
 import hr.tvz.artdrop.artdropapp.service.AuthService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -23,10 +24,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final AuthService authService;
     private final AuthCookieService authCookieService;
+    private final boolean demoLoginEnabled;
+    private final String demoUsername;
+    private final String demoPassword;
 
-    public AuthController(AuthService authService, AuthCookieService authCookieService) {
+    public AuthController(
+            AuthService authService,
+            AuthCookieService authCookieService,
+            @Value("${app.demo-login.enabled:false}") boolean demoLoginEnabled,
+            @Value("${app.demo-login.username:demo}") String demoUsername,
+            @Value("${app.demo-login.password:}") String demoPassword
+    ) {
         this.authService = authService;
         this.authCookieService = authCookieService;
+        this.demoLoginEnabled = demoLoginEnabled;
+        this.demoUsername = demoUsername;
+        this.demoPassword = demoPassword;
     }
 
     @PostMapping("/login")
@@ -45,6 +58,18 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new AuthSessionResponse(registerRequest.username()));
+    }
+
+    @PostMapping("/demo-login")
+    public ResponseEntity<AuthSessionResponse> demoLogin() {
+        if (!demoLoginEnabled) {
+            return ResponseEntity.notFound().build();
+        }
+        JwtResponse jwt = authService.login(new LoginRequest(demoUsername, demoPassword));
+        ResponseCookie cookie = authCookieService.build(jwt.accessToken());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new AuthSessionResponse(demoUsername));
     }
 
     @PostMapping("/logout")
