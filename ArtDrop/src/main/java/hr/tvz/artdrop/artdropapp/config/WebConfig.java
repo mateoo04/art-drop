@@ -34,7 +34,14 @@ public class WebConfig implements WebMvcConfigurer {
                 continue;
             }
             for (String origin : value.split(",")) {
-                String normalized = origin.trim().replaceAll("/+$", "");
+                String normalized = origin.trim()
+                        .replaceAll("^[\"']|[\"']$", "")
+                        .replaceAll("/+$", "");
+                if (!normalized.contains("://")) {
+                    normalized = normalized.startsWith("localhost") || normalized.startsWith("127.0.0.1")
+                            ? "http://" + normalized
+                            : "https://" + normalized;
+                }
                 if (!normalized.isBlank()) {
                     origins.add(normalized);
                 }
