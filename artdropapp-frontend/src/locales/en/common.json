@@ -773,6 +773,12 @@
       "cta": "Explore Demo Account",
       "note": "Opens a seeded account with Circle activity, collections, orders, sales, and shipped items."
     },
+    "demoHint": {
+      "kicker": "Demo available",
+      "body": "You can explore ArtDrop without creating an account.",
+      "cta": "Open login",
+      "dismiss": "Hide demo login hint"
+    },
     "validation": {
       "email": {
         "required": "Email is required",

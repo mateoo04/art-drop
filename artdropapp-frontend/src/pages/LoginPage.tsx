@@ -174,7 +174,7 @@ export function LoginPage() {
           </div>
         </form>
 
-        <div className="mt-5 space-y-3">
+        <div id="demo-login" className="mt-5 space-y-3">
           <Button
             type="button"
             variant="outline"

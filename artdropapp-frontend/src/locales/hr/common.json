@@ -773,6 +773,12 @@
       "cta": "Otvori demo račun",
       "note": "Otvara pripremljen račun s krugom, kolekcijama, narudžbama, prodajama i poslanim pošiljkama."
     },
+    "demoHint": {
+      "kicker": "Demo je dostupan",
+      "body": "Možete istražiti ArtDrop bez izrade računa.",
+      "cta": "Otvori prijavu",
+      "dismiss": "Sakrij obavijest o demo prijavi"
+    },
     "validation": {
       "email": {
         "required": "Email adresa je obavezna",

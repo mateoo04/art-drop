@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
+import { DemoLoginHint } from './components/auth/DemoLoginHint'
 import { ScrollToTop } from './components/ScrollToTop'
 import { MainLayout } from './components/layout/MainLayout'
 import { AccountPage } from './pages/AccountPage'
@@ -30,6 +31,7 @@ function App() {
   return (
     <>
       <ScrollToTop />
+      <DemoLoginHint />
       <Routes>
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
