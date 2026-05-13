@@ -1,12 +1,12 @@
 package hr.tvz.artdrop.artdropapp.security;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -46,8 +46,8 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilter_noAuthHeader_continuesWithoutAuth() throws Exception {
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(null);
+    void doFilter_noCookies_continuesWithoutAuth() throws Exception {
+        when(request.getCookies()).thenReturn(null);
 
         filter.doFilter(request, response, chain);
 
@@ -56,8 +56,8 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilter_nonBearerHeader_continuesWithoutAuth() throws Exception {
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Basic abc");
+    void doFilter_noJwtCookie_continuesWithoutAuth() throws Exception {
+        when(request.getCookies()).thenReturn(new Cookie[]{ new Cookie("other", "value") });
 
         filter.doFilter(request, response, chain);
 
@@ -66,8 +66,8 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilter_invalidBearerToken_continuesWithoutAuth() throws Exception {
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer bad-token");
+    void doFilter_invalidJwtCookie_continuesWithoutAuth() throws Exception {
+        when(request.getCookies()).thenReturn(new Cookie[]{ new Cookie("jwt", "bad-token") });
         when(tokenProvider.validateToken("bad-token")).thenReturn(false);
 
         filter.doFilter(request, response, chain);
@@ -77,9 +77,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilter_validBearerToken_setsAuthentication() throws Exception {
+    void doFilter_validJwtCookie_setsAuthentication() throws Exception {
         UserDetails userDetails = new User("joe", "x", List.of(new SimpleGrantedAuthority("ROLE_USER")));
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer good-token");
+        when(request.getCookies()).thenReturn(new Cookie[]{ new Cookie("jwt", "good-token") });
         when(tokenProvider.validateToken("good-token")).thenReturn(true);
         when(tokenProvider.getUsernameFromToken("good-token")).thenReturn("joe");
         when(userDetailsService.loadUserByUsername("joe")).thenReturn(userDetails);
@@ -94,7 +94,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void doFilter_validTokenButUserMissing_continuesWithoutAuth() throws Exception {
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer good-token");
+        when(request.getCookies()).thenReturn(new Cookie[]{ new Cookie("jwt", "good-token") });
         when(tokenProvider.validateToken("good-token")).thenReturn(true);
         when(tokenProvider.getUsernameFromToken("good-token")).thenReturn("ghost");
         when(userDetailsService.loadUserByUsername(eq("ghost")))

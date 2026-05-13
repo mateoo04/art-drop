@@ -32,13 +32,15 @@ class AuthControllerIntegrationTest extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void loginValidCredentialsReturnsToken() throws Exception {
+    void loginValidCredentialsReturnsSessionAndSetsCookie() throws Exception {
         LoginRequest req = new LoginRequest("user", "admin6060");
         mockMvc.perform(post("/api/auth/login")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").exists());
+                .andExpect(jsonPath("$.username").value("user"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Set-Cookie", org.hamcrest.Matchers.containsString("jwt=")));
     }
 
     @Test
@@ -59,14 +61,16 @@ class AuthControllerIntegrationTest extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void signupNewUserReturnsCreated() throws Exception {
+    void signupNewUserReturnsCreatedAndSetsCookie() throws Exception {
         String unique = "lab9_" + System.nanoTime();
         RegisterRequest req = new RegisterRequest(unique, unique + "@artdrop.local", "password123", "Lab9 User");
         mockMvc.perform(post("/api/auth/signup")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.accessToken").exists());
+                .andExpect(jsonPath("$.username").value(unique))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Set-Cookie", org.hamcrest.Matchers.containsString("jwt=")));
     }
 
     @Test

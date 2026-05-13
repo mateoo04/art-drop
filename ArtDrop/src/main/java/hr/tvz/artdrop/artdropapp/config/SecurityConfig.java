@@ -1,9 +1,11 @@
 package hr.tvz.artdrop.artdropapp.config;
 
 import hr.tvz.artdrop.artdropapp.security.AuthRateLimitFilter;
+import hr.tvz.artdrop.artdropapp.security.CsrfCookieFilter;
 import hr.tvz.artdrop.artdropapp.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,26 +19,49 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 @Configuration
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthRateLimitFilter authRateLimitFilter;
+    private final boolean csrfEnabled;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                          AuthRateLimitFilter authRateLimitFilter) {
+                          AuthRateLimitFilter authRateLimitFilter,
+                          Environment environment) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authRateLimitFilter = authRateLimitFilter;
+        this.csrfEnabled = !environment.matchesProfiles("test");
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        if (csrfEnabled) {
+            CookieCsrfTokenRepository tokenRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+            CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+            requestHandler.setCsrfRequestAttributeName(null);
+
+            http.csrf(csrf -> csrf
+                    .csrfTokenRepository(tokenRepo)
+                    .csrfTokenRequestHandler(requestHandler)
+                    .ignoringRequestMatchers(
+                            "/api/auth/login",
+                            "/api/auth/signup",
+                            "/api/checkout/webhook"
+                    )
+            );
+        } else {
+            http.csrf(AbstractHttpConfigurer::disable);
+        }
+
         http
-                .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/checkout/webhook", "/error", "/h2-console/**").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/checkout/webhook", "/error").permitAll()
+                        .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/users/me").authenticated()
@@ -52,9 +77,12 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .addFilterBefore(authRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        if (csrfEnabled) {
+            http.addFilterAfter(new CsrfCookieFilter(), org.springframework.security.web.csrf.CsrfFilter.class);
+        }
 
         return http.build();
     }
