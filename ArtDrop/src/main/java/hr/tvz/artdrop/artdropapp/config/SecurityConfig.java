@@ -71,6 +71,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/feed/**").authenticated()
                         .requestMatchers("/api/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/**").authenticated()
                         .anyRequest().authenticated()
