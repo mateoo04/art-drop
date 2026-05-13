@@ -10,6 +10,7 @@ import { useMySellerApplication } from '../hooks/useMySellerApplication'
 import { SellerApplicationModal } from '../components/SellerApplicationModal'
 import { BackButton } from '../components/ui/BackButton'
 import { cloudinaryUrl, openCloudinaryUpload } from '../lib/cloudinary'
+import { formatEuDate } from '../lib/dateFormat'
 import type { DimensionUnit, SaleType } from '../types/artwork'
 import type { Challenge } from '../types/challenge'
 
@@ -633,7 +634,7 @@ export function ArtworkDropPage() {
                   </>
                 ) : application?.canReapplyAt ? (
                   t('artwork.drop.seller.canReapply', {
-                    date: new Date(application.canReapplyAt).toLocaleDateString(),
+                    date: formatEuDate(application.canReapplyAt),
                   })
                 ) : (
                   t('artwork.drop.seller.requiresStatusFallback')

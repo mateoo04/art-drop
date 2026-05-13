@@ -5,6 +5,7 @@ import { fetchMyOrders } from '../api/ordersApi'
 import type { Order, OrderStatus } from '../types/order'
 import { Spinner } from '../components/ui/Spinner'
 import { cloudinaryUrl } from '../lib/cloudinary'
+import { formatEuDate } from '../lib/dateFormat'
 
 function statusBadgeClass(status: OrderStatus): string {
   switch (status) {
@@ -28,14 +29,6 @@ function formatCurrency(amount: number, currency: string): string {
     currency,
     maximumFractionDigits: 2,
   }).format(amount)
-}
-
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString()
-  } catch {
-    return iso
-  }
 }
 
 export function OrdersPage() {
@@ -93,7 +86,7 @@ export function OrdersPage() {
                     {o.artworkTitle ?? `#${o.id}`}
                   </p>
                   <p className="font-label text-xs text-on-surface-variant uppercase tracking-widest mt-1">
-                    {formatDate(o.createdAt)} · {formatCurrency(o.total, o.currency)}
+                    {formatEuDate(o.createdAt)} · {formatCurrency(o.total, o.currency)}
                   </p>
                 </div>
                 <span

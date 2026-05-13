@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Challenge } from '../../types/challenge'
+import { formatEuDate } from '../../lib/dateFormat'
 
 type PastChallengesListProps = {
   challenges: Challenge[]
@@ -10,15 +11,9 @@ type PastChallengesListProps = {
 const INITIAL_COUNT = 6
 const PAGE_SIZE = 6
 
-const MONTH_FORMATTER = new Intl.DateTimeFormat('en-US', {
-  month: 'long',
-  year: 'numeric',
-})
-
 function formatEndedOn(endsAt: string | null): string {
   if (!endsAt) return ''
-  const date = new Date(endsAt)
-  return Number.isNaN(date.getTime()) ? '' : MONTH_FORMATTER.format(date)
+  return formatEuDate(endsAt)
 }
 
 export function PastChallengesList({ challenges }: PastChallengesListProps) {

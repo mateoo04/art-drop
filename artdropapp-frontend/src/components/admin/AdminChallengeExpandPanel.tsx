@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import type { AdminChallengeRow } from '../../api/adminApi'
+import { formatEuDateTime } from '../../lib/dateFormat'
 import { Button } from '../ui/Button'
 
 const PANEL_BTN = '!py-2 !px-3 !text-[10px] !tracking-[0.12em]'
@@ -8,8 +9,7 @@ const PANEL_BTN = '!py-2 !px-3 !text-[10px] !tracking-[0.12em]'
 function formatRange(startsAt: string | null, endsAt: string | null) {
   const fmt = (s: string | null) => {
     if (!s) return '—'
-    const d = new Date(s)
-    return Number.isNaN(d.getTime()) ? s : d.toLocaleString()
+    return formatEuDateTime(s)
   }
   return `${fmt(startsAt)} – ${fmt(endsAt)}`
 }

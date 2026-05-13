@@ -5,12 +5,7 @@ import { SellerStatusBadge } from '../SellerStatusBadge'
 import { Button } from '../ui/Button'
 import { Spinner } from '../ui/Spinner'
 import { useMySellerApplication } from '../../hooks/useMySellerApplication'
-
-function formatDate(value: string | null) {
-  if (!value) return ''
-  const d = new Date(value)
-  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString()
-}
+import { formatEuDate } from '../../lib/dateFormat'
 
 export function SellerSection() {
   const { application, loading, error, refetch } = useMySellerApplication()
@@ -50,7 +45,7 @@ export function SellerSection() {
       ) : status === 'PENDING' ? (
         <div>
           <p className="text-on-surface-variant">
-            {t('account.seller.pending', { date: formatDate(application!.submittedAt) })}
+            {t('account.seller.pending', { date: formatEuDate(application!.submittedAt) })}
           </p>
           <p className="mt-3 text-sm text-on-surface bg-surface-variant rounded-md p-3 whitespace-pre-wrap">
             {application!.message}
@@ -58,14 +53,14 @@ export function SellerSection() {
         </div>
       ) : status === 'APPROVED' ? (
         <p className="text-on-surface-variant">
-          {t('account.seller.approved', { date: formatDate(application!.decidedAt) })}
+          {t('account.seller.approved', { date: formatEuDate(application!.decidedAt) })}
         </p>
       ) : (
         <div>
           <p className="text-on-surface-variant">
             {status === 'REVOKED'
-              ? t('account.seller.revoked', { date: formatDate(application!.revokedAt) })
-              : t('account.seller.rejected', { date: formatDate(application!.decidedAt) })}
+              ? t('account.seller.revoked', { date: formatEuDate(application!.revokedAt) })
+              : t('account.seller.rejected', { date: formatEuDate(application!.decidedAt) })}
           </p>
           {(status === 'REVOKED' ? application!.revokeReason : application!.decisionReason) ? (
             <p className="mt-2 text-sm text-on-surface bg-surface-variant rounded-md p-3 whitespace-pre-wrap">
@@ -74,7 +69,7 @@ export function SellerSection() {
           ) : null}
           {cooldownActive ? (
             <p className="mt-3 text-sm text-on-surface-variant">
-              {t('account.seller.cooldown', { date: formatDate(application!.canReapplyAt) })}
+              {t('account.seller.cooldown', { date: formatEuDate(application!.canReapplyAt) })}
             </p>
           ) : (
             <div className="mt-3">

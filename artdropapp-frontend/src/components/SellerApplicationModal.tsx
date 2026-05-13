@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { submitApplication, type SubmitApplicationError } from '../api/sellerApi'
+import { formatEuDate } from '../lib/dateFormat'
 import { Button } from './ui/Button'
 
 type Props = {
@@ -85,7 +86,7 @@ export function SellerApplicationModal({ open, onClose, onSubmitted }: Props) {
         {error ? (
           <p className="mt-3 text-sm text-error" role="alert">
             {error}
-            {cooldownAt ? ` ${t('account.seller.modal.cooldownSuffix', { date: new Date(cooldownAt).toLocaleDateString() })}` : ''}
+            {cooldownAt ? ` ${t('account.seller.modal.cooldownSuffix', { date: formatEuDate(cooldownAt) })}` : ''}
           </p>
         ) : null}
         <div className="flex justify-end gap-3 mt-6">

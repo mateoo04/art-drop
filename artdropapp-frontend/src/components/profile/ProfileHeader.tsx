@@ -1,16 +1,11 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { UserProfile } from '../../types/user'
+import { formatEuDate } from '../../lib/dateFormat'
 
 type ProfileHeaderProps = {
   user: UserProfile
   action?: ReactNode
-}
-
-function formatJoinDate(iso: string): string {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
 }
 
 function Avatar({ user }: { user: UserProfile }) {
@@ -87,7 +82,7 @@ export function ProfileHeader({ user, action }: ProfileHeaderProps) {
           </div>
           <div>
             <dt className="sr-only">{t('profile.joinedPrefix')}</dt>
-            <dd>{t('profile.joinedPrefix')} {formatJoinDate(user.createdAt)}</dd>
+            <dd>{t('profile.joinedPrefix')} {formatEuDate(user.createdAt)}</dd>
           </div>
         </dl>
       </div>

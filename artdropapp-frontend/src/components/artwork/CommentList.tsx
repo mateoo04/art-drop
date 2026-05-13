@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { Comment } from '../../types/comment'
 import { getToken } from '../../lib/auth'
 import { useAuthPrompt } from '../../contexts/useAuthPrompt'
+import { formatEuDate } from '../../lib/dateFormat'
 import { ConfirmModal } from '../ui/ConfirmModal'
 import { Spinner } from '../ui/Spinner'
 import { CommentComposer } from './CommentComposer'
@@ -27,7 +28,7 @@ function formatRelative(iso: string): string {
   if (hours < 24) return `${hours}h ago`
   const days = Math.round(hours / 24)
   if (days < 30) return `${days}d ago`
-  return d.toLocaleDateString()
+  return formatEuDate(d)
 }
 
 function AuthorAvatar({ comment, size = 'md' }: { comment: Comment; size?: 'md' | 'sm' }) {

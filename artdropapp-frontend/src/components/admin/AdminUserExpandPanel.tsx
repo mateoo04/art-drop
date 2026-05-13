@@ -7,15 +7,10 @@ import { SellerStatusBadge } from '../SellerStatusBadge'
 import { RoleBadge } from './RoleBadge'
 import { useAdminUserDetail } from '../../hooks/useAdminUserDetail'
 import type { AdminUserSummary } from '../../types/seller'
+import { formatEuDate } from '../../lib/dateFormat'
 
 /** Overrides default Button padding (py-5 px-6) for compact admin panel actions */
 const PANEL_BTN = '!py-2 !px-3 !text-[10px] !tracking-[0.12em]'
-
-function formatDate(value: string | null) {
-  if (!value) return ''
-  const d = new Date(value)
-  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString()
-}
 
 type Props = {
   userId: number
@@ -125,7 +120,7 @@ export function AdminUserExpandPanel({
               </p>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs text-on-surface-variant">
-                  {t('admin.users.submitted', { date: formatDate(pending.submittedAt) })}
+                  {t('admin.users.submitted', { date: formatEuDate(pending.submittedAt) })}
                 </span>
                 <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
                   <Button
@@ -155,7 +150,7 @@ export function AdminUserExpandPanel({
                         {app.revokedAt ? ` · ${t('admin.userDetail.revokedSuffix')}` : ''}
                       </span>
                       <span className="text-xs text-on-surface-variant">
-                        {t('admin.userDetail.submitted', { date: formatDate(app.submittedAt) })}
+                        {t('admin.userDetail.submitted', { date: formatEuDate(app.submittedAt) })}
                       </span>
                     </div>
                     <p className="text-sm text-on-surface bg-surface-variant rounded-md p-2 whitespace-pre-wrap">
@@ -163,13 +158,13 @@ export function AdminUserExpandPanel({
                     </p>
                     {app.decidedAt ? (
                       <p className="text-xs text-on-surface-variant mt-2">
-                        {t('admin.userDetail.decided', { date: formatDate(app.decidedAt) })}
+                        {t('admin.userDetail.decided', { date: formatEuDate(app.decidedAt) })}
                         {app.decisionReason ? ` — ${app.decisionReason}` : ''}
                       </p>
                     ) : null}
                     {app.revokedAt ? (
                       <p className="text-xs text-error mt-2">
-                        {t('admin.userDetail.revoked', { date: formatDate(app.revokedAt) })}
+                        {t('admin.userDetail.revoked', { date: formatEuDate(app.revokedAt) })}
                         {app.revokeReason ? ` — ${app.revokeReason}` : ''}
                       </p>
                     ) : null}

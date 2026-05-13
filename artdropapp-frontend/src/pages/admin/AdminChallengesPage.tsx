@@ -20,12 +20,12 @@ import { Button } from '../../components/ui/Button'
 import { ConfirmModal } from '../../components/ui/ConfirmModal'
 import { Input } from '../../components/ui/Input'
 import { Spinner } from '../../components/ui/Spinner'
+import { formatEuDate } from '../../lib/dateFormat'
 
 function formatRange(startsAt: string | null, endsAt: string | null) {
   const fmt = (s: string | null) => {
     if (!s) return '—'
-    const d = new Date(s)
-    return Number.isNaN(d.getTime()) ? s : d.toLocaleDateString()
+    return formatEuDate(s)
   }
   return `${fmt(startsAt)} – ${fmt(endsAt)}`
 }

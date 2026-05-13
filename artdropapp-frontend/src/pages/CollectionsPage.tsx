@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useCollections } from '../hooks/useCollections'
+import { formatEuDateTime } from '../lib/dateFormat'
 
 export function CollectionsPage() {
   const { t } = useTranslation()
@@ -23,7 +24,7 @@ export function CollectionsPage() {
                 <span>{collection.description}</span>
                 <span className="artwork-list__medium">{t('collections.artworkId')}: {collection.artworkId}</span>
                 <span className="artwork-list__tags">
-                  {t('collections.created')}: {new Date(collection.createdAt).toLocaleString()}
+                  {t('collections.created')}: {formatEuDateTime(collection.createdAt)}
                 </span>
                 <span className="artwork-list__tags">
                   {t('collections.visibility')}: {collection.isPublic ? t('collections.public') : t('collections.private')}

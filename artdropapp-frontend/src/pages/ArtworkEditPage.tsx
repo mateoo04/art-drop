@@ -6,6 +6,7 @@ import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useMySellerApplication } from '../hooks/useMySellerApplication'
 import { SellerApplicationModal } from '../components/SellerApplicationModal'
 import { Spinner } from '../components/ui/Spinner'
+import { formatEuDate } from '../lib/dateFormat'
 import type { SaleType } from '../types/artwork'
 
 type SaleTypeChoice = SaleType | ''
@@ -168,7 +169,7 @@ export function ArtworkEditPage() {
                     </>
                   : application?.canReapplyAt
                   ? t('artwork.edit.seller.canReapply', {
-                      date: new Date(application.canReapplyAt).toLocaleDateString(),
+                      date: formatEuDate(application.canReapplyAt),
                     })
                   : t('artwork.edit.seller.requiresStatusFallback')}
               </p>

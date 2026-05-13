@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { AdminChallengeRow } from '../../api/adminApi'
 import { useFeaturedChallenge } from '../../hooks/useFeaturedChallenge'
+import { formatEuDateTime } from '../../lib/dateFormat'
 import { FeaturedScheduleDialog, type ChallengePickerItem } from './FeaturedScheduleDialog'
 import { Button } from '../ui/Button'
 
@@ -69,7 +70,7 @@ export function FeaturedChallengePanel({ allChallenges }: Props) {
                 <span className="text-on-surface font-medium">{state.next.title}</span>
                 <span className="text-on-surface-variant text-xs">
                   {state.triggerType === 'AT_TIME' && state.triggerAt
-                    ? `— at ${new Date(state.triggerAt).toLocaleString()}`
+                    ? `— at ${formatEuDateTime(state.triggerAt)}`
                     : '— when current ends'}
                 </span>
                 <button
