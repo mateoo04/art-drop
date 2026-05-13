@@ -22,6 +22,10 @@ public record ArtworkUpdateCommand(
         BigDecimal depth,
         @Pattern(regexp = "CM|MM|IN|PX", message = "dimensionUnit must be CM, MM, IN or PX")
         String dimensionUnit,
+        @Pattern(regexp = "WIP|FINISHED", message = "progressStatus must be WIP or FINISHED")
+        String progressStatus,
+        @Size(max = 30, message = "at most 30 tags")
+        List<@Size(max = 60, message = "tag too long") String> tags,
         BigDecimal price,
         @Pattern(regexp = "ORIGINAL|EDITION", message = "saleType must be ORIGINAL or EDITION")
         String saleType,

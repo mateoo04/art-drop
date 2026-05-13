@@ -13,6 +13,8 @@ public interface ArtworkLikeJpaRepository extends JpaRepository<ArtworkLike, Lon
 
     long deleteByArtworkIdAndUserId(Long artworkId, Long userId);
 
+    long deleteByArtworkId(Long artworkId);
+
     @Query("SELECT l.artworkId FROM ArtworkLike l WHERE l.userId = :userId AND l.artworkId IN :artworkIds")
     List<Long> findArtworkIdsLikedByUser(@Param("userId") Long userId, @Param("artworkIds") Collection<Long> artworkIds);
 }

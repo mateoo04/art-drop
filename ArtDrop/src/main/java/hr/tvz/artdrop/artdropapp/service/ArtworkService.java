@@ -53,11 +53,15 @@ public interface ArtworkService {
 
     LikeResult unlike(Long artworkId, String username);
 
-    enum UpdateOutcome { OK, NOT_FOUND, FORBIDDEN_SALE_GATE }
+    enum UpdateOutcome { OK, NOT_FOUND, FORBIDDEN, FORBIDDEN_SALE_GATE }
 
     record UpdateResult(UpdateOutcome outcome, ArtworkDTO artwork) {}
 
     UpdateResult updateArtwork(Long id, ArtworkUpdateCommand command, String editorUsername);
+
+    enum DeleteOutcome { DELETED, NOT_FOUND, FORBIDDEN, HAS_ORDERS }
+
+    DeleteOutcome deleteArtwork(Long id, String requesterUsername);
 
     boolean deleteByTitle(String title);
 

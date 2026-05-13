@@ -31,6 +31,8 @@ public interface ChallengeSubmissionJpaRepository extends JpaRepository<Challeng
 
     Optional<ChallengeSubmission> findByChallengeIdAndArtworkId(Long challengeId, Long artworkId);
 
+    long deleteByArtworkId(Long artworkId);
+
     Optional<ChallengeSubmission> findFirstByArtworkIdAndChallenge_StatusNot(
             Long artworkId, ChallengeStatus status);
 

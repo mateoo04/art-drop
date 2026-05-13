@@ -13,6 +13,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     long countByArtworkIdAndStatusIn(Long artworkId, List<OrderStatus> statuses);
 
+    long countByArtworkId(Long artworkId);
+
     Optional<Order> findByStripeCheckoutSessionId(String sessionId);
 
     Optional<Order> findByStripePaymentIntentId(String paymentIntentId);

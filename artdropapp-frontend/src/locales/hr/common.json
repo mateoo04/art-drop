@@ -342,6 +342,15 @@
         "errorNotOwner": "Samo umjetnik može povući ovaj rad.",
         "errorFallback": "Povlačenje nije uspjelo. Pokušajte ponovno."
       },
+      "manage": {
+        "edit": "Uredi",
+        "delete": "Obriši",
+        "confirmDeleteTitle": "Obrisati rad?",
+        "confirmDeleteMessage": "Ovo će trajno obrisati “{{title}}”. Ovu radnju nije moguće poništiti.",
+        "deleteHasOrders": "Ovaj rad ima povijest narudžbi i ne može se obrisati.",
+        "deleteForbidden": "Samo umjetnik može obrisati ovaj rad.",
+        "deleteFailed": "Brisanje rada nije uspjelo. Pokušajte ponovno."
+      },
       "submitToChallenge": {
         "title": "Prijavi na izazov",
         "subtitle": "Odaberite aktivan izazov za koji ovaj rad ispunjava uvjete.",
@@ -434,7 +443,10 @@
     },
     "edit": {
       "title": "Uredi rad",
+      "subtitle": "Ažurirajte detalje, status, oznake, dimenzije i objavu na prodaju za ovaj rad.",
       "loadingLabel": "Učitavanje rada",
+      "cancelLabel": "Natrag na rad",
+      "mediaLocked": "Slike su zaključane tijekom uređivanja. Obrišite i ponovno objavite rad ako treba promijeniti medije.",
       "save": "Spremi",
       "saving": "Spremanje…",
       "fields": {
@@ -466,6 +478,7 @@
         "invalidId": "Nevažeći ID",
         "notFound": "Rad nije pronađen.",
         "loadFailed": "Učitavanje rada nije uspjelo",
+        "forbiddenOwner": "Samo umjetnik može uređivati ovaj rad.",
         "forbiddenSale": "Za prodaju radova potreban je status verificiranog prodavača.",
         "saveFailed": "Spremanje nije uspjelo"
       }

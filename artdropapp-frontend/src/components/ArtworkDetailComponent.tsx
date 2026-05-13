@@ -1,6 +1,6 @@
-import { ChevronLeft, ChevronRight, Heart, Minus, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Heart, Minus, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Keyboard, A11y, Pagination } from 'swiper/modules'
@@ -9,6 +9,7 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 
 import type { Artwork, DimensionUnit, SaleState, SaleType } from '../types/artwork'
+import { deleteArtwork } from '../api/artworksApi'
 import { useComments } from '../hooks/useComments'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useLikeArtwork } from '../hooks/useLikeArtwork'
@@ -54,6 +55,7 @@ export function ArtworkDetailComponent({
   error,
 }: ArtworkDetailComponentProps) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const comments = useComments(artwork?.id ?? null)
   const { promptToAuth } = useAuthPrompt()
   const likeMutation = useLikeArtwork()
@@ -65,6 +67,9 @@ export function ArtworkDetailComponent({
   const [submitModalOpen, setSubmitModalOpen] = useState(false)
   const [withdrawConfirmOpen, setWithdrawConfirmOpen] = useState(false)
   const [withdrawError, setWithdrawError] = useState<string | null>(null)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const isOwner =
     artwork != null && user != null && artwork.artist != null && artwork.artist.id === user.id
@@ -89,6 +94,27 @@ export function ArtworkDetailComponent({
         },
       },
     )
+  }
+
+  async function handleDeleteConfirmed() {
+    if (!artwork) return
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      await deleteArtwork(artwork.id)
+      navigate('/account', { replace: true })
+    } catch (e) {
+      const message =
+        e instanceof Error && e.message === 'ARTWORK_HAS_ORDERS'
+          ? t('artwork.detail.manage.deleteHasOrders')
+          : e instanceof Error && e.message === 'FORBIDDEN'
+            ? t('artwork.detail.manage.deleteForbidden')
+            : t('artwork.detail.manage.deleteFailed')
+      setDeleteError(message)
+      setDeleteConfirmOpen(false)
+    } finally {
+      setDeleting(false)
+    }
   }
 
   const MAX_QUANTITY = 99
@@ -389,6 +415,32 @@ export function ArtworkDetailComponent({
 
           {isOwner ? (
             <div className="border-t border-outline-variant/15 pt-6 mb-6">
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <Link
+                  to={`/edit/${artwork.id}`}
+                  className="inline-flex items-center gap-2 border border-on-surface px-4 py-3 font-label text-[11px] uppercase tracking-[0.2em] text-on-surface hover:bg-on-surface hover:text-surface transition-colors"
+                >
+                  <Pencil size={14} aria-hidden="true" />
+                  {t('artwork.detail.manage.edit')}
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteError(null)
+                    setDeleteConfirmOpen(true)
+                  }}
+                  disabled={deleting}
+                  className="inline-flex items-center gap-2 border border-error/50 px-4 py-3 font-label text-[11px] uppercase tracking-[0.2em] text-error hover:bg-error hover:text-on-error transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Trash2 size={14} aria-hidden="true" />
+                  {t('artwork.detail.manage.delete')}
+                </button>
+              </div>
+              {deleteError ? (
+                <p className="mb-4 text-sm text-error" role="alert">
+                  {deleteError}
+                </p>
+              ) : null}
               {artwork.currentSubmission != null ? (
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div>
@@ -530,6 +582,21 @@ export function ArtworkDetailComponent({
             if (!withdrawing) setWithdrawConfirmOpen(false)
           }}
           onConfirm={() => void handleWithdrawConfirmed()}
+        />
+      ) : null}
+
+      {isOwner ? (
+        <ConfirmModal
+          open={deleteConfirmOpen}
+          title={t('artwork.detail.manage.confirmDeleteTitle')}
+          message={t('artwork.detail.manage.confirmDeleteMessage', { title: artwork.title })}
+          confirmLabel={t('artwork.detail.manage.delete')}
+          destructive
+          busy={deleting}
+          onCancel={() => {
+            if (!deleting) setDeleteConfirmOpen(false)
+          }}
+          onConfirm={() => void handleDeleteConfirmed()}
         />
       ) : null}
     </article>

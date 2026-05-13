@@ -42,7 +42,14 @@ function App() {
           <Route path="/collections" element={<CollectionsPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/details/:id" element={<ArtworkDetailPage />} />
-          <Route path="/edit/:id" element={<ArtworkEditPage />} />
+          <Route
+            path="/edit/:id"
+            element={
+              <ProtectedRoute>
+                <ArtworkEditPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/drop"
             element={

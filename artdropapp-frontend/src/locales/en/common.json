@@ -342,6 +342,15 @@
         "errorNotOwner": "Only the artist can withdraw this artwork.",
         "errorFallback": "Could not withdraw. Please try again."
       },
+      "manage": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete artwork?",
+        "confirmDeleteMessage": "This will permanently delete “{{title}}”. You can't undo this.",
+        "deleteHasOrders": "This artwork has order history and can't be deleted.",
+        "deleteForbidden": "Only the artist can delete this artwork.",
+        "deleteFailed": "Could not delete artwork. Please try again."
+      },
       "submitToChallenge": {
         "title": "Submit to a challenge",
         "subtitle": "Pick an active challenge this artwork is eligible for.",
@@ -434,7 +443,10 @@
     },
     "edit": {
       "title": "Edit artwork",
+      "subtitle": "Update the details, status, tags, dimensions, and listing for this piece.",
       "loadingLabel": "Loading artwork",
+      "cancelLabel": "Back to artwork",
+      "mediaLocked": "Images are locked while editing. Delete and re-drop the artwork if the media needs to change.",
       "save": "Save",
       "saving": "Saving…",
       "fields": {
@@ -466,6 +478,7 @@
         "invalidId": "Invalid ID",
         "notFound": "Artwork not found.",
         "loadFailed": "Failed to load artwork",
+        "forbiddenOwner": "Only the artist can edit this artwork.",
         "forbiddenSale": "Selling artworks requires verified seller status.",
         "saveFailed": "Save failed"
       }

@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -177,11 +178,45 @@ class ArtworkControllerIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
+    void updateArtworkTagsAndStatusReturnsOk() throws Exception {
+        Long userId = userRepository.findByUsername("user").orElseThrow().getId();
+        Artwork own = artworkRepository.findAll().stream()
+                .filter(a -> a.getAuthor() != null && userId.equals(a.getAuthor().getId()))
+                .findFirst().orElseThrow();
+        String body = "{\"progressStatus\":\"WIP\",\"tags\":[\"halos\",\"digital\"]}";
+        mockMvc.perform(patch("/api/artworks/" + own.getId())
+                        .contentType("application/json")
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.progressStatus").value("WIP"))
+                .andExpect(jsonPath("$.tags[0]").value("halos"));
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void updateMissingArtworkReturnsNotFound() throws Exception {
         mockMvc.perform(patch("/api/artworks/9999999")
                         .contentType("application/json")
                         .content("{\"description\":\"x\"}"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = {"USER"})
+    void deleteOwnArtworkReturnsNoContent() throws Exception {
+        ArtworkCommand cmd = newValidCommand("Delete Test Artwork " + System.nanoTime(), "PAINTING");
+        String body = mockMvc.perform(post("/api/artworks")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(cmd)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Long id = objectMapper.readTree(body).get("id").longValue();
+
+        mockMvc.perform(delete("/api/artworks/" + id))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
     }
 
     @Test

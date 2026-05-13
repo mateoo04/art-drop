@@ -21,6 +21,7 @@ import hr.tvz.artdrop.artdropapp.repository.ArtworkLikeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.ChallengeSubmissionJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.CommentJpaRepository;
+import hr.tvz.artdrop.artdropapp.repository.OrderRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserFollowJpaRepository;
 import hr.tvz.artdrop.artdropapp.repository.UserJpaRepository;
 import org.springframework.data.domain.PageRequest;
@@ -48,6 +49,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     private final ChallengeJpaRepository challengeRepository;
     private final ChallengeSubmissionJpaRepository submissionRepository;
     private final UserFollowJpaRepository followRepository;
+    private final OrderRepository orderRepository;
 
     public ArtworkServiceImpl(
             ArtworkJpaRepository artworkRepository,
@@ -56,7 +58,8 @@ public class ArtworkServiceImpl implements ArtworkService {
             CommentJpaRepository commentRepository,
             ChallengeJpaRepository challengeRepository,
             ChallengeSubmissionJpaRepository submissionRepository,
-            UserFollowJpaRepository followRepository
+            UserFollowJpaRepository followRepository,
+            OrderRepository orderRepository
     ) {
         this.artworkRepository = artworkRepository;
         this.likeRepository = likeRepository;
@@ -65,6 +68,7 @@ public class ArtworkServiceImpl implements ArtworkService {
         this.challengeRepository = challengeRepository;
         this.submissionRepository = submissionRepository;
         this.followRepository = followRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -247,7 +251,7 @@ public class ArtworkServiceImpl implements ArtworkService {
             artwork.setEditionSize(command.editionSize());
         }
         artwork.setPrice(command.price());
-        artwork.setTags(command.tags() == null ? List.of() : List.copyOf(command.tags()));
+        artwork.setTags(command.tags() == null ? new ArrayList<>() : new ArrayList<>(command.tags()));
         artwork.setPublishedAt(LocalDateTime.now());
         artwork.setCreatedAt(LocalDateTime.now());
         artwork.setUpdatedAt(LocalDateTime.now());
@@ -310,20 +314,26 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     @Transactional
     public UpdateResult updateArtwork(Long id, ArtworkUpdateCommand command, String editorUsername) {
+        if (editorUsername == null) {
+            return new UpdateResult(UpdateOutcome.FORBIDDEN, null);
+        }
+        Optional<User> editor = userRepository.findByUsername(editorUsername);
+        if (editor.isEmpty()) {
+            return new UpdateResult(UpdateOutcome.FORBIDDEN, null);
+        }
         Optional<Artwork> maybeArtwork = artworkRepository.findById(id);
         if (maybeArtwork.isEmpty()) {
             return new UpdateResult(UpdateOutcome.NOT_FOUND, null);
         }
         Artwork artwork = maybeArtwork.get();
+        if (!canManageArtwork(artwork, editor.get())) {
+            return new UpdateResult(UpdateOutcome.FORBIDDEN, null);
+        }
 
         boolean wantsSetSale = command.price() != null || command.saleType() != null;
         boolean wantsClearSale = Boolean.TRUE.equals(command.unlist());
         if (wantsSetSale) {
-            Optional<User> editor = userRepository.findByUsername(editorUsername);
-            boolean isSeller = editor.isPresent()
-                    && editor.get().getAuthorities() != null
-                    && editor.get().getAuthorities().stream()
-                            .anyMatch(a -> "ROLE_SELLER".equals(a.getName()));
+            boolean isSeller = hasAuthority(editor.get(), "ROLE_SELLER");
             if (!isSeller) {
                 return new UpdateResult(UpdateOutcome.FORBIDDEN_SALE_GATE, null);
             }
@@ -346,6 +356,12 @@ public class ArtworkServiceImpl implements ArtworkService {
         if (command.width() != null || command.height() != null
                 || command.depth() != null || command.dimensionUnit() != null) {
             applyDimensions(artwork, command.width(), command.height(), command.depth(), command.dimensionUnit());
+        }
+        if (command.progressStatus() != null) {
+            artwork.setProgressStatus(ProgressStatus.valueOf(command.progressStatus()));
+        }
+        if (command.tags() != null) {
+            artwork.setTags(new ArrayList<>(command.tags()));
         }
         if (wantsClearSale) {
             artwork.setPrice(null);
@@ -378,8 +394,48 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     @Override
     @Transactional
+    public DeleteOutcome deleteArtwork(Long id, String requesterUsername) {
+        if (requesterUsername == null) {
+            return DeleteOutcome.FORBIDDEN;
+        }
+        Optional<User> requester = userRepository.findByUsername(requesterUsername);
+        if (requester.isEmpty()) {
+            return DeleteOutcome.FORBIDDEN;
+        }
+        Optional<Artwork> maybeArtwork = artworkRepository.findById(id);
+        if (maybeArtwork.isEmpty()) {
+            return DeleteOutcome.NOT_FOUND;
+        }
+        Artwork artwork = maybeArtwork.get();
+        if (!canManageArtwork(artwork, requester.get())) {
+            return DeleteOutcome.FORBIDDEN;
+        }
+        if (orderRepository.countByArtworkId(id) > 0) {
+            return DeleteOutcome.HAS_ORDERS;
+        }
+
+        submissionRepository.deleteByArtworkId(id);
+        likeRepository.deleteByArtworkId(id);
+        artworkRepository.delete(artwork);
+        return DeleteOutcome.DELETED;
+    }
+
+    @Override
+    @Transactional
     public boolean deleteByTitle(String title) {
         return artworkRepository.deleteByTitleIgnoreCase(title) > 0;
+    }
+
+    private boolean canManageArtwork(Artwork artwork, User user) {
+        if (hasAuthority(user, "ROLE_ADMIN")) {
+            return true;
+        }
+        return artwork.getAuthor() != null && artwork.getAuthor().getId().equals(user.getId());
+    }
+
+    private boolean hasAuthority(User user, String authority) {
+        return user.getAuthorities() != null
+                && user.getAuthorities().stream().anyMatch(a -> authority.equals(a.getName()));
     }
 
     private List<ArtworkImage> buildImages(Artwork artwork, List<ArtworkImageCommand> commands) {

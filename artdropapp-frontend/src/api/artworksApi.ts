@@ -382,6 +382,8 @@ export type UpdateArtworkPayload = {
   height?: number | null
   depth?: number | null
   dimensionUnit?: DimensionUnit | null
+  progressStatus?: ProgressStatus
+  tags?: string[]
   price?: number | null
   saleType?: SaleType | null
   editionSize?: number | null
@@ -411,11 +413,29 @@ export async function updateArtwork(id: number, payload: UpdateArtworkPayload): 
     ) {
       throw new Error('FORBIDDEN_SALE_GATE')
     }
-    throw new Error(`Update failed (${res.status})`)
+    throw new Error('FORBIDDEN')
   }
   if (!res.ok) {
     throw new Error(`Update failed (${res.status})`)
   }
   const json: unknown = await res.json()
   return mapApiArtwork(json as Record<string, unknown>)
+}
+
+export async function deleteArtwork(id: number): Promise<void> {
+  const res = await authFetch(`/api/artworks/${id}`, { method: 'DELETE' })
+  if (res.status === 404) {
+    throw new Error('NOT_FOUND')
+  }
+  if (res.status === 403) {
+    throw new Error('FORBIDDEN')
+  }
+  if (res.status === 409) {
+    const code = await readErrorCode(res)
+    if (code === 'ARTWORK_HAS_ORDERS') throw new Error('ARTWORK_HAS_ORDERS')
+    throw new Error(`Delete failed (${res.status})`)
+  }
+  if (!res.ok && res.status !== 204) {
+    throw new Error(`Delete failed (${res.status})`)
+  }
 }

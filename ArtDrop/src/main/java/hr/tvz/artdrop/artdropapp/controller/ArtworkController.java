@@ -147,17 +147,23 @@ public class ArtworkController {
         return switch (result.outcome()) {
             case OK -> ResponseEntity.ok(result.artwork());
             case NOT_FOUND -> ResponseEntity.notFound().build();
+            case FORBIDDEN -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             case FORBIDDEN_SALE_GATE -> ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
                     .body(java.util.Map.of("error", "FORBIDDEN_SALE_GATE"));
         };
     }
 
-    @DeleteMapping("/{title}")
-    public ResponseEntity<Void> deleteArtworkByTitle(@PathVariable String title) {
-        if (!artworkService.deleteByTitle(title)) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteArtwork(@PathVariable Long id, Authentication authentication) {
+        String name = authentication == null ? null : authentication.getName();
+        return switch (artworkService.deleteArtwork(id, name)) {
+            case DELETED -> ResponseEntity.noContent().build();
+            case NOT_FOUND -> ResponseEntity.notFound().build();
+            case FORBIDDEN -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            case HAS_ORDERS -> ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(java.util.Map.of("error", "ARTWORK_HAS_ORDERS"));
+        };
     }
 }
