@@ -67,7 +67,7 @@ export function LoginPage() {
         email: values.email.trim(),
         password: values.password,
       })
-      storeToken(response.accessToken)
+      storeToken(response.username)
       navigate('/')
     } catch (error) {
       if (isLoginError(error)) {

@@ -1,4 +1,4 @@
-import { clearToken, getToken } from './auth'
+import { clearToken } from './auth'
 
 export class UnauthorizedError extends Error {
   constructor() {
@@ -7,14 +7,29 @@ export class UnauthorizedError extends Error {
   }
 }
 
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
+
+function readCookie(name: string): string | null {
+  const prefix = `${name}=`
+  for (const part of document.cookie.split(';')) {
+    const trimmed = part.trim()
+    if (trimmed.startsWith(prefix)) {
+      return decodeURIComponent(trimmed.substring(prefix.length))
+    }
+  }
+  return null
+}
+
 export async function authFetch(input: string, init: RequestInit = {}): Promise<Response> {
-  const token = getToken()
   const headers = new Headers(init.headers ?? {})
-  if (token && !headers.has('Authorization')) {
-    headers.set('Authorization', `Bearer ${token}`)
+  const method = (init.method ?? 'GET').toUpperCase()
+
+  if (!SAFE_METHODS.has(method) && !headers.has('X-XSRF-TOKEN')) {
+    const csrf = readCookie('XSRF-TOKEN')
+    if (csrf) headers.set('X-XSRF-TOKEN', csrf)
   }
 
-  const res = await fetch(input, { ...init, headers })
+  const res = await fetch(input, { ...init, headers, credentials: 'include' })
 
   if (res.status === 401) {
     clearToken()

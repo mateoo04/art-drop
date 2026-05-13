@@ -93,7 +93,7 @@ export function SignupPage() {
         password: values.password,
         displayName: `${values.firstName.trim()} ${values.lastName.trim()}`,
       })
-      storeToken(response.accessToken)
+      storeToken(response.username)
       navigate('/')
     } catch (error) {
       if (isSignupError(error)) {

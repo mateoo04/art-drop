@@ -6,8 +6,8 @@ export type RegisterRequest = {
   displayName: string
 }
 
-export type JwtResponse = {
-  accessToken: string
+export type AuthSessionResponse = {
+  username: string
 }
 
 export type SignupError =
@@ -15,12 +15,13 @@ export type SignupError =
   | { kind: 'invalid' }
   | { kind: 'network' }
 
-export async function signup(request: RegisterRequest): Promise<JwtResponse> {
+export async function signup(request: RegisterRequest): Promise<AuthSessionResponse> {
   let res: Response
   try {
     res = await fetch(`/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(request),
     })
   } catch {
@@ -29,7 +30,7 @@ export async function signup(request: RegisterRequest): Promise<JwtResponse> {
   }
 
   if (res.status === 201) {
-    return (await res.json()) as JwtResponse
+    return (await res.json()) as AuthSessionResponse
   }
   if (res.status === 409) {
     const err: SignupError = { kind: 'email_taken' }
@@ -62,12 +63,13 @@ export type LoginError =
   | { kind: 'invalid' }
   | { kind: 'network' }
 
-export async function login(request: LoginRequest): Promise<JwtResponse> {
+export async function login(request: LoginRequest): Promise<AuthSessionResponse> {
   let res: Response
   try {
     res = await fetch(`/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ username: request.email, password: request.password }),
     })
   } catch {
@@ -76,7 +78,7 @@ export async function login(request: LoginRequest): Promise<JwtResponse> {
   }
 
   if (res.status === 200) {
-    return (await res.json()) as JwtResponse
+    return (await res.json()) as AuthSessionResponse
   }
   if (res.status === 401) {
     const err: LoginError = { kind: 'bad_credentials' }
@@ -97,4 +99,22 @@ export function isLoginError(value: unknown): value is LoginError {
     'kind' in value &&
     typeof (value as { kind: unknown }).kind === 'string'
   )
+}
+
+export async function logout(): Promise<void> {
+  try {
+    await fetch(`/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: csrfHeader(),
+    })
+  } catch {
+  }
+}
+
+function csrfHeader(): Record<string, string> {
+  const cookie = document.cookie.split(';').find((c) => c.trim().startsWith('XSRF-TOKEN='))
+  if (!cookie) return {}
+  const value = decodeURIComponent(cookie.split('=')[1] ?? '')
+  return value ? { 'X-XSRF-TOKEN': value } : {}
 }

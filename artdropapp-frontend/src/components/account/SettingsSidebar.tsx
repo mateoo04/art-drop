@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { clearToken } from '../../lib/auth'
+import { logout } from '../../api/authApi'
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../lib/i18n'
 
 type SettingsSidebarProps = {
@@ -29,7 +30,8 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [open, handleClose])
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout()
     clearToken()
     void navigate('/login', { replace: true })
   }

@@ -1,35 +1,15 @@
-const TOKEN_KEY = 'artdrop_token'
+const SESSION_KEY = 'artdrop_session'
 
-export function storeToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token)
+export function storeToken(username: string): void {
+  localStorage.setItem(SESSION_KEY, username)
 }
 
 export function getToken(): string | null {
-  const token = localStorage.getItem(TOKEN_KEY)
-  if (!token) return null
-  if (isTokenExpired(token)) {
-    localStorage.removeItem(TOKEN_KEY)
-    return null
-  }
-  return token
+  return localStorage.getItem(SESSION_KEY)
 }
 
 export function clearToken(): void {
-  localStorage.removeItem(TOKEN_KEY)
-}
-
-function isTokenExpired(token: string): boolean {
-  const parts = token.split('.')
-  if (parts.length !== 3) return true
-  try {
-    const payload = JSON.parse(
-      atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')),
-    ) as { exp?: number }
-    if (typeof payload.exp !== 'number') return false
-    return payload.exp * 1000 <= Date.now()
-  } catch {
-    return true
-  }
+  localStorage.removeItem(SESSION_KEY)
 }
 
 export function deriveUsernameFromEmail(email: string): string {
