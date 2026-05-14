@@ -1,9 +1,11 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { LogOut, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { clearToken } from '../../lib/auth'
 import { logout } from '../../api/authApi'
+import { resetCurrentUser } from '../../hooks/useCurrentUser'
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../lib/i18n'
 
 type SettingsSidebarProps = {
@@ -14,6 +16,7 @@ type SettingsSidebarProps = {
 export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [confirmingLogout, setConfirmingLogout] = useState(false)
 
   const handleClose = useCallback(() => {
@@ -33,6 +36,8 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
   const handleLogout = async () => {
     await logout()
     clearToken()
+    resetCurrentUser()
+    queryClient.clear()
     void navigate('/login', { replace: true })
   }
 

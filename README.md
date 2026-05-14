@@ -1,90 +1,102 @@
-# ArtDrop — Full-Stack Portfolio Project
+# ArtDrop
 
 [![CI](https://github.com/mateoo04/art-drop/actions/workflows/ci.yml/badge.svg)](https://github.com/mateoo04/art-drop/actions/workflows/ci.yml)
 
-ArtDrop is my full-stack project for practicing real backend work with Java and Spring Boot, together with a React frontend.
-I built it to get better at API design, authentication, data modeling, and shipping features end to end.
+**ArtDrop is a full-stack art marketplace** built as a portfolio project with a Spring Boot backend and a React frontend. It covers the main flows of a real marketplace: users can browse artwork, sell pieces, join challenges, purchase artwork, and manage orders.
+
+The goal was to practice **end-to-end product development**: REST API design, authentication, role-based access, relational data modeling, checkout flows, admin tooling, and a polished frontend.
+
+## Highlights
+
+- **Authentication and roles** with JWT-based login, protected routes, demo login, user profiles, seller status, and admin access.
+- **Artwork marketplace** with artwork drops, editing, detail pages, likes, comments, collections, search, and responsive feed layouts.
+- **Orders and checkout** with shipping addresses, Stripe checkout session support, buyer order history, seller sales view, order status changes, and reservation conflict handling.
+- **Challenge system** where artists can submit eligible artwork to active challenges.
+- **Admin dashboard** for users, seller applications, role changes, account activation, challenge management, and featured challenge selection.
+- **Production-style backend foundations**: PostgreSQL, Flyway migrations, Caffeine caching/rate limiting, validation, Testcontainers integration tests, and Docker-based local development.
 
 ## Tech Stack
-- Backend: Java 25, Spring Boot, Spring Security, Spring Data JPA, JWT, Maven, PostgreSQL, Flyway
-- Frontend: React, TypeScript, Vite, Tailwind CSS, React Query
-- Workflow: Git, REST API design, validation, role-based access control, Docker for local Postgres
 
-## What It Can Do Right Now
-- Authentication and authorization with JWT and roles
-- Artwork feed and artwork details
-- Comments, collections, and challenge flows
-- Admin and seller-related management flows
+**Backend:** Java 25, Spring Boot 4, Spring Security, Spring Data JPA, PostgreSQL, Flyway, Caffeine, Maven, Testcontainers, Stripe API  
+**Frontend:** React 19, TypeScript, Vite, Tailwind CSS, React Router, React Query, i18next, Cloudinary uploads  
+**Workflow:** REST APIs, role-based authorization, Docker, GitHub Actions CI
+
+## Screenshots
+
+### Home Feed
+
+<img src="./screenshots/home_page.png" alt="ArtDrop home feed" width="900" />
+
+### Artwork Detail
+
+<img src="./screenshots/artwork_detail_page.png" alt="Artwork detail page" width="900" />
+
+### Checkout / Order Flow
+
+<img src="./screenshots/ordering.png" alt="Checkout and order flow" width="900" />
+
+### Orders and Sales
+
+<img src="./screenshots/sales.png" alt="Orders and seller sales dashboard" width="900" />
+
+### Admin Dashboard
+
+<img src="./screenshots/admin_page.png" alt="Admin dashboard" width="900" />
 
 ## Run Locally
 
-1. Start Postgres in Docker (first time only — afterwards it just resumes):
+Requirements: **Java 25**, **Node.js**, **Docker**, and **npm**.
+
+1. Copy environment files:
+
 ```bash
-cp .env.example .env   # then edit JWT_BASE64_SECRET
+cp .env.example .env
+cp artdropapp-frontend/.env.example artdropapp-frontend/.env
+```
+
+Set `JWT_BASE64_SECRET` in `.env`:
+
+```bash
+openssl rand -base64 64 | tr -d '\n'
+```
+
+2. Start PostgreSQL:
+
+```bash
 docker compose up -d
 ```
 
-2. Backend (loads dev seed via Flyway when the `dev` profile is active):
+3. Start the backend:
+
 ```bash
 cd ArtDrop
 SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
 ```
 
-3. Frontend:
+4. Start the frontend:
+
 ```bash
 cd artdropapp-frontend
 npm install
 npm run dev
 ```
 
-Migrations live in `ArtDrop/src/main/resources/db/migration/` (versioned `V1__`, `V2__`, …) and Flyway applies them on startup. The dev seed is `ArtDrop/src/main/resources/db/dev/R__seed.sql` and runs only under the `dev` profile.
+The frontend runs on `http://localhost:5173`. The backend uses the local Postgres database from `docker-compose.yml`; Flyway applies migrations automatically, and the `dev` profile loads seed data.
 
-## Deployment Notes
+## Useful Commands
 
-Backend environment variables:
-- `PORT` — hosting provider port; defaults to `8089` locally
-- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
-- `JWT_BASE64_SECRET` — generate with `openssl rand -base64 64 | tr -d '\n'`
-- `APP_BASE_URL` — frontend public URL, used for checkout redirects
-- `APP_CORS_ALLOWED_ORIGIN` — frontend public URL, used by CORS
-- `AUTH_COOKIE_SECURE=true` and `AUTH_COOKIE_SAME_SITE=None` when frontend and backend are on different HTTPS domains
-- `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` only if checkout is enabled
-- `SPRING_PROFILES_ACTIVE=demo` for a seeded job-fair/demo database; omit it for a clean production database
+```bash
+cd ArtDrop && ./mvnw test
+cd artdropapp-frontend && npm run build
+cd artdropapp-frontend && npm run lint
+```
 
-Frontend environment variables:
-- `VITE_API_BASE_URL` — backend public URL when there is no `/api` proxy
-- `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET`
-
-### Tests
-
-Integration tests use [Testcontainers](https://www.testcontainers.org/) to spin up a throwaway Postgres for each test run. On macOS with Docker Desktop, the JVM may not auto-detect the daemon socket — set `DOCKER_HOST` first:
+Integration tests use **Testcontainers**. On macOS with Docker Desktop, set this first if Docker is not detected:
 
 ```bash
 export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock
-cd ArtDrop && ./mvnw test
 ```
 
-## Screenshots
-### Home
-<img src="./screenshots/home-page.png" alt="Home page" width="900" />
-
-### Artwork Detail
-<img src="./screenshots/artwork_detail.png" alt="Artwork detail page" width="900" />
-
-### Profile
-<img src="./screenshots/profile.png" alt="Profile page" width="900" />
-
-### Admin
-<img src="./screenshots/admin.png" alt="Admin page" width="900" />
-
-### Sign Up
-<img src="./screenshots/sign-up.png" alt="Sign Up page" width="900" />
-
-## What I Am Working On Next
-- Increase automated test coverage with JUnit (service and controller layers)
-- Improve UX across key flows (navigation clarity, feedback states, responsiveness)
-- Implement order logic for purchase flow
-- Integrate Stripe for checkout and payment confirmation
-
 ## Status
-Portfolio-ready MVP. The core product is implemented, and active work is focused on UX polish, checkout hardening, and broader automated test coverage.
+
+Core marketplace, admin, challenge, checkout, and order flows are implemented. Ongoing work is focused on UX polish, broader test coverage, and deployment/demo hardening.

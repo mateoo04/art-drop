@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
@@ -9,6 +10,7 @@ import { AuthHeader } from '../components/layout/AuthHeader'
 import { Button } from '../components/ui/Button'
 import { FormField } from '../components/ui/FormField'
 import { Input } from '../components/ui/Input'
+import { resetCurrentUser } from '../hooks/useCurrentUser'
 import { deriveUsernameFromEmail, storeToken } from '../lib/auth'
 import type { TFunction } from 'i18next'
 
@@ -54,6 +56,7 @@ type SignupFormValues = {
 export function SignupPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [formError, setFormError] = useState<SignupError | null>(null)
   const [isDemoSubmitting, setIsDemoSubmitting] = useState(false)
 
@@ -94,6 +97,8 @@ export function SignupPage() {
         password: values.password,
         displayName: `${values.firstName.trim()} ${values.lastName.trim()}`,
       })
+      queryClient.clear()
+      resetCurrentUser()
       storeToken(response.username)
       navigate('/')
     } catch (error) {
@@ -110,6 +115,8 @@ export function SignupPage() {
     setIsDemoSubmitting(true)
     try {
       const response = await demoLogin()
+      queryClient.clear()
+      resetCurrentUser()
       storeToken(response.username)
       navigate('/')
     } catch {

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
@@ -9,6 +10,7 @@ import { AuthHeader } from '../components/layout/AuthHeader'
 import { Button } from '../components/ui/Button'
 import { FormField } from '../components/ui/FormField'
 import { Input } from '../components/ui/Input'
+import { resetCurrentUser } from '../hooks/useCurrentUser'
 import { storeToken } from '../lib/auth'
 import type { TFunction } from 'i18next'
 
@@ -33,6 +35,7 @@ type LoginFormValues = {
 export function LoginPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [formError, setFormError] = useState<LoginError | null>(null)
   const [isDemoSubmitting, setIsDemoSubmitting] = useState(false)
 
@@ -68,6 +71,8 @@ export function LoginPage() {
         email: values.email.trim(),
         password: values.password,
       })
+      queryClient.clear()
+      resetCurrentUser()
       storeToken(response.username)
       navigate('/')
     } catch (error) {
@@ -84,6 +89,8 @@ export function LoginPage() {
     setIsDemoSubmitting(true)
     try {
       const response = await demoLogin()
+      queryClient.clear()
+      resetCurrentUser()
       storeToken(response.username)
       navigate('/')
     } catch (error) {

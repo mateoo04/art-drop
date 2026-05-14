@@ -13,6 +13,7 @@ type Listener = (state: State) => void
 
 let currentState: State = { user: null, loading: false, error: null }
 let inflight: Promise<void> | null = null
+let loadGeneration = 0
 const listeners = new Set<Listener>()
 
 function setState(next: State) {
@@ -21,24 +22,41 @@ function setState(next: State) {
 }
 
 async function load(): Promise<void> {
-  if (!getToken()) {
+  const token = getToken()
+  if (!token) {
+    loadGeneration += 1
+    inflight = null
     setState({ user: null, loading: false, error: null })
     return
   }
   if (inflight) return inflight
-  setState({ ...currentState, loading: true, error: null })
+  const generation = ++loadGeneration
+  const nextUser = currentState.user?.username === token ? currentState.user : null
+  setState({ user: nextUser, loading: true, error: null })
   inflight = (async () => {
     try {
       const user = await fetchMe()
+      if (generation !== loadGeneration) return
+      if (getToken() !== token) {
+        setState({ user: null, loading: false, error: null })
+        return
+      }
       setState({ user, loading: false, error: null })
     } catch (e) {
+      if (generation !== loadGeneration) return
+      if (getToken() !== token) {
+        setState({ user: null, loading: false, error: null })
+        return
+      }
       setState({
         user: null,
         loading: false,
         error: e instanceof Error ? e.message : 'Unknown error',
       })
     } finally {
-      inflight = null
+      if (generation === loadGeneration) {
+        inflight = null
+      }
     }
   })()
   return inflight
@@ -50,7 +68,10 @@ export function useCurrentUser() {
   useEffect(() => {
     const listener: Listener = (s) => setLocal(s)
     listeners.add(listener)
-    if (currentState.user == null && !currentState.loading && getToken()) {
+    const token = getToken()
+    if (!token && currentState.user != null) {
+      resetCurrentUser()
+    } else if (token && !currentState.loading && currentState.user?.username !== token) {
       void load()
     }
     return () => {
@@ -68,5 +89,7 @@ export function useCurrentUser() {
 }
 
 export function resetCurrentUser() {
+  loadGeneration += 1
+  inflight = null
   setState({ user: null, loading: false, error: null })
 }
