@@ -13,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -129,11 +130,42 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of("NOT_FOUND", e.getMessage(), 404, req.getRequestURI()));
     }
 
+    @ExceptionHandler(AsyncRequestNotUsableException.class)
+    public void handleClientAbort(AsyncRequestNotUsableException e, HttpServletRequest req) {
+        log.debug("client aborted request at {}: {}", req.getRequestURI(), e.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception e, HttpServletRequest req) {
+        if (isClientAbort(e)) {
+            log.debug("client aborted request at {}: {}", req.getRequestURI(), e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+        }
+
         log.error("unhandled exception at {}: {}", req.getRequestURI(), e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ErrorResponse.of("INTERNAL_ERROR", "an unexpected error occurred",
                         500, req.getRequestURI()));
+    }
+
+    private boolean isClientAbort(Throwable e) {
+        Throwable current = e;
+        while (current != null) {
+            String className = current.getClass().getName();
+            String message = current.getMessage();
+            if (current instanceof AsyncRequestNotUsableException
+                    || className.equals("org.apache.catalina.connector.ClientAbortException")
+                    || message != null && isClientAbortMessage(message)) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private boolean isClientAbortMessage(String message) {
+        return message.contains("Broken pipe")
+                || message.contains("Connection reset by peer")
+                || message.contains("connection reset by peer");
     }
 }

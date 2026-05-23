@@ -23,8 +23,8 @@ export function SellerSection() {
   }
 
   return (
-    <section className="pt-12 pb-8">
-      <div className="flex items-center gap-3 mb-4">
+    <section className="pt-6 pb-4">
+      <div className="flex flex-wrap items-center gap-3 mb-3">
         <h2 className="font-headline text-2xl text-on-surface">{t('account.seller.title')}</h2>
         <SellerStatusBadge status={status} />
       </div>

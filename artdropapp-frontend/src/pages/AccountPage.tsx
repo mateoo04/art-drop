@@ -31,7 +31,7 @@ export function AccountPage() {
 
   if (loading && !user) {
     return (
-      <main className="max-w-[1440px] mx-auto px-8 pt-4">
+      <main className="max-w-[1440px] mx-auto px-4 pt-4 sm:px-8">
         <div className="py-24 flex justify-center">
           <Spinner label={t('account.loadingProfile')} />
         </div>
@@ -41,7 +41,7 @@ export function AccountPage() {
 
   if (error && !user) {
     return (
-      <main className="max-w-[1440px] mx-auto px-8 pt-4">
+      <main className="max-w-[1440px] mx-auto px-4 pt-4 sm:px-8">
         <p
           className="py-24 text-center text-error border border-error-container/40 bg-error-container/10"
           role="alert"
@@ -56,7 +56,7 @@ export function AccountPage() {
 
   return (
     <>
-      <main className="max-w-[1440px] mx-auto px-8 pt-4 pb-24">
+      <main className="max-w-[1440px] mx-auto px-4 pt-4 pb-24 sm:px-8">
         {user.avatarUrl == null ? (
           <AvatarUploadPrompt onUpload={() => openEdit(true)} />
         ) : null}

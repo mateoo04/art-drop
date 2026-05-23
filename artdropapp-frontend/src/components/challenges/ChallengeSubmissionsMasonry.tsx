@@ -8,7 +8,7 @@ const BREAKPOINTS = {
   default: 3,
   1024: 3,
   768: 2,
-  0: 1,
+  640: 1,
 }
 
 const CARD_WIDTHS = [240, 360, 480, 720, 960]

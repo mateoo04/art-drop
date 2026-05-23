@@ -148,9 +148,9 @@ export function ProfileEditSidebar({
         role="dialog"
         aria-modal="true"
         aria-label={t('profile.editProfile.ariaLabel')}
-        className={`absolute top-0 right-0 h-full w-full max-w-md bg-surface shadow-2xl transition-transform duration-300 ease-out overflow-y-auto ${
+        className={`absolute top-0 right-0 h-full w-full max-w-md bg-surface transition-[transform,box-shadow] duration-300 ease-out overflow-y-auto ${
           open ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        } ${open ? 'shadow-none sm:shadow-2xl' : 'shadow-none'}`}
       >
         <div className="flex items-center justify-between px-8 py-6 border-b border-outline-variant/15">
           <h2 className="font-headline text-2xl text-on-surface">{t('profile.editProfile.title')}</h2>

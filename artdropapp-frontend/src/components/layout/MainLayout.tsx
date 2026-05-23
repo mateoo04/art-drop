@@ -29,11 +29,15 @@ export function MainLayout() {
   return (
     <AuthPromptProvider>
       <SearchOverlayProvider>
-        <div ref={headerShellRef} className="relative z-50">
-          <AppHeader />
+        <div className="min-h-screen flex flex-col">
+          <div ref={headerShellRef} className="relative z-50">
+            <AppHeader />
+          </div>
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          <AppFooter />
         </div>
-        <Outlet />
-        <AppFooter />
         <NewDropFab />
       </SearchOverlayProvider>
     </AuthPromptProvider>

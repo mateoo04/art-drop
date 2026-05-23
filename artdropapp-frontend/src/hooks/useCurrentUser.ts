@@ -14,6 +14,7 @@ type Listener = (state: State) => void
 let currentState: State = { user: null, loading: false, error: null }
 let inflight: Promise<void> | null = null
 let loadGeneration = 0
+let attemptedToken: string | null = null
 const listeners = new Set<Listener>()
 
 function setState(next: State) {
@@ -21,16 +22,21 @@ function setState(next: State) {
   for (const fn of listeners) fn(currentState)
 }
 
-async function load(): Promise<void> {
+async function load(force = false): Promise<void> {
   const token = getToken()
   if (!token) {
     loadGeneration += 1
     inflight = null
+    attemptedToken = null
     setState({ user: null, loading: false, error: null })
+    return
+  }
+  if (!force && attemptedToken === token && currentState.user?.username !== token) {
     return
   }
   if (inflight) return inflight
   const generation = ++loadGeneration
+  attemptedToken = token
   const nextUser = currentState.user?.username === token ? currentState.user : null
   setState({ user: nextUser, loading: true, error: null })
   inflight = (async () => {
@@ -38,6 +44,7 @@ async function load(): Promise<void> {
       const user = await fetchMe()
       if (generation !== loadGeneration) return
       if (getToken() !== token) {
+        attemptedToken = null
         setState({ user: null, loading: false, error: null })
         return
       }
@@ -45,6 +52,7 @@ async function load(): Promise<void> {
     } catch (e) {
       if (generation !== loadGeneration) return
       if (getToken() !== token) {
+        attemptedToken = null
         setState({ user: null, loading: false, error: null })
         return
       }
@@ -79,7 +87,7 @@ export function useCurrentUser() {
     }
   }, [])
 
-  const refetch = useCallback(() => load(), [])
+  const refetch = useCallback(() => load(true), [])
 
   const setUser = useCallback((user: UserProfile | null) => {
     setState({ ...currentState, user })
@@ -91,5 +99,6 @@ export function useCurrentUser() {
 export function resetCurrentUser() {
   loadGeneration += 1
   inflight = null
+  attemptedToken = null
   setState({ user: null, loading: false, error: null })
 }

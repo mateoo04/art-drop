@@ -43,7 +43,7 @@ export function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="max-w-[1440px] mx-auto px-8 pt-4">
+      <main className="max-w-[1440px] mx-auto px-4 pt-4 sm:px-8">
         <div className="py-24 flex justify-center">
           <Spinner label={t('profile.loadingProfile')} />
         </div>
@@ -53,7 +53,7 @@ export function ProfilePage() {
 
   if (error === 'NOT_FOUND') {
     return (
-      <main className="max-w-[1440px] mx-auto px-8 pt-4">
+      <main className="max-w-[1440px] mx-auto px-4 pt-4 sm:px-8">
         <p className="py-24 text-center text-on-surface-variant italic">
           {t('profile.notFound')}
         </p>
@@ -63,7 +63,7 @@ export function ProfilePage() {
 
   if (error || !profile) {
     return (
-      <main className="max-w-[1440px] mx-auto px-8 pt-4">
+      <main className="max-w-[1440px] mx-auto px-4 pt-4 sm:px-8">
         <p
           className="py-24 text-center text-error border border-error-container/40 bg-error-container/10"
           role="alert"
@@ -82,11 +82,11 @@ export function ProfilePage() {
   const circleActionLabel = inCircle ? t('profile.inCircle') : t('profile.joinCircle')
 
   return (
-    <main className="max-w-[1440px] mx-auto px-8 pt-4 pb-24">
+    <main className="max-w-[1440px] mx-auto px-4 pt-4 pb-24 sm:px-8">
       <ProfileHeader
         user={profile}
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex max-w-full flex-wrap items-center gap-2">
             {profile.isSelf && (profile.sellerStatus === 'NONE' || profile.sellerStatus === 'REJECTED' || profile.sellerStatus === 'REVOKED') ? (
               <Button variant="secondary" onClick={() => navigate('/account')}>
                 {t('account.becomeSeller')}

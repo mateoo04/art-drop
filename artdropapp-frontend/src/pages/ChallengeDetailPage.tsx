@@ -53,7 +53,7 @@ export function ChallengeDetailPage() {
   return (
     <main className="max-w-[1920px] mx-auto pb-20">
       <ChallengeHeroBanner challenge={challenge} onJoin={() => setJoinOpen(true)} />
-      <section className="py-16">
+      <section className="pt-8 pb-16 md:py-16">
         <ChallengeSortTabs active={sort} onChange={setSort} />
         {submissionsLoading ? (
           <div className="py-12 flex justify-center">

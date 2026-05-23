@@ -64,18 +64,20 @@ export function AdminChallengesPage() {
     <section>
       <FeaturedChallengePanel allChallenges={allChallenges} />
 
-      <div className="flex gap-3 items-stretch mb-6 flex-wrap">
-        <Input
-          type="search"
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); setPage(0) }}
-          placeholder={t('admin.challenges.search')}
-          className="flex-1 min-w-[12rem]"
-        />
-        <Button variant="secondary" onClick={() => setDrawerOpen(true)}>
-          {fc > 0 ? t('admin.users.filtersWithCount', { count: fc }) : t('admin.users.filters')}
-        </Button>
-        <Button className="ml-auto shrink-0" onClick={() => navigate('/admin/challenges/new')}>
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-stretch">
+        <div className="flex gap-3 sm:contents">
+          <Input
+            type="search"
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setPage(0) }}
+            placeholder={t('admin.challenges.search')}
+            className="min-w-0 flex-1 sm:flex-1"
+          />
+          <Button variant="secondary" onClick={() => setDrawerOpen(true)}>
+            {fc > 0 ? t('admin.users.filtersWithCount', { count: fc }) : t('admin.users.filters')}
+          </Button>
+        </div>
+        <Button className="w-full sm:ml-auto sm:w-auto sm:shrink-0" onClick={() => navigate('/admin/challenges/new')}>
           {t('admin.challenges.create')}
         </Button>
       </div>
@@ -104,7 +106,7 @@ export function AdminChallengesPage() {
                   tabIndex={0}
                   aria-expanded={expanded}
                   aria-label={expanded ? t('admin.challenges.expand.toggleCollapse') : t('admin.challenges.expand.toggleExpand')}
-                  className="p-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between cursor-pointer select-none rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                  className="p-4 flex items-center justify-between gap-3 sm:items-start cursor-pointer select-none rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
                   onClick={() => setExpandedChallengeId(expanded ? null : c.id)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -128,7 +130,7 @@ export function AdminChallengesPage() {
                     </p>
                   </div>
                   <ExpandRowToggle
-                    className="self-start sm:self-center"
+                    className="self-center"
                     expanded={expanded}
                     onToggle={() => setExpandedChallengeId(expanded ? null : c.id)}
                     labelExpand={t('admin.challenges.expand.toggleExpand')}

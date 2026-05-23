@@ -13,7 +13,7 @@ export function AdminLayoutPage() {
     ].join(' ')
 
   return (
-    <main className="max-w-[1440px] mx-auto px-8 pt-4 pb-24">
+    <main className="max-w-[1440px] mx-auto px-4 pt-4 pb-24 sm:px-8">
       <h1 className="font-headline text-3xl text-on-surface mb-6">{t('admin.layout.title')}</h1>
       <nav className="flex gap-10 mb-8 border-b border-outline-variant/35">
         <NavLink to="/admin/users" end className={({ isActive }) => tabClass(isActive)}>{t('admin.layout.userDirectory')}</NavLink>

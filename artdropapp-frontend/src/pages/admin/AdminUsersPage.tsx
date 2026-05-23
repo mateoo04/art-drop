@@ -78,15 +78,15 @@ export function AdminUsersPage() {
 
   return (
     <section>
-      <div className="flex gap-3 items-stretch mb-6">
+      <div className="flex gap-3 mb-6 sm:items-stretch">
         <Input
           type="search"
           value={query}
           onChange={(e) => { setQuery(e.target.value); setPage(0) }}
           placeholder={t('admin.users.search')}
-          className="flex-1"
+          className="min-w-0 flex-1"
         />
-        <Button variant="secondary" onClick={() => setDrawerOpen(true)}>
+        <Button variant="secondary" className="shrink-0" onClick={() => setDrawerOpen(true)}>
           {filterCount > 0 ? t('admin.users.filtersWithCount', { count: filterCount }) : t('admin.users.filters')}
         </Button>
       </div>
@@ -114,7 +114,7 @@ export function AdminUsersPage() {
                   tabIndex={0}
                   aria-expanded={expanded}
                   aria-label={expanded ? t('admin.users.expand.toggleCollapse') : t('admin.users.expand.toggleExpand')}
-                  className="flex items-center gap-3 px-2 py-3 hover:bg-surface-container-low flex-wrap cursor-pointer select-none rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                  className="flex flex-col gap-3 px-2 py-3 hover:bg-surface-container-low cursor-pointer select-none rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary sm:flex-row sm:items-center"
                   onClick={() => setExpandedUserId(expanded ? null : u.id)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -130,14 +130,16 @@ export function AdminUsersPage() {
                       <div className="text-sm text-on-surface-variant truncate">@{u.username} · {u.email}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-                    {pending ? (
-                      <span className="inline-flex items-center rounded-none border border-tertiary/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] bg-transparent text-tertiary">
-                        {t('admin.users.expand.pendingBadge')}
-                      </span>
-                    ) : null}
-                    <RoleBadge role={u.primaryRole} label={u.primaryRole === 'ADMIN' ? t('admin.filters.roles.admin') : t('admin.filters.roles.user')} />
-                    <SellerStatusBadge status={u.sellerStatus} />
+                  <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:shrink-0">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      {pending ? (
+                        <span className="inline-flex items-center rounded-none border border-tertiary/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] bg-transparent text-tertiary">
+                          {t('admin.users.expand.pendingBadge')}
+                        </span>
+                      ) : null}
+                      <RoleBadge role={u.primaryRole} label={u.primaryRole === 'ADMIN' ? t('admin.filters.roles.admin') : t('admin.filters.roles.user')} />
+                      <SellerStatusBadge status={u.sellerStatus} />
+                    </div>
                     <ExpandRowToggle
                       expanded={expanded}
                       onToggle={() => setExpandedUserId(expanded ? null : u.id)}

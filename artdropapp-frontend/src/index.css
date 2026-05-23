@@ -108,6 +108,22 @@ body {
 .masonry-grid-mc__column > * {
   margin-bottom: 2rem;
 }
+@media (max-width: 640px) {
+  .masonry-grid-mc {
+    display: block;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .masonry-grid-mc__column {
+    padding-left: 0;
+    width: 100% !important;
+  }
+
+  .masonry-grid-mc__column > * {
+    margin-bottom: 1.25rem;
+  }
+}
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
