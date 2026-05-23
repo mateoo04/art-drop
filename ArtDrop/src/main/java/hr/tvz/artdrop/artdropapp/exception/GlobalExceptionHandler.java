@@ -139,7 +139,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGeneric(Exception e, HttpServletRequest req) {
         if (isClientAbort(e)) {
             log.debug("client aborted request at {}: {}", req.getRequestURI(), e.getMessage());
-            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+            return ResponseEntity.noContent().build();
         }
 
         log.error("unhandled exception at {}: {}", req.getRequestURI(), e.getMessage(), e);
