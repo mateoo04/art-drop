@@ -1,6 +1,10 @@
 package hr.tvz.artdrop.artdropapp.service;
 
 import hr.tvz.artdrop.artdropapp.dto.FeaturedChallengeStateDTO;
+import hr.tvz.artdrop.artdropapp.model.Challenge;
+import hr.tvz.artdrop.artdropapp.model.ChallengeStatus;
+import hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType;
+import hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository;
 import hr.tvz.artdrop.artdropapp.support.AbstractPostgresIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -16,16 +23,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FeaturedChallengeServiceTest extends AbstractPostgresIntegrationTest {
 
     @Autowired private FeaturedChallengeService service;
-    @Autowired private hr.tvz.artdrop.artdropapp.repository.ChallengeJpaRepository challengeRepo;
+    @Autowired private ChallengeJpaRepository challengeRepo;
 
-    private hr.tvz.artdrop.artdropapp.model.Challenge createChallenge(String title) {
-        var c = new hr.tvz.artdrop.artdropapp.model.Challenge();
+    private Challenge createChallenge(String title) {
+        var c = new Challenge();
         c.setTitle(title);
-        c.setStatus(hr.tvz.artdrop.artdropapp.model.ChallengeStatus.ACTIVE);
-        c.setStartsAt(java.time.LocalDateTime.now().minusDays(1));
-        c.setEndsAt(java.time.LocalDateTime.now().plusDays(7));
-        c.setCreatedAt(java.time.LocalDateTime.now());
-        c.setUpdatedAt(java.time.LocalDateTime.now());
+        c.setStatus(ChallengeStatus.ACTIVE);
+        c.setStartsAt(LocalDateTime.now().minusDays(1));
+        c.setEndsAt(LocalDateTime.now().plusDays(7));
+        c.setCreatedAt(LocalDateTime.now());
+        c.setUpdatedAt(LocalDateTime.now());
         return challengeRepo.save(c);
     }
 
@@ -57,8 +64,8 @@ class FeaturedChallengeServiceTest extends AbstractPostgresIntegrationTest {
         var pending = createChallenge("Pending");
         service.setCurrent(current.getId());
         service.scheduleReplacement(pending.getId(),
-                hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType.AT_TIME,
-                java.time.LocalDateTime.now().plusHours(1));
+                FeaturedTriggerType.AT_TIME,
+                LocalDateTime.now().plusHours(1));
 
         var second = createChallenge("Second");
         service.setCurrent(second.getId());
@@ -84,9 +91,8 @@ class FeaturedChallengeServiceTest extends AbstractPostgresIntegrationTest {
         var current = createChallenge("Current");
         var next = createChallenge("Next");
         service.setCurrent(current.getId());
-        var when = java.time.LocalDateTime.now().plusHours(2);
-        service.scheduleReplacement(next.getId(),
-                hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType.AT_TIME, when);
+        var when = LocalDateTime.now().plusHours(2);
+        service.scheduleReplacement(next.getId(), FeaturedTriggerType.AT_TIME, when);
 
         var state = service.getState(null);
         assertThat(state.next().id()).isEqualTo(next.getId());
@@ -100,7 +106,7 @@ class FeaturedChallengeServiceTest extends AbstractPostgresIntegrationTest {
         var next = createChallenge("Next");
         service.setCurrent(current.getId());
         service.scheduleReplacement(next.getId(),
-                hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType.WHEN_CURRENT_ENDS, null);
+                FeaturedTriggerType.WHEN_CURRENT_ENDS, null);
 
         var state = service.getState(null);
         assertThat(state.triggerType()).isEqualTo("WHEN_CURRENT_ENDS");
@@ -112,10 +118,9 @@ class FeaturedChallengeServiceTest extends AbstractPostgresIntegrationTest {
         var current = createChallenge("Current");
         var next = createChallenge("Next");
         service.setCurrent(current.getId());
-        org.junit.jupiter.api.Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
-                () -> service.scheduleReplacement(next.getId(),
-                        hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType.AT_TIME, null));
+                () -> service.scheduleReplacement(next.getId(), FeaturedTriggerType.AT_TIME, null));
     }
 
     @Test
@@ -123,21 +128,18 @@ class FeaturedChallengeServiceTest extends AbstractPostgresIntegrationTest {
         // Seed sets a current; clear it so no current challenge is set.
         service.clearCurrent();
         var next = createChallenge("Next");
-        org.junit.jupiter.api.Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
-                () -> service.scheduleReplacement(next.getId(),
-                        hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType.WHEN_CURRENT_ENDS, null));
+                () -> service.scheduleReplacement(next.getId(), FeaturedTriggerType.WHEN_CURRENT_ENDS, null));
     }
 
     @Test
     void scheduleReplacement_rejectsNextEqualToCurrent() {
         var c = createChallenge("Same");
         service.setCurrent(c.getId());
-        org.junit.jupiter.api.Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
-                () -> service.scheduleReplacement(c.getId(),
-                        hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType.AT_TIME,
-                        java.time.LocalDateTime.now().plusDays(1)));
+                () -> service.scheduleReplacement(c.getId(), FeaturedTriggerType.AT_TIME, LocalDateTime.now().plusDays(1)));
     }
 
     // --- Task 18: processScheduleIfReady ---
@@ -153,8 +155,8 @@ class FeaturedChallengeServiceTest extends AbstractPostgresIntegrationTest {
         var next = createChallenge("Next");
         service.setCurrent(current.getId());
         service.scheduleReplacement(next.getId(),
-                hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType.AT_TIME,
-                java.time.LocalDateTime.now().minusSeconds(1));
+                FeaturedTriggerType.AT_TIME,
+                LocalDateTime.now().minusSeconds(1));
 
         boolean fired = service.processScheduleIfReady();
 
@@ -171,8 +173,8 @@ class FeaturedChallengeServiceTest extends AbstractPostgresIntegrationTest {
         var next = createChallenge("Next");
         service.setCurrent(current.getId());
         service.scheduleReplacement(next.getId(),
-                hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType.AT_TIME,
-                java.time.LocalDateTime.now().plusHours(1));
+                FeaturedTriggerType.AT_TIME,
+                LocalDateTime.now().plusHours(1));
 
         assertThat(service.processScheduleIfReady()).isFalse();
         assertThat(service.getState(null).current().id()).isEqualTo(current.getId());
@@ -182,12 +184,12 @@ class FeaturedChallengeServiceTest extends AbstractPostgresIntegrationTest {
     void processScheduleIfReady_whenCurrentEnds_firesAfterEndsAt() {
         var current = createChallenge("Current");
         // Force endsAt to past
-        current.setEndsAt(java.time.LocalDateTime.now().minusMinutes(1));
+        current.setEndsAt(LocalDateTime.now().minusMinutes(1));
         challengeRepo.save(current);
         var next = createChallenge("Next");
         service.setCurrent(current.getId());
         service.scheduleReplacement(next.getId(),
-                hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType.WHEN_CURRENT_ENDS, null);
+                FeaturedTriggerType.WHEN_CURRENT_ENDS, null);
 
         boolean fired = service.processScheduleIfReady();
 
@@ -201,7 +203,7 @@ class FeaturedChallengeServiceTest extends AbstractPostgresIntegrationTest {
         var next = createChallenge("Next");
         service.setCurrent(current.getId());
         service.scheduleReplacement(next.getId(),
-                hr.tvz.artdrop.artdropapp.model.FeaturedTriggerType.WHEN_CURRENT_ENDS, null);
+                FeaturedTriggerType.WHEN_CURRENT_ENDS, null);
 
         assertThat(service.processScheduleIfReady()).isFalse();
         assertThat(service.getState(null).current().id()).isEqualTo(current.getId());

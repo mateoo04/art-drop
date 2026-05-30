@@ -4,11 +4,13 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import hr.tvz.artdrop.artdropapp.dto.FeedSnapshotEntry;
 import hr.tvz.artdrop.artdropapp.dto.FeedSnapshotRowKind;
 import hr.tvz.artdrop.artdropapp.model.Artwork;
+import hr.tvz.artdrop.artdropapp.model.Comment;
 import hr.tvz.artdrop.artdropapp.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,7 +61,7 @@ class FeedRankingServiceTest {
 
     @Test
     void mergeSecondChallengeRespectsInterval() {
-        List<Long> art = new java.util.ArrayList<>();
+        List<Long> art = new ArrayList<>();
         for (long i = 1; i <= 30; i++) {
             art.add(i);
         }
@@ -181,9 +183,9 @@ class FeedRankingServiceTest {
         author.setId(authorId);
         a.setAuthor(author);
         a.setLikeCount(likes);
-        a.setComments(new java.util.ArrayList<>());
+        a.setComments(new ArrayList<>());
         for (int i = 0; i < comments; i++) {
-            a.getComments().add(new hr.tvz.artdrop.artdropapp.model.Comment());
+            a.getComments().add(new Comment());
         }
         a.setPublishedAt(publishedAt);
         return a;

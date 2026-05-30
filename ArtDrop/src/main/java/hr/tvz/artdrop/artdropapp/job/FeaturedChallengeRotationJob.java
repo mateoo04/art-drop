@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
+
 @DisallowConcurrentExecution
 public class FeaturedChallengeRotationJob implements Job {
 
@@ -29,7 +31,7 @@ public class FeaturedChallengeRotationJob implements Job {
         }
     }
 
-    private static String formatDuration(java.time.Duration d) {
+    private static String formatDuration(Duration d) {
         if (d == null || d.isZero() || d.isNegative()) return "ended/none";
         long days = d.toDays();
         long hours = d.toHoursPart();

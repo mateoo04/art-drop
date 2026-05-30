@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/artworks")
@@ -90,17 +91,17 @@ public class ArtworkController {
             case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).build();
             case FORBIDDEN_SALE_GATE -> ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(java.util.Map.of("error", "FORBIDDEN_SALE_GATE"));
+                    .body(Map.of("error", "FORBIDDEN_SALE_GATE"));
             case UNAUTHENTICATED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             case CHALLENGE_NOT_FOUND -> ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(java.util.Map.of("error", "CHALLENGE_NOT_FOUND"));
+                    .body(Map.of("error", "CHALLENGE_NOT_FOUND"));
             case CHALLENGE_NOT_ACTIVE -> ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(java.util.Map.of("error", "CHALLENGE_NOT_ACTIVE"));
+                    .body(Map.of("error", "CHALLENGE_NOT_ACTIVE"));
             case CHALLENGE_USER_ALREADY_HAS_ENTRY -> ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body(java.util.Map.of("error", "CHALLENGE_USER_ALREADY_HAS_ENTRY"));
+                    .body(Map.of("error", "CHALLENGE_USER_ALREADY_HAS_ENTRY"));
         };
     }
 
@@ -150,7 +151,7 @@ public class ArtworkController {
             case FORBIDDEN -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             case FORBIDDEN_SALE_GATE -> ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(java.util.Map.of("error", "FORBIDDEN_SALE_GATE"));
+                    .body(Map.of("error", "FORBIDDEN_SALE_GATE"));
         };
     }
 
@@ -163,7 +164,7 @@ public class ArtworkController {
             case FORBIDDEN -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             case HAS_ORDERS -> ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body(java.util.Map.of("error", "ARTWORK_HAS_ORDERS"));
+                    .body(Map.of("error", "ARTWORK_HAS_ORDERS"));
         };
     }
 }

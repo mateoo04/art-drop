@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface UserFollowJpaRepository extends JpaRepository<UserFollow, Long> {
@@ -23,7 +24,7 @@ public interface UserFollowJpaRepository extends JpaRepository<UserFollow, Long>
             "WHERE f.followerId = :followerId AND f.followeeId IN :followeeIds")
     List<Long> findFolloweeIdsByFollowerIdAndFolloweeIdIn(
             @Param("followerId") Long followerId,
-            @Param("followeeIds") java.util.Collection<Long> followeeIds);
+            @Param("followeeIds") Collection<Long> followeeIds);
 
     @Modifying
     @Query("DELETE FROM UserFollow f WHERE f.followerId = :followerId AND f.followeeId = :followeeId")

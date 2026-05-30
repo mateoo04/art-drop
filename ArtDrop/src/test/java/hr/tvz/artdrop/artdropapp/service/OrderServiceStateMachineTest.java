@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -318,7 +319,7 @@ class OrderServiceStateMachineTest {
         order.setStripeCheckoutSessionId("cs_test_old");
         Mockito.when(orderRepo.findByStatusAndCreatedAtBefore(
                         Mockito.eq(OrderStatus.PENDING_PAYMENT), Mockito.any()))
-                .thenReturn(java.util.List.of(order));
+                .thenReturn(List.of(order));
 
         int n = svc.deleteAbandonedPendingOrders(30);
 

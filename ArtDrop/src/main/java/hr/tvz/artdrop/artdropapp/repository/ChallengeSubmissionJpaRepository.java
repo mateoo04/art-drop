@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,7 +64,7 @@ public interface ChallengeSubmissionJpaRepository extends JpaRepository<Challeng
             """)
     List<Long> findEligibleArtworkIds(
             @Param("authorId") Long authorId,
-            @Param("since") java.time.LocalDateTime since);
+            @Param("since") LocalDateTime since);
 
     @Query("""
             SELECT c.id FROM Challenge c
@@ -79,5 +80,5 @@ public interface ChallengeSubmissionJpaRepository extends JpaRepository<Challeng
     List<Long> findEligibleChallengeIdsForArtwork(
             @Param("artworkId") Long artworkId,
             @Param("userId") Long userId,
-            @Param("artworkPublishedAt") java.time.LocalDateTime artworkPublishedAt);
+            @Param("artworkPublishedAt") LocalDateTime artworkPublishedAt);
 }

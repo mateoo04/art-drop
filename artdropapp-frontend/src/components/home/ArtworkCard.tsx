@@ -1,4 +1,4 @@
-import { Bookmark, Heart, MessageCircle } from 'lucide-react'
+import { Heart, MessageCircle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
@@ -228,13 +228,6 @@ export function ArtworkCard({ artwork, onSeen }: ArtworkCardProps) {
               {formatCount(artwork.commentCount)}
             </Link>
           </div>
-          <button
-            type="button"
-            aria-label={t('home.card.bookmark')}
-            className="text-on-surface-variant hover:text-on-surface transition-colors"
-          >
-            <Bookmark size={20} />
-          </button>
         </div>
       </div>
     </article>

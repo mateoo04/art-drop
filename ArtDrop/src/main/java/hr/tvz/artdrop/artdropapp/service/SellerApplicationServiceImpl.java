@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class SellerApplicationServiceImpl implements SellerApplicationService {
@@ -166,7 +167,7 @@ public class SellerApplicationServiceImpl implements SellerApplicationService {
             if (!wanted.isEmpty()) {
                 enriched = enriched.stream()
                         .filter(e -> wanted.contains(e.derivedStatus()))
-                        .collect(java.util.stream.Collectors.toList());
+                        .collect(Collectors.toList());
             }
         }
 
@@ -177,7 +178,7 @@ public class SellerApplicationServiceImpl implements SellerApplicationService {
                     .filter(e -> e.user().getAuthorities() != null
                             && e.user().getAuthorities().stream()
                                     .anyMatch(a -> wantedRole.equals(a.getName())))
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
         }
 
         // Sort.

@@ -2,6 +2,7 @@ export const qk = {
   artworks: {
     all: ['artworks'] as const,
     detail: (id: number | string) => ['artworks', 'detail', String(id)] as const,
+    mine: ['artworks', 'mine'] as const,
     mediums: () => ['artworks', 'mediums'] as const,
     search: (q: string) => ['artworks', 'search', q] as const,
     searchPreview: (q: string) => ['artworks', 'search-preview', q] as const,
@@ -22,9 +23,11 @@ export const qk = {
     search: (q: string) => ['users', 'search', q] as const,
   },
   feed: {
+    all: ['feed'] as const,
     home: (medium: string | null | undefined) => ['feed', 'home', medium ?? 'All'] as const,
   },
   profile: {
+    all: ['profile'] as const,
     artworks: (slug: string) => ['profile', 'artworks', slug] as const,
   },
   reservations: {

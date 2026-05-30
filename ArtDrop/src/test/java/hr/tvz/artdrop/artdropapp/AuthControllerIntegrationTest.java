@@ -13,7 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,8 +41,7 @@ class AuthControllerIntegrationTest extends AbstractPostgresIntegrationTest {
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("user"))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
-                        .header().string("Set-Cookie", org.hamcrest.Matchers.containsString("jwt=")));
+                .andExpect(header().string("Set-Cookie", containsString("jwt=")));
     }
 
     @Test
@@ -65,8 +66,7 @@ class AuthControllerIntegrationTest extends AbstractPostgresIntegrationTest {
         mockMvc.perform(post("/api/auth/demo-login"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("demo"))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
-                        .header().string("Set-Cookie", org.hamcrest.Matchers.containsString("jwt=")));
+                .andExpect(header().string("Set-Cookie", containsString("jwt=")));
     }
 
     @Test
@@ -78,8 +78,7 @@ class AuthControllerIntegrationTest extends AbstractPostgresIntegrationTest {
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username").value(unique))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
-                        .header().string("Set-Cookie", org.hamcrest.Matchers.containsString("jwt=")));
+                .andExpect(header().string("Set-Cookie", containsString("jwt=")));
     }
 
     @Test

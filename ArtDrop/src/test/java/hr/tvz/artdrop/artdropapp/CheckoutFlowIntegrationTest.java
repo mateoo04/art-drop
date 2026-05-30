@@ -19,6 +19,7 @@ import hr.tvz.artdrop.artdropapp.support.FakeStripeGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -64,7 +65,7 @@ class CheckoutFlowIntegrationTest extends AbstractPostgresIntegrationTest {
         // Clear any leftover active reservations + pending orders for the test buyer so tests start clean.
         Long buyerId = userRepository.findByUsername("user").orElseThrow().getId();
         orderRepository.findByBuyerUserIdOrderByCreatedAtDesc(buyerId,
-                        org.springframework.data.domain.PageRequest.of(0, 200)).stream()
+                        PageRequest.of(0, 200)).stream()
                 .filter(o -> o.getStatus() == OrderStatus.PENDING_PAYMENT)
                 .forEach(orderRepository::delete);
         artworkRepository.findAll().stream()

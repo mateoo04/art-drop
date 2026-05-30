@@ -144,8 +144,8 @@ public class UserServiceImpl implements UserService {
         int artworkCount = (int) artworkRepository.countByAuthor_Id(user.getId());
         Integer circleSize = isSelf ? (int) followRepository.countByFolloweeId(user.getId()) : null;
         Integer followingCount = isSelf ? (int) followRepository.countByFollowerId(user.getId()) : null;
-        java.util.List<String> roles = user.getAuthorities() == null
-                ? java.util.List.of()
+        List<String> roles = user.getAuthorities() == null
+                ? List.of()
                 : user.getAuthorities().stream().map(a -> a.getName()).sorted().toList();
         String sellerStatus = sellerApplicationService.deriveSellerStatusForUser(user);
         return new UserProfileDTO(

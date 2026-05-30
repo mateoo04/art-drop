@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -23,7 +25,7 @@ public class FakeStripeGateway implements StripeGateway {
     private final AtomicLong refundSeq = new AtomicLong(2000);
     public final Map<String, CheckoutSessionRequest> sessionsBySessionId = new HashMap<>();
     public final Map<String, String> paymentIntentBySessionId = new HashMap<>();
-    public final java.util.Set<String> expiredSessionIds = new java.util.HashSet<>();
+    public final Set<String> expiredSessionIds = new HashSet<>();
     public volatile boolean rejectSignature = false;
     public volatile Event nextEvent;
     public volatile int refundCount = 0;

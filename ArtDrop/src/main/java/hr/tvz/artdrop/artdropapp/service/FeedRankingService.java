@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -307,7 +308,7 @@ public class FeedRankingService {
 
         double ageHours = artwork.getPublishedAt() == null
                 ? Double.POSITIVE_INFINITY
-                : Math.max(0.0, java.time.Duration.between(artwork.getPublishedAt(), now).toMinutes() / 60.0);
+                : Math.max(0.0, Duration.between(artwork.getPublishedAt(), now).toMinutes() / 60.0);
 
         double recencyTerm = Double.isInfinite(ageHours)
                 ? 0.0
@@ -322,7 +323,7 @@ public class FeedRankingService {
         if (anonymous || lastSeenAt == null) {
             seenTerm = 0.0;
         } else {
-            double hoursSinceSeen = Math.max(0.0, java.time.Duration.between(lastSeenAt, now).toMinutes() / 60.0);
+            double hoursSinceSeen = Math.max(0.0, Duration.between(lastSeenAt, now).toMinutes() / 60.0);
             seenTerm = wSeen * Math.exp(-hoursSinceSeen / seenRecencyHalfLifeHours);
         }
 

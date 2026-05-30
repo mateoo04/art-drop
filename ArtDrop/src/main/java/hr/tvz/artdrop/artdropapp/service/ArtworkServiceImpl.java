@@ -29,15 +29,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ArtworkServiceImpl implements ArtworkService {
@@ -134,11 +138,11 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     private static String toPrefixTsQuery(String input) {
-        return java.util.Arrays.stream(input.toLowerCase().split("\\s+"))
+        return Arrays.stream(input.toLowerCase().split("\\s+"))
                 .map(s -> s.replaceAll("[^a-z0-9]", ""))
                 .filter(s -> !s.isEmpty())
                 .map(s -> s + ":*")
-                .collect(java.util.stream.Collectors.joining(" & "));
+                .collect(Collectors.joining(" & "));
     }
 
     private static Pageable paged(int limit, int offset) {
@@ -172,10 +176,10 @@ public class ArtworkServiceImpl implements ArtworkService {
         );
         Set<Long> followedAuthors = rows.stream()
                 .map(Artwork::getAuthor)
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .map(User::getId)
-                .filter(java.util.Objects::nonNull)
-                .collect(java.util.stream.Collectors.toSet());
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
         Map<Long, Integer> commentCounts = commentCountsFor(rows);
         return rows.stream().map(a -> mapToDTO(a, likedSet, followedAuthors, commentCounts)).toList();
     }
@@ -263,19 +267,16 @@ public class ArtworkServiceImpl implements ArtworkService {
         if (command.challengeId() != null) {
             Optional<Challenge> challengeOpt = challengeRepository.findById(command.challengeId());
             if (challengeOpt.isEmpty()) {
-                org.springframework.transaction.interceptor.TransactionAspectSupport
-                        .currentTransactionStatus().setRollbackOnly();
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return new CreateResult(CreateOutcome.CHALLENGE_NOT_FOUND, null);
             }
             Challenge challenge = challengeOpt.get();
             if (challenge.getStatus() != ChallengeStatus.ACTIVE) {
-                org.springframework.transaction.interceptor.TransactionAspectSupport
-                        .currentTransactionStatus().setRollbackOnly();
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return new CreateResult(CreateOutcome.CHALLENGE_NOT_ACTIVE, null);
             }
             if (submissionRepository.existsByChallenge_IdAndSubmittedBy(challenge.getId(), author.getId())) {
-                org.springframework.transaction.interceptor.TransactionAspectSupport
-                        .currentTransactionStatus().setRollbackOnly();
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return new CreateResult(CreateOutcome.CHALLENGE_USER_ALREADY_HAS_ENTRY, null);
             }
             ChallengeSubmission submission = submissionRepository.save(new ChallengeSubmission(
@@ -490,10 +491,10 @@ public class ArtworkServiceImpl implements ArtworkService {
         Long viewerId = viewer.get().getId();
         Set<Long> authorIds = rows.stream()
                 .map(Artwork::getAuthor)
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .map(User::getId)
                 .filter(id -> id != null && !id.equals(viewerId))
-                .collect(java.util.stream.Collectors.toSet());
+                .collect(Collectors.toSet());
         if (authorIds.isEmpty()) return Set.of();
         return new HashSet<>(followRepository.findFolloweeIdsByFollowerIdAndFolloweeIdIn(viewerId, authorIds));
     }
@@ -512,7 +513,7 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     private Map<Long, Integer> commentCountsFor(List<Artwork> rows) {
         if (rows.isEmpty()) return Map.of();
-        List<Long> ids = rows.stream().map(Artwork::getId).filter(java.util.Objects::nonNull).toList();
+        List<Long> ids = rows.stream().map(Artwork::getId).filter(Objects::nonNull).toList();
         if (ids.isEmpty()) return Map.of();
         Map<Long, Integer> result = new HashMap<>();
         for (Object[] row : commentRepository.countActiveByArtworkIds(ids)) {

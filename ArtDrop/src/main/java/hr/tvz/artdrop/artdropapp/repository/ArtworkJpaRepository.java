@@ -53,8 +53,8 @@ public interface ArtworkJpaRepository extends JpaRepository<Artwork, Long> {
             "ORDER BY a.publishedAt DESC")
     List<Artwork> findRankingCandidates(
             @Param("viewerId") Long viewerId,
-            @Param("recentSince") java.time.LocalDateTime recentSince,
-            @Param("circleSince") java.time.LocalDateTime circleSince,
+            @Param("recentSince") LocalDateTime recentSince,
+            @Param("circleSince") LocalDateTime circleSince,
             @Param("medium") String medium,
             Pageable pageable);
 

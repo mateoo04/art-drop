@@ -1,11 +1,14 @@
 package hr.tvz.artdrop.artdropapp.repository;
 
 import hr.tvz.artdrop.artdropapp.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserJpaRepository extends JpaRepository<User, Long> {
@@ -27,15 +30,13 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
 
     boolean existsBySlug(String slug);
 
-    @org.springframework.data.jpa.repository.Query(
+    @Query(
         "SELECT u FROM User u WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :q, '%')) " +
         "OR LOWER(u.displayName) LIKE LOWER(CONCAT('%', :q, '%')) " +
         "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :q, '%')) " +
         "ORDER BY u.username ASC"
     )
-    org.springframework.data.domain.Page<User> searchByUsernameDisplayNameOrEmail(
-            @org.springframework.data.repository.query.Param("q") String q,
-            org.springframework.data.domain.Pageable pageable);
+    Page<User> searchByUsernameDisplayNameOrEmail(@Param("q") String q, Pageable pageable);
 
     @Query(value = """
             SELECT * FROM app_user u
@@ -53,5 +54,5 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
                      ) DESC,
                      u.display_name ASC
             """, nativeQuery = true)
-    java.util.List<User> searchPublic(@Param("q") String q, org.springframework.data.domain.Pageable pageable);
+    List<User> searchPublic(@Param("q") String q, Pageable pageable);
 }
